@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Megaphone,
-  Wand2, 
+  Wand2,
   BarChart3,
   FileText,
   CreditCard,
@@ -24,12 +24,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import Image from "next/image";
 
-// Sidebar nav items (matching your image)
-const items = [
+// ---- MENU ITEMS ----
+
+// User menu items (your current design)
+const userItems = [
   {
     title: "Dashboard",
-    url: "/dashboard-page",
+    url: "/dashboard/admin-dashboard",
     icon: Home,
   },
   {
@@ -69,34 +72,75 @@ const items = [
   },
 ];
 
+// Admin menu items (matching the admin screenshot)
+const adminItems = [
+  {
+    title: "Dashboard",
+    url: "/admin/dashboard",
+    icon: Home,
+  },
+  {
+    title: "User Management",
+    url: "/admin/user-management",
+    icon: Users,
+  },
+  {
+    title: "Campaigns Monitoring",
+    url: "/admin/campaigns-monitoring",
+    icon: Megaphone,
+  },
+  {
+    title: "Content Moderation",
+    url: "/admin/content-moderation",
+    icon: FileText,
+  },
+  {
+    title: "Finance",
+    url: "/admin/finance",
+    icon: CreditCard,
+  },
+  {
+    title: "Platform Analytics",
+    url: "/admin/platform-analytics",
+    icon: BarChart3,
+  },
+  {
+    title: "Settings",
+    url: "/admin/settings",
+    icon: Settings,
+  },
+];
+
 // colors from your design
 const ACTIVE_BG = "#2D6FF8";
 const ACTIVE_TEXT = "#FFFFFF";
 const INACTIVE_TEXT = "#4B5563"; // gray-700
-const INACTIVE_ICON = "#6B7280"; // gray-600;
+const INACTIVE_ICON = "#6B7280"; // gray-600
 const HOVER_BG = "#EEF3FF"; // light bluish
 
-export function AppSidebar() {
+// 👇 UPDATED: accept isAdmin prop and choose items based on that
+export function AppSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const items = isAdmin ? adminItems : userItems;
 
   return (
-    <Sidebar className="border-r bg-white">
+    <Sidebar className="border-r bg-white pr-2">
       <SidebarContent className="flex h-full flex-col justify-between py-4">
         {/* TOP: Logo + menu */}
         <div>
           {/* Logo area */}
-          <div className="mb-6 flex items-center gap-2 px-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(45,111,248,0.1)]">
-              <span className="text-lg font-bold text-[#2D6FF8]">A</span>
-            </div>
-            <span className="text-lg font-semibold text-[#2D6FF8]">
-              AdPortal
-            </span>
-          </div>
+       <div>   <div className="flex items-center gap-2 px-4">
+            <Image
+              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765309106/Rectangle_ktqcsy.png"
+              alt="AdPortal Logo"
+              width={160}
+              height={160}
+            />
+          </div></div>
 
           <SidebarGroup>
             <SidebarGroupLabel className="px-4 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Main
+              {/* empty label to match spacing */}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -153,7 +197,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Plan card (like in your image) */}
+          {/* Plan card (you can hide this for admin if you want using isAdmin) */}
           <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
             <div className="mb-2 flex items-center justify-between text-[11px] text-gray-500">
               <span>Current Plan</span>
