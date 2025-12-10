@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Megaphone,
-  Wand2,
+  Wand2, 
   BarChart3,
   FileText,
   CreditCard,
