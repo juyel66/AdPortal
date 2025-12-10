@@ -12,6 +12,8 @@ import {
   FileText,
   type LucideIcon,
 } from "lucide-react";
+import SpendOverview from "@/app/Pages/SpendOverview/SpendOverview";
+import RecentCampaigns from "@/app/Pages/RecentCampaigns/RecentCampaigns";
 
 const nowRelative = "2 minutes ago";
 
@@ -173,6 +175,14 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="mt-4 text-sm text-gray-500">Latest report: Campaign performance (downloadable)</div>
         </div>
+      </div>
+
+      <div>
+        <SpendOverview />
+      </div>
+
+      <div>
+        {/* <RecentCampaigns /> */}
       </div>
     </main>
   );
