@@ -2,9 +2,6 @@
 
 import React from "react";
 import {
-  DollarSign,
-  Eye,
-
   Target,
   Plus,
   Sparkles,
@@ -12,55 +9,80 @@ import {
   FileText,
   type LucideIcon,
 } from "lucide-react";
+
 import SpendOverview from "@/app/Pages/SpendOverview/SpendOverview";
 import RecentCampaigns from "@/app/Pages/RecentCampaigns/RecentCampaigns";
+import Image from "next/image";
 
 const nowRelative = "2 minutes ago";
 
 /* -------------------------
-   Small reusable components
+   StatCard Component (Updated for Image Icons)
    ------------------------- */
 
-// StatCard: icon, label, value, delta
-function StatCard({ Icon, label, value, delta, positive = true }: {
-  Icon: LucideIcon;
+function StatCard({
+  label,
+  value,
+  delta,
+  positive = true,
+  iconImg,
+}: {
   label: string;
   value: React.ReactNode;
   delta?: string;
   positive?: boolean;
+  iconImg: string;
 }) {
   return (
-    <div className="rounded-xl bg-white p-5 shadow-sm">
+    <div className="rounded-xl bg-white p-5 shadow-sm border border-slate-100">
+      {/* Top Row: Label + growth rate */}
       <div className="flex items-start justify-between">
-        <div className="text-sm text-gray-500">{label}</div>
+        {/* Top-left circular icon */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+            <Image src={iconImg} alt="icon" className="w-5 h-5 object-contain" width={20} height={20} />
+          </div>
+        </div>
+
         {delta && (
-          <div className={`rounded-full px-2 py-1 text-xs font-medium ${positive ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
+          <div
+            className={`rounded-full px-2 py-1 text-xs font-medium ${
+              positive ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+            }`}
+          >
             {delta}
           </div>
         )}
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
-        <div className="rounded-full bg-gray-100 p-2">
-          <Icon className="h-5 w-5 text-gray-600" />
-        </div>
-        <div>
-          <div className="text-xl font-semibold text-gray-900">{value}</div>
-        </div>
-      </div>
+      {/* Label */}
+      <div className="mt-3 text-sm text-gray-500">{label}</div>
+
+      {/* Value */}
+      <div className="mt-1 text-xl font-semibold text-gray-900">{value}</div>
     </div>
   );
 }
 
-// ActionCard: large colorful CTA card used in Quick Actions
-function ActionCard({ title, subtitle, bgClass, Icon }: {
+/* -------------------------
+   ActionCard Component
+   ------------------------- */
+
+function ActionCard({
+  title,
+  subtitle,
+  bgClass,
+  Icon,
+}: {
   title: string;
   subtitle: string;
   bgClass: string;
   Icon: LucideIcon;
 }) {
   return (
-    <button className={`${bgClass} rounded-2xl p-6 text-left shadow-sm hover:shadow-md transition`}>
+    <button
+      className={`${bgClass} rounded-2xl p-6 text-left shadow-sm hover:shadow-md transition`}
+    >
       <div className="flex items-start gap-4">
         <div className="rounded-md bg-white/20 p-2">
           <Icon className="h-6 w-6 text-white" />
@@ -75,12 +97,26 @@ function ActionCard({ title, subtitle, bgClass, Icon }: {
 }
 
 /* -------------------------
-   Main page
+   ICONS from Cloudinary
+   ------------------------- */
+
+const ICONS = {
+  dollar:
+    "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494156/Container_6_h2gdjc.png",
+  eye: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_7_dlwyhq.png",
+  cursor:
+    "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_8_y2rgps.png",
+  ROAS:
+    "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_9_apjmto.png",
+};
+
+/* -------------------------
+   Main Page
    ------------------------- */
 
 const AdminDashboard: React.FC = () => {
   return (
-    <main className=" p-8">
+    <main className="p-8">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -91,7 +127,9 @@ const AdminDashboard: React.FC = () => {
               <span>AI Powered</span>
             </span>
           </div>
-          <p className="text-sm text-gray-500">Welcome back! Here's your campaign overview with AI insights.</p>
+          <p className="text-sm text-gray-500">
+            Welcome back! Here's your campaign overview with AI insights.
+          </p>
         </div>
 
         <div className="text-right text-sm text-gray-500">
@@ -100,31 +138,34 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* STAT CARDS */}
+      {/* STAT CARDS — NOW FULLY STATIC WITH IMAGE ICONS */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          Icon={DollarSign}
+          iconImg={ICONS.dollar}
           label="Total Spend"
           value="$12,483"
           delta="+12.3%"
           positive
         />
+
         <StatCard
-          Icon={Eye}
+          iconImg={ICONS.eye}
           label="Impressions"
           value="2.4M"
           delta="+8.2%"
           positive
         />
+
         <StatCard
-            Icon={/*CursorClick*/ DollarSign} // --- IGNORE ---
+          iconImg={ICONS.cursor}
           label="Click Rate"
           value="3.42%"
           delta="-0.5%"
           positive={false}
         />
+
         <StatCard
-          Icon={Target}
+          iconImg={ICONS.ROAS}
           label="ROAS"
           value="4.2x"
           delta="+15.8%"
@@ -158,31 +199,14 @@ const AdminDashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* Optional: below quick-actions you might show recent reports / highlights */}
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="col-span-2 rounded-xl bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-lg font-semibold text-gray-900">Campaigns Overview</div>
-            <button className="text-sm text-blue-600">View all</button>
-          </div>
-          <div className="mt-4 text-sm text-gray-500">Summary charts and quick KPIs can go here. Use charts (recharts / chart.js) in production.</div>
-        </div>
-
-        <div className="rounded-xl bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-lg font-semibold text-gray-900">Reports</div>
-            <FileText className="h-5 w-5 text-gray-400" />
-          </div>
-          <div className="mt-4 text-sm text-gray-500">Latest report: Campaign performance (downloadable)</div>
-        </div>
-      </div>
-
-      <div>
+      {/* Spend Overview */}
+      <div className="mt-5">
         <SpendOverview />
       </div>
 
-      <div>
-        {/* <RecentCampaigns /> */}
+      {/* Recent Campaigns */}
+      <div className="mt-4">
+        <RecentCampaigns />
       </div>
     </main>
   );

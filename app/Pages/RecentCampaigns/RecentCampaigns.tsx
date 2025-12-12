@@ -1,238 +1,285 @@
-"use client";
+// CampaignsTable.jsx
+import React, { useState } from "react";
+import Swal from "sweetalert2";
 
-import React from "react";
-import {
-  Eye,
+export default function CampaignsTable() {
+  const initial = [
+    { id: 1, name: "Summer Sale 2024", status: "active", platforms: ["facebook", "google", "tiktok"], spend: "$1,245", performance: { impressions: "324K", ctr: "3.8%" } },
+    { id: 2, name: "Product Launch - New Collection", status: "active", platforms: ["facebook", "google", "tiktok"], spend: "$1,245", performance: { impressions: "324K", ctr: "3.8%" } },
+    { id: 3, name: "Summer Sale 2024", status: "paused", platforms: ["facebook", "google", "tiktok"], spend: "$1,245", performance: { impressions: "324K", ctr: "3.8%" } },
+    { id: 4, name: "Summer Sale 2024", status: "draft", platforms: ["facebook", "google", "tiktok"], spend: "$1,245", performance: { impressions: "324K", ctr: "3.8%" } },
+    { id: 5, name: "Holiday Promo 2024", status: "active", platforms: ["facebook", "google", "tiktok"], spend: "$2,100", performance: { impressions: "420K", ctr: "4.1%" } },
+    { id: 6, name: "Back to School", status: "paused", platforms: ["facebook", "google", "tiktok"], spend: "$980", performance: { impressions: "210K", ctr: "2.9%" } },
+  ];
 
-  Edit2,
-  Trash2,
-  type LucideIcon,
-  DollarSign,
-} from "lucide-react";
+  const ICONS = {
+    facebook: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_3_rocwbl.png",
+    google: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_4_wtcxrl.png",
+    tiktok: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_5_aav4oy.png",
+    edit: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Edit_idtp7y.png",
+    trash: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Trash_qeknyo.png",
+    eye: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765493531/Icon_10_gci7gl.png",
+    cursor: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765493531/Icon_9_iwacr1.png",
+  };
 
-/**
- * RecentCampaigns component
- * - Responsive table with status badges, platform icons, KPIs and actions
- * - Tailwind CSS for styling
- */
+  const [data, setData] = useState(initial);
+  const [showAll, setShowAll] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ name: "", status: "draft", spend: "", platforms: [] });
 
-type Campaign = {
-  id: string;
-  title: string;
-  status: "active" | "paused" | "draft";
-  platforms: ("facebook" | "google" | "tiktok")[];
-  spend: string;
-  impressions: string;
-  ctr: string;
-};
-
-const campaigns: Campaign[] = [
-  {
-    id: "c1",
-    title: "Summer Sale 2024",
-    status: "active",
-    platforms: ["facebook", "google", "tiktok"],
-    spend: "$1,245",
-    impressions: "324K",
-    ctr: "3.8%",
-  },
-  {
-    id: "c2",
-    title: "Product Launch - New Collection",
-    status: "active",
-    platforms: ["facebook", "google", "tiktok"],
-    spend: "$1,245",
-    impressions: "324K",
-    ctr: "3.8%",
-  },
-  {
-    id: "c3",
-    title: "Summer Sale 2024 (Paused)",
-    status: "paused",
-    platforms: ["facebook", "google", "tiktok"],
-    spend: "$1,245",
-    impressions: "324K",
-    ctr: "3.8%",
-  },
-  {
-    id: "c4",
-    title: "Summer Sale 2024 (Draft)",
-    status: "draft",
-    platforms: ["facebook", "google", "tiktok"],
-    spend: "$1,245",
-    impressions: "324K",
-    ctr: "3.8%",
-  },
-];
-
-/* Small presentational helpers */
-
-function PlatformIcon({ platform }: { platform: Campaign["platforms"][number] }) {
-  // Simple circle logos that visually match Facebook / Google / TikTok colors
-  if (platform === "facebook") {
-    return (
-      <div className="h-8 w-8 flex items-center justify-center rounded-full bg-[#1877F2]/10 ring-1 ring-[#1877F2]/20">
-        <span className="text-[#1877F2] font-bold text-sm">f</span>
-      </div>
-    );
+  function openEdit(item) {
+    setEditing(item);
+    setForm({ name: item.name, status: item.status, spend: item.spend, platforms: item.platforms });
+    setModalOpen(true);
   }
-  if (platform === "google") {
-    return (
-      <div className="h-8 w-8 flex items-center justify-center rounded-full bg-white ring-1 ring-gray-100 shadow-inner">
-        {/* multi-color G */}
-        <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="">
-          <path d="M44.5 20H24v8.5h11.8C34.3 33.6 30 36.5 24 36.5 15 36.5 8.5 29.2 8.5 20 8.5 10.8 15 3.5 24 3.5c6.1 0 10.9 2.5 14.2 6.1l-5.8 5.6C30.9 13.2 27.8 11.5 24 11.5c-6.1 0-11 4.9-11 8.5s4.9 8.5 11 8.5c4.6 0 7.6-2 8.3-3l-8.3-3v-6.5h20.5z" fill="#4285F4"/>
-        </svg>
-      </div>
-    );
+
+  function handleSave() {
+    if (!editing) {
+      Swal.fire("Disabled", "Creating campaigns is disabled", "info");
+      return;
+    }
+    if (!form.name.trim()) {
+      Swal.fire("Validation", "Campaign name is required", "warning");
+      return;
+    }
+    setData((d) => d.map((it) => (it.id === editing.id ? { ...it, ...form } : it)));
+    Swal.fire("Updated", "Campaign updated successfully", "success");
+
+    setModalOpen(false);
+    setEditing(null);
+    setForm({ name: "", status: "draft", spend: "", platforms: [] });
   }
-  // tiktok
+
+  function handleDelete(item) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Delete ${item.name}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        setData((d) => d.filter((i) => i.id !== item.id));
+        Swal.fire("Deleted", "Campaign deleted successfully", "success");
+      }
+    });
+  }
+
+  function togglePlatform(p) {
+    setForm((f) => ({ ...f, platforms: f.platforms.includes(p) ? f.platforms.filter((x) => x !== p) : [...f.platforms, p] }));
+  }
+
+  function truncateTitle(t) {
+    if (!t) return "";
+    return t.length > 25 ? t.slice(0, 25) + "..." : t;
+  }
+
   return (
-    <div className="h-8 w-8 flex items-center justify-center rounded-full bg-black text-white">
-      {/* simple tiktok glyph approximation */}
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 3v6.2A3.2 3.2 0 1 1 9 6.4V9.5A6 6 0 1 0 15 15V9h-3V3h0z" fill="#25F4EE"/>
-      </svg>
-    </div>
-  );
-}
+    <div className="w-full mx-auto mt-5">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+          <div>
+            <h3 className="text-lg font-extrabold text-slate-900">Recent Campaigns</h3>
+            <p className="text-sm text-slate-500 mt-1">Track your active campaign performance</p>
+          </div>
 
-function StatusBadge({ status }: { status: Campaign["status"] }) {
-  const styles =
-    status === "active"
-      ? "bg-green-50 text-green-700 ring-1 ring-green-100"
-      : status === "paused"
-      ? "bg-yellow-50 text-yellow-800 ring-1 ring-yellow-100"
-      : "bg-gray-50 text-gray-500 ring-1 ring-gray-100";
-
-  return <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${styles}`}>{status}</span>;
-}
-
-/* KPI small display */
-function PerformanceCell({ impressions, ctr }: { impressions: string; ctr: string }) {
-  return (
-    <div className="flex items-center gap-4 text-sm text-gray-600">
-      <div className="flex items-center gap-2">
-        <Eye className="h-4 w-4 text-gray-400" />
-        <span>{impressions}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <DollarSign className="h-4 w-4 text-gray-400" />
-        <span>{ctr}</span>
-      </div>
-    </div>
-  );
-}
-
-/* Table row actions */
-function ActionButtons({ onEdit, onDelete }: { onEdit?: () => void; onDelete?: () => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={onEdit}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-100 bg-white text-blue-600 shadow-sm hover:bg-blue-50"
-        aria-label="Edit campaign"
-        title="Edit"
-      >
-        <Edit2 className="h-4 w-4" />
-      </button>
-      <button
-        onClick={onDelete}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-100 bg-white text-red-500 shadow-sm hover:bg-red-50"
-        aria-label="Delete campaign"
-        title="Delete"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-    </div>
-  );
-}
-
-/* ----------------------
-   Main component export
-   ---------------------- */
-
-export default function RecentCampaigns() {
-  return (
-    <div className="rounded-xl bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-start justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Recent Campaigns</h3>
-          <p className="mt-1 text-sm text-gray-500">Track your active campaign performance</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowAll((s) => !s)} className="text-sm text-sky-600 hover:underline">
+              {showAll ? "View less" : "View all"} →
+            </button>
+          </div>
         </div>
 
-        <a className="text-sm font-medium text-blue-600 hover:underline" href="#">
-          View all →
-        </a>
-      </div>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col style={{ width: "48px" }} />
+              <col style={{ width: "38%" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "120px" }} />
+            </colgroup>
 
-      {/* table */}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] table-fixed">
-          <thead>
-            <tr className="text-left text-sm text-gray-500">
-              <th className="w-12 pl-4 pr-2 py-3">
-                <input type="checkbox" aria-label="select all" className="h-4 w-4 rounded border-gray-200" />
-              </th>
-              <th className="py-3">Campaign</th>
-              <th className="py-3 w-28">Status</th>
-              <th className="py-3 w-36">Platforms</th>
-              <th className="py-3 w-28">Spend</th>
-              <th className="py-3 w-40">Performance</th>
-              <th className="py-3 w-36 text-right pr-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-            {campaigns.map((c) => (
-              <tr key={c.id} className="hover:bg-gray-50">
-                <td className="pl-4 pr-2 py-4 align-top">
-                  <input type="checkbox" aria-label={`select ${c.title}`} className="h-4 w-4 rounded border-gray-200" />
-                </td>
-
-                <td className="py-4 align-top">
-                  <div className="font-medium text-gray-900">{c.title}</div>
-                </td>
-
-                <td className="py-4 align-top">
-                  <StatusBadge status={c.status} />
-                </td>
-
-                <td className="py-4 align-top">
-                  <div className="flex items-center gap-3">
-                    {c.platforms.map((p) => (
-                      <PlatformIcon key={p} platform={p} />
-                    ))}
-                  </div>
-                </td>
-
-                <td className="py-4 align-top">
-                  <div className="font-medium text-gray-900">{c.spend}</div>
-                </td>
-
-                <td className="py-4 align-top">
-                  <PerformanceCell impressions={c.impressions} ctr={c.ctr} />
-                </td>
-
-                <td className="py-4 pr-4 align-top text-right">
-                  <ActionButtons
-                    onEdit={() => {
-                      /* handle edit */
-                      alert(`Edit ${c.title}`);
-                    }}
-                    onDelete={() => {
-                      /* handle delete */
-                      // eslint-disable-next-line no-restricted-globals
-                      if (confirm(`Delete ${c.title}?`)) {
-                        alert("Deleted (example only)");
-                      }
-                    }}
-                  />
-                </td>
+            <thead className="bg-slate-50">
+              <tr className="text-left text-xs font-extrabold text-slate-700 ">
+                <th className="p-4">
+                  <input type="checkbox" className="w-4 h-4 rounded border-slate-200" />
+                </th>
+                <th className="p-4">Campaign</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Platforms</th>
+                <th className="p-4">Spend</th>
+                <th className="p-4">Performance</th>
+                <th className="pr-9 text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100 bg-white">
+              {(showAll ? data : data.slice(0, 4)).map((row) => (
+                <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+
+                  <td className="p-4 align-middle">
+                    <input type="checkbox" className="w-4 h-4 rounded border-slate-200" />
+                  </td>
+
+                  <td className="p-4 align-middle text-slate-800" title={row.name}>
+                    {truncateTitle(row.name)}
+                  </td>
+
+                  <td className="p-4 align-middle">
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        row.status === "active" ? "bg-emerald-100 text-emerald-700" :
+                        row.status === "paused" ? "bg-yellow-100 text-amber-700" :
+                        "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {row.status}
+                    </span>
+                  </td>
+
+                  {/* Platforms */}
+                  <td className="p-4 align-middle">
+                    <div className="flex items-center gap-3">
+                      {row.platforms.map((p) => (
+                        <div key={p} className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-slate-100 shadow-sm">
+                          <img src={ICONS[p]} alt={p} className="w-5 h-5 object-contain" />
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+
+                  <td className="p-4 align-middle text-slate-800">{row.spend}</td>
+
+                  {/* UPDATED PERFORMANCE ICONS */}
+                  <td className="p-4 align-middle text-slate-600">
+                    <div className="flex items-center gap-6">
+
+                      {/* Eye icon - impressions */}
+                      <div className="flex items-center gap-2">
+                        <img src={ICONS.eye} alt="views" className="w-4 h-4 object-contain" />
+                        <span>{row.performance.impressions}</span>
+                      </div>
+
+                      {/* Cursor icon - CTR */}
+                      <div className="flex items-center gap-2">
+                        <img src={ICONS.cursor} alt="ctr" className="w-4 h-4 object-contain" />
+                        <span>{row.performance.ctr}</span>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="p-4 align-middle text-right">
+                    <div className="inline-flex items-center gap-2">
+
+                      <button
+                        onClick={() => openEdit(row)}
+                        className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
+                      >
+                        <img src={ICONS.edit} alt="edit" className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(row)}
+                        className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
+                      >
+                        <img src={ICONS.trash} alt="delete" className="w-4 h-4" />
+                      </button>
+
+                    </div>
+                  </td>
+
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* Edit Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setModalOpen(false)} />
+          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-xl p-6 z-10">
+
+            <h3 className="text-lg font-semibold mb-3">Edit Campaign</h3>
+
+            <div className="space-y-3">
+
+              <div>
+                <label className="text-sm text-slate-600">Name</label>
+                <input
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  className="mt-1 block w-full border rounded-md p-2"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-slate-600">Status</label>
+                <select
+                  value={form.status}
+                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+                  className="mt-1 block w-full border rounded-md p-2"
+                >
+                  <option value="draft">draft</option>
+                  <option value="active">active</option>
+                  <option value="paused">paused</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-slate-600">Spend</label>
+                <input
+                  value={form.spend}
+                  onChange={(e) => setForm((f) => ({ ...f, spend: e.target.value }))}
+                  className="mt-1 block w-full border rounded-md p-2"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-slate-600">Platforms</label>
+                <div className="flex gap-3 mt-2">
+                  <button type="button" onClick={() => togglePlatform("facebook")} className={`px-3 py-1 rounded-md border ${form.platforms.includes("facebook") ? "bg-blue-50 border-blue-300" : "bg-white"}`}>
+                    <img src={ICONS.facebook} alt="facebook" className="w-4 h-4" />
+                  </button>
+                  <button type="button" onClick={() => togglePlatform("google")} className={`px-3 py-1 rounded-md border ${form.platforms.includes("google") ? "bg-blue-50 border-blue-300" : "bg-white"}`}>
+                    <img src={ICONS.google} alt="google" className="w-4 h-4" />
+                  </button>
+                  <button type="button" onClick={() => togglePlatform("tiktok")} className={`px-3 py-1 rounded-md border ${form.platforms.includes("tiktok") ? "bg-blue-50 border-blue-300" : "bg-white"}`}>
+                    <img src={ICONS.tiktok} alt="tiktok" className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => { setModalOpen(false); setEditing(null); }}
+                  className="px-4 py-2 rounded-md border"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 rounded-md bg-blue-600 text-white"
+                >
+                  Save
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

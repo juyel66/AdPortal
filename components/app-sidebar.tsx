@@ -32,42 +32,42 @@ import Image from "next/image";
 const userItems = [
   {
     title: "Dashboard",
-    url: "/dashboard/admin-dashboard",
+    url: "/user-dashboard/dashboard",
     icon: Home,
   },
   {
     title: "Campaigns",
-    url: "/dashboard/campaigns",
+    url: "/user-dashboard/campaigns",
     icon: Megaphone,
   },
   {
     title: "AI Tools",
-    url: "/dashboard/ai-tools",
+    url: "/user-dashboard/ai-tools",
     icon: Wand2,
   },
   {
     title: "Analytics",
-    url: "/dashboard/analytics",
+    url: "/user-dashboard/analytics",
     icon: BarChart3,
   },
   {
     title: "Reports",
-    url: "/dashboard/reports",
+    url: "/user-dashboard/reports",
     icon: FileText,
   },
   {
     title: "Subscription",
-    url: "/dashboard/subscription",
+    url: "/user-dashboard/subscription",
     icon: CreditCard,
   },
   {
     title: "Team",
-    url: "/dashboard/team",
+    url: "/user-dashboard/team",
     icon: Users,
   },
   {
     title: "Settings",
-    url: "/dashboard/settings",
+    url: "/user-dashboard/settings",
     icon: Settings,
   },
 ];
@@ -76,37 +76,37 @@ const userItems = [
 const adminItems = [
   {
     title: "Dashboard",
-    url: "/admin/dashboard",
+    url: "/admin-dashboard/dashboard",
     icon: Home,
   },
   {
     title: "User Management",
-    url: "/admin/user-management",
+    url: "/admin-dashboard/user-management",
     icon: Users,
   },
   {
     title: "Campaigns Monitoring",
-    url: "/admin/campaigns-monitoring",
+    url: "/admin-dashboard/campaigns-monitoring",
     icon: Megaphone,
   },
   {
     title: "Content Moderation",
-    url: "/admin/content-moderation",
+    url: "/admin-dashboard/content-moderation",
     icon: FileText,
   },
   {
     title: "Finance",
-    url: "/admin/finance",
+    url: "/admin-dashboard/finance",
     icon: CreditCard,
   },
   {
     title: "Platform Analytics",
-    url: "/admin/platform-analytics",
+    url: "/admin-dashboard/platform-analytics",
     icon: BarChart3,
   },
   {
     title: "Settings",
-    url: "/admin/settings",
+    url: "/admin-dashboard/settings",
     icon: Settings,
   },
 ];
@@ -130,12 +130,17 @@ export function AppSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
         <div>
           {/* Logo area */}
        <div>   <div className="flex items-center gap-2 px-4">
+
+
             <Image
               src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765309106/Rectangle_ktqcsy.png"
               alt="AdPortal Logo"
               width={160}
               height={160}
+              className="h-[66px] w-[200]"
             />
+
+
           </div></div>
 
           <SidebarGroup>
