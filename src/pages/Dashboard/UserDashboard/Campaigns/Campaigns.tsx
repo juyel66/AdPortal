@@ -12,12 +12,13 @@ import {
 } from "lucide-react";
 
 import type {
-  CampaignCardProps,
+
   MenuItemProps,
   BadgeProps,
   KpiProps,
   StatProps,
   ChipProps,
+  CampaignData,
 } from "@/types/campaign";
 
 const ACTION_BTN =
@@ -27,7 +28,7 @@ const ACTION_BTN =
    MAIN PAGE
 ================================== */
 const Campaigns: React.FC = () => {
-  const campaigns = [
+  const campaigns: CampaignData[] = [
     {
       id: 1,
       title: "Summer Sale 2024",
@@ -143,7 +144,7 @@ const Campaigns: React.FC = () => {
 /* ==================================
    CAMPAIGN CARD
 ================================== */
-const CampaignCard: React.FC<CampaignCardProps & { id: number }> = ({
+const CampaignCard: React.FC<CampaignData> = ({
   title,
   status,
   type,
@@ -176,8 +177,12 @@ const CampaignCard: React.FC<CampaignCardProps & { id: number }> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <img src={ACTION_BTN} alt="action" className="h-7 w-7 cursor-pointer" />
-          <button onClick={() => setOpen((p) => !p)}>
+          <img
+            src={ACTION_BTN}
+            alt="action"
+            className="h-7 w-7 cursor-pointer"
+          />
+          <button onClick={() => setOpen((p: boolean) => !p)}>
             <MoreVertical className="h-5 w-5 text-slate-400" />
           </button>
         </div>
@@ -209,11 +214,7 @@ const CampaignCard: React.FC<CampaignCardProps & { id: number }> = ({
           <MenuItem icon={<Pencil size={16} />} text="Edit Campaign" />
           <MenuItem icon={<Copy size={16} />} text="Duplicate Campaign" />
           <div className="border-t" />
-          <MenuItem
-            icon={<Trash2 size={16} />}
-            text="Delete Campaign"
-            danger
-          />
+          <MenuItem icon={<Trash2 size={16} />} text="Delete Campaign" danger />
         </div>
       )}
     </div>
@@ -231,9 +232,7 @@ const Badge: React.FC<BadgeProps> = ({ status }) => {
   };
 
   return (
-    <span className={`rounded-full px-2 py-0.5 ${map[status]}`}>
-      {status}
-    </span>
+    <span className={`rounded-full px-2 py-0.5 ${map[status]}`}>{status}</span>
   );
 };
 
@@ -263,11 +262,7 @@ const Kpi: React.FC<KpiProps> = ({ label, value, highlight }) => (
   </div>
 );
 
-const MenuItem: React.FC<MenuItemProps> = ({
-  icon,
-  text,
-  danger = false,
-}) => (
+const MenuItem: React.FC<MenuItemProps> = ({ icon, text, danger = false }) => (
   <button
     className={`flex w-full items-center gap-3 px-4 py-3 text-sm ${
       danger ? "text-red-600 hover:bg-red-50" : "hover:bg-slate-50"

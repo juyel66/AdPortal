@@ -39,3 +39,7 @@ export interface MenuItemProps {
   text: string;
   danger?: boolean;
 }
+
+export interface CampaignData extends CampaignCardProps {
+  id: number;
+}
