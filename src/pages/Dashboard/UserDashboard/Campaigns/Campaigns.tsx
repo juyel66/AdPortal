@@ -20,13 +20,12 @@ import type {
   ChipProps,
   CampaignData,
 } from "@/types/campaign";
+import { Link } from "react-router";
 
 const ACTION_BTN =
   "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765671112/Button_2_upzjmx.png";
 
-/* ==================================
-   MAIN PAGE
-================================== */
+
 const Campaigns: React.FC = () => {
   const campaigns: CampaignData[] = [
     {
@@ -107,10 +106,10 @@ const Campaigns: React.FC = () => {
             Sync your Ad
           </button>
 
-          <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition">
+          <Link to="/user-dashboard/campaigns-create" className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition">
             <Plus size={16} />
             Add Campaign
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -141,9 +140,7 @@ const Campaigns: React.FC = () => {
   );
 };
 
-/* ==================================
-   CAMPAIGN CARD
-================================== */
+
 const CampaignCard: React.FC<CampaignData> = ({
   title,
   status,
@@ -203,14 +200,14 @@ const CampaignCard: React.FC<CampaignData> = ({
 
       <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
         <span>{date}</span>
-        <button className="text-blue-600 hover:underline">
+        <Link to ="/user-dashboard/campaigns-view-details" className="text-blue-600 hover:underline">
           View Details →
-        </button>
+        </Link>
       </div>
 
       {open && (
         <div className="absolute right-4 top-12 z-50 w-52 rounded-xl border border-slate-200 bg-white shadow-lg">
-          <MenuItem icon={<Eye size={16} />} text="View Details" />
+         <Link to="/user-dashboard/campaigns-view-details"> <MenuItem icon={<Eye size={16} />} text="View Campaign" /></Link>
           <MenuItem icon={<Pencil size={16} />} text="Edit Campaign" />
           <MenuItem icon={<Copy size={16} />} text="Duplicate Campaign" />
           <div className="border-t" />
@@ -221,9 +218,7 @@ const CampaignCard: React.FC<CampaignData> = ({
   );
 };
 
-/* ==================================
-   SMALL UI
-================================== */
+
 const Badge: React.FC<BadgeProps> = ({ status }) => {
   const map: Record<BadgeProps["status"], string> = {
     active: "bg-green-100 text-green-600",
