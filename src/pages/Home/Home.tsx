@@ -1,21 +1,14 @@
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 const Home = () => {
     return (
-        <div className="">
+        <div className=" ">
    
-
-            <Tooltip>
-  <TooltipTrigger>Hover</TooltipTrigger>
-  <TooltipContent>
-    <p>Add to library</p>
-  </TooltipContent>
-</Tooltip>
+   <div>
+   <Link to="/user-dashboard/dashboard"> <Button  >Go to Dashboard</Button></Link>
+   </div>
 
             
         </div>

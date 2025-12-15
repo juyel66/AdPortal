@@ -43,3 +43,4 @@ export interface MenuItemProps {
 export interface CampaignData extends CampaignCardProps {
   id: number;
 }
+
