@@ -19,6 +19,8 @@ import Step6Review from "./pages/create-campaign/Step6Review";
 import CampaignsViewDetails from "./pages/Dashboard/UserDashboard/Campaigns/campaignsViewDetails/CampaignsViewDetails";
 import Root from "./pages/Root";
 import Home from "./pages/Home/Home";
+import AiTools from "./components/AITools/AiTools";
+import Analytics from "./components/Analytics/Analytics";
 
 
 export const router = createBrowserRouter([
@@ -52,6 +54,14 @@ export const router = createBrowserRouter([
       {
         path: "campaigns-view-details",
         element: <CampaignsViewDetails />,
+      },
+      {
+        path: "ai-tools",
+        element: <AiTools />,
+      },
+      {
+        path: "analytics",
+        element: <Analytics />,
       },
 
     
