@@ -7,6 +7,8 @@ import {
   Eye,
   MousePointerClick,
   Target,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import {
   LineChart,
@@ -52,28 +54,28 @@ const stats: StatCard[] = [
     value: "$8,700",
     change: "+12.3%",
     positive: true,
-    icon: <DollarSign className="text-blue-600" size={18} />,
+    icon: <DollarSign size={16} className="text-blue-600" />,
   },
   {
     label: "Impressions",
     value: "2.4M",
     change: "+18.2%",
     positive: true,
-    icon: <Eye className="text-emerald-600" size={18} />,
+    icon: <Eye size={16} className="text-green-600" />,
   },
   {
-    label: "CTR Rate",
+    label: "Click Rate",
     value: "3.42%",
     change: "-0.5%",
     positive: false,
-    icon: <MousePointerClick className="text-red-500" size={18} />,
+    icon: <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765841382/Icon_14_snirvz.png" alt="" />
   },
   {
     label: "Conversions",
     value: "752",
     change: "+24.8%",
     positive: true,
-    icon: <Target className="text-purple-600" size={18} />,
+    icon: <Target size={16} className="text-indigo-600" />,
   },
 ];
 
@@ -105,9 +107,9 @@ const deviceData = [
 
 const renderPieLabel = (props: any) => {
   const { cx, cy, midAngle, outerRadius, percent, name, fill } = props;
-
   const RADIAN = Math.PI / 180;
   const radius = outerRadius + 28;
+
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -141,29 +143,44 @@ const Analytics: React.FC = () => {
         </p>
       </div>
 
-      {/* Stat Cards */}
+      {/* ✅ Stat Cards – SAME TO SAME DESIGN */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl bg-white border p-4 flex justify-between"
+            className="rounded-xl border bg-white p-4"
           >
-            <div>
-              <p className="text-sm text-slate-500">{stat.label}</p>
-              <p className="text-xl font-semibold text-slate-900 mt-1">
-                {stat.value}
-              </p>
-              <p
-                className={`text-xs mt-1 ${
-                  stat.positive ? "text-green-600" : "text-red-600"
+            {/* Top Row */}
+            <div className="flex items-center justify-between">
+              {/* Icon */}
+              <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center">
+                {stat.icon}
+              </div>
+
+              {/* Percentage badge */}
+              <div
+                className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
+                  stat.positive
+                    ? "bg-green-50 text-green-600"
+                    : "bg-red-50 text-red-600"
                 }`}
               >
+                {stat.positive ? (
+                  <TrendingUp size={12} />
+                ) : (
+                  <TrendingDown size={12} />
+                )}
                 {stat.change}
-              </p>
+              </div>
             </div>
-            <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center">
-              {stat.icon}
-            </div>
+
+            {/* Label */}
+            <p className="mt-3 text-sm text-slate-500">{stat.label}</p>
+
+            {/* Value */}
+            <p className="mt-1 text-xl font-semibold text-slate-900">
+              {stat.value}
+            </p>
           </div>
         ))}
       </div>
@@ -193,7 +210,7 @@ const Analytics: React.FC = () => {
 
       {/* Bottom Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Spend by Platform (CUSTOM DESIGN) */}
+        {/* Spend by Platform */}
         <div className="rounded-xl bg-white border p-6">
           <h2 className="font-semibold text-slate-900 mb-4">
             Spend by Platform
