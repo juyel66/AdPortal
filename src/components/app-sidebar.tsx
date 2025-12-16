@@ -54,7 +54,7 @@ const userItems = [
   },
   {
     title: "Subscription",
-    url: "/user-dashboard/subscription",
+    url: "/user-dashboard/subscriptions",
     icon: CreditCard,
   },
   {
