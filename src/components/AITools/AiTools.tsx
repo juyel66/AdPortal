@@ -252,8 +252,8 @@ const AiTools: React.FC = () => {
               <span
                 className={`text-xs px-2 py-1 rounded-full h-fit ${
                   item.impact === "High Impact"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
+                    ? "bg-green-100 border border-green-500 text-green-700"
+                    : "bg-yellow-100 border border-yellow-500 text-yellow-700"
                 }`}
               >
                 {item.impact}
