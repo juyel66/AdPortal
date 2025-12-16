@@ -21,6 +21,10 @@ import Root from "./pages/Root";
 import Home from "./pages/Home/Home";
 import AiTools from "./components/AITools/AiTools";
 import Analytics from "./components/Analytics/Analytics";
+import Reports from "./components/Reports/Reports";
+import Subscriptions from "./components/Analytics/Subscriptions/Subscriptions";
+import Team from "./components/Team/Team";
+import Settings from "./components/Settings/Settings";
 
 
 export const router = createBrowserRouter([
@@ -62,6 +66,22 @@ export const router = createBrowserRouter([
       {
         path: "analytics",
         element: <Analytics />,
+      },
+      {
+        path: "reports",
+        element: <Reports />,
+      },
+      {
+        path: "subscriptions",
+        element: <Subscriptions />,
+      },
+      {
+        path: "team",
+        element: <Team />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
       },
 
     
