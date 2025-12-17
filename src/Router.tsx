@@ -25,12 +25,21 @@ import Reports from "./components/Reports/Reports";
 import Subscriptions from "./components/Analytics/Subscriptions/Subscriptions";
 import Team from "./components/Team/Team";
 import Settings from "./components/Settings/Settings";
+import AdminDashboard from "./pages/admin/AdminDashboard/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement/UserManagement";
+import CampaignMonitoring from "./pages/admin/CampaignMonitoring/CampaignMonitoring";
+import ContentModeration from "./pages/admin/ContentModeration/ContentModeration";
+import  Finance from "./pages/admin/Finance/Finance";
+import PlatformAnalytics from "./pages/admin/PlatformAnalytics/PlatformAnalytics";
+import AdminSetting from "./pages/admin/AdminSetting/AdminSetting";
+
 
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
+    errorElement: <div>404</div>,
     children: [
       {
         index: true,
@@ -121,4 +130,45 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+
+  {
+    path: "/admin-dashboard",
+    element: <DashboardLayout />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="dashboard" replace />,
+      },
+      {
+        path: "dashboard",
+        element: <AdminDashboard />,
+      },
+      {
+        path: "user-management",
+        element: <UserManagement />,
+      },
+      {
+        path: "campaigns-monitoring",
+        element: <CampaignMonitoring />,
+      },
+      {
+        path: "content-moderation",
+        element: <ContentModeration />,
+      },
+      {
+        path: "finance",
+        element: <Finance />
+      },
+      {
+        path: "platform-analytics",
+        element: <PlatformAnalytics />
+      },
+      {
+        path: "settings",
+        element: <AdminSetting />
+      }
+    ],
+
+  }
 ]);
