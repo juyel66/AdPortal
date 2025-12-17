@@ -15,7 +15,7 @@ import {
 } from "recharts";
 
 import type { PieLabelRenderProps } from "recharts";
-import AdminRecentCampaign from "./AdminRecentCampaign";
+import AdminRecentCampaign from "./AdminManagementPages";
 
 /* =========================
    TYPES
