@@ -5,7 +5,7 @@ import React from "react";
 import {
   DollarSign,
   Eye,
-  MousePointerClick,
+
   Target,
   TrendingUp,
   TrendingDown,
