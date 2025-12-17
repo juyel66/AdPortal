@@ -74,10 +74,11 @@ const CreateCampaignLayout: React.FC = () => {
           className="text-slate-600"
           variant="outline"
           onClick={goPrevious}
-          disabled={currentStep === 1}
+          hidden={currentStep === 1}
         >
           Previous
         </Button>
+        <p></p>
 
         <Button
           onClick={goNext}
