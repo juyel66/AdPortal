@@ -21,6 +21,7 @@ const DashboardLayout: React.FC = () => {
 
           {/* Page Content */}
           <div className="w-full">
+            <div className="flex items-center justify-center">Navbar</div>
             <Outlet />
           </div>
 
