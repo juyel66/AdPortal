@@ -24,7 +24,7 @@ import Analytics from "./components/Analytics/Analytics";
 import Reports from "./components/Reports/Reports";
 import Subscriptions from "./components/Analytics/Subscriptions/Subscriptions";
 import Team from "./components/Team/Team";
-import Settings from "./components/Settings/Settings";
+import Settings from "./components/Settings/UserSettings";
 import AdminDashboard from "./pages/admin/AdminDashboard/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement/UserManagement";
 import CampaignMonitoring from "./pages/admin/CampaignMonitoring/CampaignMonitoring";
@@ -32,6 +32,9 @@ import ContentModeration from "./pages/admin/ContentModeration/ContentModeration
 import  Finance from "./pages/admin/Finance/Finance";
 import PlatformAnalytics from "./pages/admin/PlatformAnalytics/PlatformAnalytics";
 import AdminSetting from "./pages/admin/AdminSetting/AdminSetting";
+
+import SignUp from "./components/Auth/signUp";
+import SignIn from "./components/Auth/signIn";
 
 
 
@@ -45,7 +48,30 @@ export const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
+     
     ],
+  },
+
+
+    {
+    path: "/auth",
+    children: [
+      {
+        index: true,
+        element: <Navigate to="signin" replace />,
+      },
+      {
+        path: "signin",
+        element: <SignIn />,
+      },
+      {
+        path: "signup",
+        element: <SignUp />,
+      },
+    ],
+
+    
+
   },
 
   {
@@ -169,6 +195,6 @@ export const router = createBrowserRouter([
         element: <AdminSetting />
       }
     ],
+  },
 
-  }
 ]);
