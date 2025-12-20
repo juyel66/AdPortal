@@ -1,16 +1,10 @@
-/* =========================
-   USER STATUS
-========================= */
+
 export type UserStatus = "active" | "suspended" | "inactive";
 
-/* =========================
-   USER PLAN
-========================= */
+
 export type UserPlan = "Starter" | "Growth" | "Scale";
 
-/* =========================
-   USER ITEM
-========================= */
+
 export interface UserItem {
   id: number;
   name: string;
@@ -24,9 +18,7 @@ export interface UserItem {
   lastActive: string;
 }
 
-/* =========================
-   USER STATS
-========================= */
+
 export interface UserStats {
   total: number;
   active: number;
@@ -34,9 +26,7 @@ export interface UserStats {
   trial: number;
 }
 
-/* =========================
-   ACTION MENU POSITION
-========================= */
+
 export type ActionMenuPosition = {
   vertical: "top" | "bottom";
   horizontal: "left" | "right";

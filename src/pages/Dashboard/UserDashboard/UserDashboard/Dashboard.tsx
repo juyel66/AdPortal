@@ -16,9 +16,7 @@ import CampaignsTable from "./RecentCampaigns/RecentCampaigns";
 
 const nowRelative = "2 minutes ago";
 
-/* -------------------------
-   StatCard Component (Updated for Image Icons)
-   ------------------------- */
+
 
 function StatCard({
   label,
@@ -70,9 +68,7 @@ function StatCard({
   );
 }
 
-/* -------------------------
-   ActionCard Component
-   ------------------------- */
+
 
 function ActionCard({
   title,
@@ -102,9 +98,6 @@ function ActionCard({
   );
 }
 
-/* -------------------------
-   ICONS from Cloudinary
-   ------------------------- */
 
 const ICONS = {
   dollar:
@@ -115,9 +108,7 @@ const ICONS = {
   ROAS: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_9_apjmto.png",
 };
 
-/* -------------------------
-   Main Page
-   ------------------------- */
+
 
 const UserDashboard: React.FC = () => {
   return (
