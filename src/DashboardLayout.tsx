@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import AdminNavbar from "./pages/admin/AdminNavbar/AdminNavbar";
 
 const DashboardLayout: React.FC = () => {
   return (
@@ -12,17 +13,19 @@ const DashboardLayout: React.FC = () => {
         <AppSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="relative flex-1 w-full flex justify-center items-start p-6">
+        <main className="relative flex-1 w-full flex justify-center items-start pl-4 pr-4 pb-4">
           
           {/* Sidebar toggle (top-left) */}
-          <div className="absolute left-4 top-4 z-50">
+          <div className="absolute left-4 top-5 z-50">
             <SidebarTrigger />
           </div>
 
           {/* Page Content */}
           <div className="w-full">
-            <div className="flex items-center justify-center">Navbar</div>
-            <Outlet />
+              <AdminNavbar />
+           <div className="mt-4">
+             <Outlet />
+           </div>
           </div>
 
         </main>

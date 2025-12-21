@@ -1,0 +1,35 @@
+import React from 'react';
+
+const AdminNavbar = () => {
+    return (
+        <div>
+
+            <div className="navbar bg-base-100  border-b-2    ">
+  <div className="navbar-start">
+    <div className="dropdown">
+     
+      
+    </div>
+    
+  </div>
+  <div className="navbar-center hidden lg:flex">
+
+  </div>
+  <div className="navbar-end">
+  <div className='flex items-center gap-4'>
+    <div>
+        <img className='w-10 h-10 rounded-full' src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766353699/Button_3_jqwyyc.png" alt="" />
+    </div>
+     <div>
+    <p className='text-xl'>Md Juyel Rana</p>
+    <p className='text-gray-500'>mdjuyelrana.com.bd1@gmail.com</p>
+   </div>
+  </div>
+  </div>
+</div>
+            
+        </div>
+    );
+};
+
+export default AdminNavbar;

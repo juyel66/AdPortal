@@ -11,9 +11,7 @@ import type {
   CreateReportForm,
 } from "@/types/reports";
 
-/* =========================
-   Fake Data
-========================= */
+
 
 const recentReports: RecentReport[] = [
   {
