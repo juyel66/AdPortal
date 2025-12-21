@@ -1,35 +1,48 @@
 import React, { useState } from "react";
-import { Mail, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const SignIn: React.FC = () => {
-  // const [role, setRole] = useState<"user" | "admin">("user");
-  const [form, setForm] = useState({
-    email: "",
+type NewPasswordForm = {
+  password: string;
+  confirmPassword: string;
+};
+
+const NewPassword: React.FC = () => {
+  const [form, setForm] = useState<NewPasswordForm>({
     password: "",
-    remember: false,
+    confirmPassword: "",
   });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
 
+    // 🔐 API READY PAYLOAD
+    const payload = {
+      newPassword: form.password,
+    };
+
+    console.log("RESET PASSWORD PAYLOAD 👉", payload);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-      
+        
         <div>
           <div className="flex items-center gap-3 mb-6">
             <img
@@ -37,7 +50,6 @@ const SignIn: React.FC = () => {
               alt="AdPortal Logo"
               className="h-20"
             />
-          
           </div>
 
           <h1 className="text-3xl font-semibold text-slate-900 leading-snug">
@@ -59,30 +71,15 @@ const SignIn: React.FC = () => {
             className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-sm"
           >
             <h2 className="text-xl font-semibold text-slate-900">
-              Welcome back
+              Set new password
             </h2>
             <p className="text-sm text-slate-500 mb-6">
-              Sign in to access your dashboard
+              Your new password must be different from previously used passwords.
             </p>
 
-            {/* EMAIL */}
+            {/* NEW PASSWORD */}
             <label className="text-sm font-medium">
-              Email Address
-            </label>
-            <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
-              <Mail size={16} className="text-slate-400" />
-              <input
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className="w-full text-sm outline-none"
-              />
-            </div>
-
-            {/* PASSWORD */}
-            <label className="text-sm font-medium">
-              Password
+              Create New Password
             </label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
               <Lock size={16} className="text-slate-400" />
@@ -93,47 +90,40 @@ const SignIn: React.FC = () => {
                 onChange={handleChange}
                 placeholder="••••••••"
                 className="w-full text-sm outline-none"
+                required
               />
             </div>
 
-            {/* REMEMBER + FORGOT */}
-            <div className="mb-4 flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 text-slate-600">
-                <input
-                  type="checkbox"
-                  name="remember"
-                  checked={form.remember}
-                  onChange={handleChange}
-                />
-                Remember me
-              </label>
-
-              <Link
-                to="/auth/forgot-password"
-                className="text-blue-600"
-              >
-                Forgot password?
-              </Link>
+            {/* CONFIRM PASSWORD */}
+            <label className="text-sm font-medium">
+              Confirm Password
+            </label>
+            <div className="mt-1 mb-6 flex items-center gap-2 rounded-lg border px-3 py-2">
+              <Lock size={16} className="text-slate-400" />
+              <input
+                type="password"
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className="w-full text-sm outline-none"
+                required
+              />
             </div>
 
-            {/* SIGN IN */}
+            {/* RESET BUTTON */}
             <button
               type="submit"
               className="mb-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
-              Sign In
+              Reset Password
             </button>
 
-           
-          
-            {/* SIGN UP */}
+            {/* SIGN IN LINK */}
             <p className="text-center text-xs text-slate-500">
-              Don’t have an account?{" "}
-              <Link
-                to="/auth/signup"
-                className="text-blue-600"
-              >
-                Sign Up
+              Remember your password?{" "}
+              <Link to="/auth/signin" className="text-blue-600">
+                Sign In
               </Link>
             </p>
           </form>
@@ -143,4 +133,4 @@ const SignIn: React.FC = () => {
   );
 };
 
-export default SignIn;
+export default NewPassword;

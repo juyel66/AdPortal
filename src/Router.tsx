@@ -33,9 +33,15 @@ import  Finance from "./pages/admin/Finance/Finance";
 import PlatformAnalytics from "./pages/admin/PlatformAnalytics/PlatformAnalytics";
 import AdminSetting from "./pages/admin/AdminSetting/AdminSetting";
 
-import SignUp from "./components/Auth/signUp";
-import SignIn from "./components/Auth/signIn";
+
 import Location from "./Location/Location";
+import AdminReports from "./pages/admin/AdminReport/AdminReports";
+import SignIn from "./components/Auth/SignIn";
+import SignUp from "./components/Auth/SignUp";
+import ForgetPassword from "./components/Auth/ForgetPassword";
+import CheckEmail from "./components/Auth/CheckEmail";
+import NewPassword from "./components/Auth/NewPassword";
+
 
 
 
@@ -68,6 +74,19 @@ export const router = createBrowserRouter([
       {
         path: "signup",
         element: <SignUp />,
+      },
+      {
+        path: "forgot-password",
+        element: <ForgetPassword />
+
+      },
+      {
+        path: "check-email",
+        element: <CheckEmail />
+      },
+      {
+        path: "new-password",
+        element: <NewPassword />
       },
       {
         path: "location",
@@ -198,6 +217,10 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         element: <AdminSetting />
+      },
+      {
+        path: "reports",
+        element: <AdminReports />
       }
     ],
   },

@@ -4,7 +4,7 @@ import {
   TrendingUp,
   CreditCard,
   XCircle,
-  FileText,
+
 } from "lucide-react";
 
 import {
@@ -24,9 +24,7 @@ import type {
 } from "@/types/finance";
 import Transactions from "./Transactions/Transactions";
 
-/* =========================
-   FAKE DATA (API READY)
-========================= */
+
 
 const stats: FinanceStat[] = [
   {
@@ -70,9 +68,7 @@ const revenueByPlan: RevenuePlan[] = [
   { name: "Enterprise", subscribers: 42, revenue: 16758 },
 ];
 
-/* =========================
-   COMPONENT
-========================= */
+
 
 const Finance: React.FC = () => {
   const maxRevenue = Math.max(...revenueByPlan.map((p) => p.revenue));
