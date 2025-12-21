@@ -35,6 +35,7 @@ import AdminSetting from "./pages/admin/AdminSetting/AdminSetting";
 
 import SignUp from "./components/Auth/signUp";
 import SignIn from "./components/Auth/signIn";
+import Location from "./Location/Location";
 
 
 
@@ -68,6 +69,10 @@ export const router = createBrowserRouter([
         path: "signup",
         element: <SignUp />,
       },
+      {
+        path: "location",
+        element: <Location></Location>
+      }
     ],
 
     
