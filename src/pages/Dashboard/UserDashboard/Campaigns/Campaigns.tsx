@@ -115,19 +115,49 @@ const Campaigns: React.FC = () => {
 
       {/* Search */}
       <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-md">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="text"
-              placeholder="Search Resources..."
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-        </div>
+
+
+
+
+<div className="flex flex-col gap-4 rounded-xl  border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Search */}
+      <div className="relative w-full sm:max-w-md">
+        <Search
+          size={18}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+        />
+        <input
+          type="text"
+          placeholder="Search Resources..."
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-700
+                     focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2">
+        {/* Active */}
+        <button className="rounded-lg bg-[#2D6FF8] px-4 py-2 text-sm font-medium text-white shadow-sm">
+          All (4)
+        </button>
+
+        {/* Inactive */}
+        <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Active (2)
+        </button>
+
+        <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Paused (1)
+        </button>
+
+        <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Draft (1)
+        </button>
+      </div>
+    </div>
+
+
+
       </div>
 
       {/* Campaign Cards */}
