@@ -37,11 +37,11 @@ function StatCard({
       <div className="flex items-start justify-between">
         {/* Top-left circular icon */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+          <div className="">
             <img
               src={iconImg}
               alt="icon"
-              className="w-5 h-5 object-contain"
+              className="w-10 h-10 object-contain"
               width={20}
               height={20}
             />
