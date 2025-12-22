@@ -275,7 +275,7 @@ export function AppSidebar() {
           {/* ================= USER MENU ================= */}
           <SidebarGroup>
             <SidebarGroupLabel className="">
-            <span className="px-4 text-xs font-semibold uppercase text-gray-400">User </span> <span className="italic underline text-gray-400">development purpose</span>
+            <span className="px-4 text-xs font-semibold uppercase text-gray-400">User </span> 
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>{renderMenu(userItems)}</SidebarMenu>
@@ -285,7 +285,7 @@ export function AppSidebar() {
           {/* ================= ADMIN MENU ================= */}
           <SidebarGroup className="mt-4">
             <SidebarGroupLabel className="">
-              <span className="px-4 text-xs font-semibold uppercase text-gray-400">Admin </span> <span className="italic underline text-gray-400">development purpose</span>
+              <span className="px-4 text-xs font-semibold uppercase text-gray-400">Admin </span>
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>{renderMenu(adminItems)}</SidebarMenu>
