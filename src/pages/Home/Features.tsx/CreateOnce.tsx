@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const CreateOnes = () => {
   return (
-    <section className="relative overflow-hidden bg-white container mx-auto">
+    <section className="relative overflow-hidden bg-white container mx-auto lg:mt-0 mt-5 lg:p-0 p-2 ">
       <div className="max-w-7xl mx-auto ">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
         
