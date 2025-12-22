@@ -44,6 +44,7 @@ import NewPassword from "./components/Auth/NewPassword";
 import HowItWorksPage from "./pages/Home/HowItWorksPage/HowItWorksPage";
 import Pricing from "./pages/Home/Pricing/Pricing";
 import FeaturesPage from "./pages/Home/Features.tsx/FeaturesPage";
+import ErrorPage from "./pages/ErrorPage/ErrorPage";
 
 
 
@@ -52,7 +53,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
-    errorElement: <div>404</div>,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
