@@ -41,6 +41,9 @@ import SignUp from "./components/Auth/SignUp";
 import ForgetPassword from "./components/Auth/ForgetPassword";
 import CheckEmail from "./components/Auth/CheckEmail";
 import NewPassword from "./components/Auth/NewPassword";
+import HowItWorksPage from "./pages/Home/HowItWorksPage/HowItWorksPage";
+import Pricing from "./pages/Home/Pricing/Pricing";
+import FeaturesPage from "./pages/Home/Features.tsx/FeaturesPage";
 
 
 
@@ -55,6 +58,18 @@ export const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
+      {
+        path: "features",
+        element: <FeaturesPage />,
+      },
+      {
+        path: "how-it-works",
+        element: <HowItWorksPage />,
+      },
+      {
+        path: "pricing",
+        element: <Pricing />,
+      }
      
     ],
   },
