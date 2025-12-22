@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Mail } from "lucide-react";
 import { Link } from "react-router-dom";
-import { OTP } from "./OTP";
+
 
 const ForgetPassword: React.FC = () => {
   // const [role, setRole] = useState<"user" | "admin">("user");
