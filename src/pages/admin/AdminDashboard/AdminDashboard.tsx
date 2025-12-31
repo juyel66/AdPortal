@@ -16,6 +16,7 @@ import {
 
 import type { PieLabelRenderProps } from "recharts";
 import AdminRecentCampaign from "./AdminManagementPages";
+// import ArrowUp from "../../../assets/rightGreen.svg";
 
 /* =========================
    TYPES
@@ -54,7 +55,7 @@ const stats: StatCardType[] = [
     sub: "53 new this week",
     change: "+22.3%",
     positive: true,
-    icon: <Users size={16} className="text-blue-600" />,
+    icon: <Users size={16} className="" />,
   },
   {
     title: "Active Campaigns",
@@ -62,7 +63,7 @@ const stats: StatCardType[] = [
     sub: "90 created today",
     change: "+9.2%",
     positive: true,
-    icon: <Megaphone size={16} className="text-emerald-600" />,
+    icon: <Megaphone size={16} className="text-[#55E8C6]" />,
   },
   {
     title: "Monthly Revenue",
@@ -70,7 +71,7 @@ const stats: StatCardType[] = [
     sub: "MRR growing",
     change: "+23.8%",
     positive: true,
-    icon: <DollarSign size={16} className="text-indigo-600" />,
+    icon: <DollarSign size={16} className="text-[#7EB5FF]" />,
   },
 ];
 
@@ -126,9 +127,7 @@ const renderPieLabel = (props: PieLabelRenderProps) => {
   );
 };
 
-/* =========================
-   COMPONENT
-========================= */
+
 
 const AdminDashboard: React.FC = () => {
   return (
@@ -157,6 +156,7 @@ const AdminDashboard: React.FC = () => {
 
               <div className="flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs text-green-600">
                 <TrendingUp size={12} />
+             
                 {stat.change}
               </div>
             </div>

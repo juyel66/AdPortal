@@ -8,16 +8,15 @@ const General: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* ================= TITLE ================= */}
+
       <div>
         <h2 className="text-base font-semibold text-slate-900">
           General Settings
         </h2>
       </div>
 
-      {/* ================= FORM ================= */}
       <div className="space-y-4">
-        {/* Platform Name */}
+       
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
             Platform Name
@@ -30,7 +29,7 @@ const General: React.FC = () => {
           />
         </div>
 
-        {/* Support Email */}
+       
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
             Support Email
@@ -43,7 +42,7 @@ const General: React.FC = () => {
           />
         </div>
 
-        {/* Upload Logo */}
+      
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
             Upload Logo

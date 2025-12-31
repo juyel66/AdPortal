@@ -23,7 +23,7 @@ const ReadyToTransform = () => {
         {/* CTA */}
         <div className="mt-8">
           <Link
-            to="/start-free-trial"
+            to="/auth/signin"
             className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-8 py-4 text-sm font-semibold text-white shadow-lg hover:bg-blue-700 transition"
           >
             Start Free Trial

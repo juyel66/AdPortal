@@ -138,7 +138,7 @@ const CampaignMonitoring: React.FC = () => {
           >
             <p className="text-sm text-slate-500">{s.title}</p>
             <p className="mt-1 text-2xl font-semibold">{s.value}</p>
-            <p className="mt-1 text-xs text-slate-500">{s.sub}</p>
+            <p className="mt-1 text-xs text-green-500">{s.sub}</p>
           </div>
         ))}
       </div>

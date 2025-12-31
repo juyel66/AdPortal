@@ -89,7 +89,7 @@ const PlatformAnalytics: React.FC = () => {
             </div>
 
             <p className="mt-3 text-sm text-slate-500">
-              {stat.title}
+              {stat.title} 
             </p>
             <p className="mt-1 text-xl font-semibold text-slate-900">
               {stat.value}

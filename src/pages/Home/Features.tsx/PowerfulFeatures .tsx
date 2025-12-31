@@ -32,7 +32,7 @@ const PowerfulFeatures = () => {
             </p>
 
             <Link
-              to="/start-free-trial"
+              to="/auth/signin"
               className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
               Start Free Trial
@@ -85,7 +85,7 @@ const PowerfulFeatures = () => {
             </p>
 
             <Link
-              to="/start-free-trial"
+              to="/auth/signin"
               className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
               Start Free Trial
@@ -119,7 +119,7 @@ const PowerfulFeatures = () => {
             </p>
 
             <Link
-              to="/start-free-trial"
+              to="/auth/signin"
               className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
               Start Free Trial
@@ -178,7 +178,7 @@ const PowerfulFeatures = () => {
             </p>
 
             <Link
-              to="/start-free-trial"
+              to="/auth/signin"
               className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
               Start Free Trial

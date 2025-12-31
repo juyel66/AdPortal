@@ -15,8 +15,6 @@ import type {
   ReportMetric,
 } from "@/types/AdminReports";
 
-
-
 const REPORTS: ReportCard[] = [
   {
     id: 1,
@@ -38,8 +36,6 @@ const REPORTS: ReportCard[] = [
   },
 ];
 
-
-
 const METRICS: ReportMetric[] = [
   "Revenue Overview",
   "Revenue by Plan",
@@ -51,9 +47,6 @@ const METRICS: ReportMetric[] = [
   "Failed Payments",
 ];
 
-
-
-
 const AdminReports: React.FC = () => {
   const [reports, setReports] = useState<ReportCard[]>(REPORTS);
   const [openModal, setOpenModal] = useState(false);
@@ -62,7 +55,6 @@ const AdminReports: React.FC = () => {
     reportType: "Weekly",
     metrics: [],
   });
-
 
   const downloadPDF = (report: ReportCard) => {
     const pdf = new jsPDF();
@@ -84,8 +76,6 @@ const AdminReports: React.FC = () => {
 
     pdf.save(`${report.title}.pdf`);
   };
-
-
 
   const createReport = () => {
     const newReport: ReportCard = {
@@ -114,9 +104,7 @@ const AdminReports: React.FC = () => {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
-            Reports
-          </h1>
+          <h1 className="text-xl font-semibold text-slate-900">Reports</h1>
           <p className="text-sm text-slate-500">
             Generate and download comprehensive campaign reports
           </p>
@@ -133,9 +121,21 @@ const AdminReports: React.FC = () => {
 
       {/* REPORT TYPES */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ReportTypeCard icon={<Calendar size={18} />} title="Weekly Report" />
-        <ReportTypeCard icon={<TrendingUp size={18} />} title="Monthly Report" />
-        <ReportTypeCard icon={<FileText size={18} />} title="Custom Report" />
+        <ReportTypeCard
+          icon={<Calendar size={18} className="text-blue-600" />}
+          title="Weekly Report"
+          bgColor="bg-blue-100"
+        />
+        <ReportTypeCard
+          icon={<TrendingUp size={18} className="text-green-600" />}
+          title="Monthly Report"
+          bgColor="bg-green-100"
+        />
+        <ReportTypeCard
+          icon={<FileText size={18} className="text-purple-600" />}
+          title="Custom Report"
+          bgColor="bg-purple-100"
+        />
       </div>
 
       {/* RECENT REPORTS */}
@@ -172,7 +172,7 @@ const AdminReports: React.FC = () => {
         ))}
       </div>
 
-    
+      {/* MODAL */}
       {openModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-lg rounded-xl bg-white p-6 relative">
@@ -187,7 +187,6 @@ const AdminReports: React.FC = () => {
               Create Custom Report
             </h2>
 
-            {/* Report Type */}
             <label className="text-sm font-medium">Report Type</label>
             <select
               value={form.reportType}
@@ -205,7 +204,6 @@ const AdminReports: React.FC = () => {
               <option>Custom</option>
             </select>
 
-            {/* Metrics */}
             <p className="mt-4 mb-2 text-sm font-medium">Metrics</p>
 
             <div className="grid grid-cols-2 gap-3">
@@ -224,7 +222,6 @@ const AdminReports: React.FC = () => {
               ))}
             </div>
 
-            {/* ACTIONS */}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setOpenModal(false)}
@@ -247,20 +244,22 @@ const AdminReports: React.FC = () => {
   );
 };
 
-
-
 const ReportTypeCard = ({
   icon,
   title,
+  bgColor,
 }: {
   icon: React.ReactNode;
   title: string;
+  bgColor: string;
 }) => (
   <div className="rounded-xl border bg-white p-5">
-    <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+    <div
+      className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${bgColor}`}
+    >
       {icon}
     </div>
-    <p className="font-medium">{title}</p>
+    <p className="text-sm font-semibold text-slate-900">{title}</p>
     <p className="text-sm text-slate-500">
       Generate and download instantly
     </p>

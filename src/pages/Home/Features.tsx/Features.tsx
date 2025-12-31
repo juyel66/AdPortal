@@ -6,9 +6,10 @@ import HowItWorks from "./HowItWorks";
 import PowerfulFeatures from "./PowerfulFeatures ";
 import StatsBar from "./StatsBar";
 import Trusted from "./Trusted";
-import SubscriptionBillingHomePage from "./SubscriptionBillingHomePage";
+
 import Frequently from "./Frequently";
 import ReadyToTransform from "./ReadyToTransform";
+import SubscriptionsHomePage from "./subscriptionsHomePage";
 
 const Features = () => {
     return (
@@ -20,7 +21,7 @@ const Features = () => {
             <AIMarketingTeam />
             <PowerfulFeatures />
             <HowItWorks />
-            <SubscriptionBillingHomePage />
+            <SubscriptionsHomePage />
             <Frequently />
             <ReadyToTransform />
             

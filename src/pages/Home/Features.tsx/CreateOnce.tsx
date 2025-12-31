@@ -30,7 +30,7 @@ const CreateOnes = () => {
             {/* Buttons */}
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
-                to="/launch-campaign"
+                to="/auth/signin"
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
               >
                 Launch Campaign 
@@ -38,7 +38,7 @@ const CreateOnes = () => {
               </Link>
 
               <Link
-                to="/watch-demo"
+                to="/auth/signin"
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
               >
 

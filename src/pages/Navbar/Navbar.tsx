@@ -20,7 +20,7 @@ const Navbar = () => {
     <header className="w-full border-b border-gray-200 bg-white sticky top-0 z-50">
       <div className="container mx-auto px-6">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
+      
           <Link to="/" className="flex items-center gap-2">
             <img
               src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765309106/Rectangle_ktqcsy.png"
@@ -29,7 +29,7 @@ const Navbar = () => {
             />
           </Link>
 
-          {/* Desktop Navigation */}
+         
           <nav className="hidden md:flex items-center gap-2">
             <NavLink to="/" className={navLinkClass}>
               Home
@@ -43,12 +43,12 @@ const Navbar = () => {
             <NavLink to="/pricing" className={navLinkClass}>
               Pricing
             </NavLink>
-            <NavLink to="/user-dashboard/dashboard" className={navLinkClass}>
+            <NavLink to="admin-dashboard/dashboard" className={navLinkClass}>
               Dashboard
             </NavLink>
           </nav>
 
-          {/* Desktop Actions */}
+         
           <div className="hidden md:flex items-center gap-4">
             <Link
               to="/auth/signin"
@@ -58,7 +58,7 @@ const Navbar = () => {
             </Link>
 
             <Link
-              to="/start-free-trial"
+              to="auth/signin"
               className="rounded-md bg-blue-600 px-4 py-2 h-12 flex items-center text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
               Start Free Trial
@@ -109,7 +109,7 @@ const Navbar = () => {
             Pricing
           </NavLink>
           <NavLink
-            to="/user-dashboard/dashboard"
+            to="/admin-dashboard/dashboard"
             className={navLinkClass}
             onClick={handleLinkClick}
           >

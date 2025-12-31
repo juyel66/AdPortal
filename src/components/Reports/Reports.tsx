@@ -98,7 +98,7 @@ const Reports: React.FC = () => {
       {/* Report Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ReportCard
-          icon={<Calendar className="text-blue-600" />}
+          icon={<Calendar className="text-blue-600  " />}
           title="Weekly Report"
         />
         <ReportCard

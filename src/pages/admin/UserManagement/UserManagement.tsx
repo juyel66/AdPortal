@@ -7,10 +7,14 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-
 } from "lucide-react";
 
-import type { UserItem, UserStatus } from "@/types/userManagement";
+
+import type {
+  UserItem,
+  UserStatus,
+  ActionMenuPosition,
+} from "@/types/userManagement";
 
 /* =========================
    TOP STATS (API READY)
@@ -79,7 +83,7 @@ const USERS: UserItem[] = [
 /* =========================
    HELPERS
 ========================= */
-const planBadge = (plan: string) => {
+const planBadge = (plan: UserItem["plan"]) => {
   if (plan === "Growth") return "bg-blue-100 text-blue-700";
   if (plan === "Scale") return "bg-purple-100 text-purple-700";
   return "bg-slate-100 text-slate-600";
@@ -92,14 +96,6 @@ const statusBadge = (status: UserStatus) => {
 };
 
 /* =========================
-   TYPES
-========================= */
-type ActionPosition = {
-  vertical: "top" | "bottom";
-  horizontal: "left" | "right";
-};
-
-/* =========================
    COMPONENT
 ========================= */
 const ITEMS_PER_PAGE = 4;
@@ -108,7 +104,9 @@ const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<UserItem[]>(USERS);
   const [page, setPage] = useState<number>(1);
   const [openAction, setOpenAction] = useState<number | null>(null);
-  const [actionPos, setActionPos] = useState<ActionPosition>({
+
+  // ✅ FIX: explicit type
+  const [actionPos, setActionPos] = useState<ActionMenuPosition>({
     vertical: "bottom",
     horizontal: "right",
   });
@@ -120,20 +118,18 @@ const UserManagement: React.FC = () => {
     return users.slice(start, start + ITEMS_PER_PAGE);
   }, [page, users]);
 
-  /* =========================
-     SMART DROPDOWN POSITION
-  ========================= */
+  // ✅ FIX: explicit return type
   const calculatePosition = (
     btn: HTMLButtonElement
-  ): ActionPosition => {
+  ): ActionMenuPosition => {
     const rect = btn.getBoundingClientRect();
 
-    const vertical: "top" | "bottom" =
+    const vertical: ActionMenuPosition["vertical"] =
       window.innerHeight - rect.bottom < 140 && rect.top > 140
         ? "top"
         : "bottom";
 
-    const horizontal: "left" | "right" =
+    const horizontal: ActionMenuPosition["horizontal"] =
       window.innerWidth - rect.right < 160 && rect.left > 160
         ? "left"
         : "right";
@@ -151,17 +147,11 @@ const UserManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">User management</h1>
-          <p className="text-sm text-slate-500">
-            Manage all platform users and their subscriptions
-          </p>
-        </div>
-
-        {/* <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white">
-          <Plus size={16} /> Add User
-        </button> */}
+      <div>
+        <h1 className="text-xl font-semibold">User management</h1>
+        <p className="text-sm text-slate-500">
+          Manage all platform users and their subscriptions
+        </p>
       </div>
 
       {/* TOP STATS */}
@@ -172,30 +162,14 @@ const UserManagement: React.FC = () => {
         <StatCard title="Trial Users" value={USER_STATS.trial} sub="Converting well" variant="blue" />
       </div>
 
-      {/* SEARCH & FILTER */}
+      {/* SEARCH */}
       <div className="rounded-xl border bg-white p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 items-center gap-2 rounded-lg border bg-slate-50 px-3 py-2">
-            <Search size={16} className="text-slate-400" />
-            <input
-              placeholder="Search by name or email..."
-              className="w-full bg-transparent text-sm outline-none"
-            />
-          </div>
-
-          <select className="rounded-lg border bg-white px-3 py-2 text-sm">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Suspended</option>
-            <option>Inactive</option>
-          </select>
-
-          <select className="rounded-lg border bg-white px-3 py-2 text-sm">
-            <option>All Plans</option>
-            <option>Starter</option>
-            <option>Growth</option>
-            <option>Scale</option>
-          </select>
+        <div className="flex items-center gap-2 rounded-lg border bg-slate-50 px-3 py-2">
+          <Search size={16} className="text-slate-400" />
+          <input
+            placeholder="Search by name or email..."
+            className="w-full bg-transparent text-sm outline-none"
+          />
         </div>
       </div>
 
@@ -313,7 +287,7 @@ const UserManagement: React.FC = () => {
 };
 
 /* =========================
-   REUSABLE COMPONENTS
+   STAT CARD
 ========================= */
 const StatCard = ({
   title,
@@ -326,21 +300,24 @@ const StatCard = ({
   sub: string;
   variant?: "green" | "yellow" | "blue";
 }) => {
-  const variants = {
-    green: "border-green-300 bg-green-50",
-    yellow: "border-yellow-300 bg-yellow-50",
-    blue: "border-blue-300 bg-blue-50",
+  const styles = {
+    green: "border-green-300 bg-green-50 text-green-600",
+    yellow: "border-yellow-300 bg-yellow-50 text-yellow-600",
+    blue: "border-blue-300 bg-blue-50 text-blue-600",
   };
 
   return (
-    <div className={`rounded-xl border p-4 bg-white ${variant ? variants[variant] : ""}`}>
-      <p className="text-sm text-slate-500">{title}</p>
+    <div className={`rounded-xl border p-4 ${variant ? styles[variant] : "bg-white"}`}>
+      <p className="text-sm">{title}</p>
       <p className="mt-1 text-2xl font-semibold">{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{sub}</p>
+      <p className="mt-1 text-xs">{sub}</p>
     </div>
   );
 };
 
+/* =========================
+   ACTION
+========================= */
 const Action = ({
   label,
   icon,
