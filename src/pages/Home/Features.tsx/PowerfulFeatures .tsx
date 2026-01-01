@@ -1,4 +1,8 @@
 import { Link } from "react-router-dom";
+import dashboard from "../../../assets/dashboard.svg"
+import dashboard1 from "../../../assets/dashboard1.svg"
+import dashboard2 from "../../../assets/dashboard2.svg"
+import dashboard3 from "../../../assets/dashboard3.svg"
 
 const PowerfulFeatures = () => {
   return (
@@ -31,12 +35,23 @@ const PowerfulFeatures = () => {
               one powerful dashboard.
             </p>
 
-            <Link
-              to="/auth/signin"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
-            >
-              Start Free Trial
-            </Link>
+                       <Link
+  to="/auth/signin"
+  className="
+    inline-flex items-center justify-center
+    rounded-xl
+    bg-[#3B6FF5]
+    px-8 py-4
+    text-base font-semibold text-white
+    shadow-[0_12px_30px_rgba(59,111,245,0.45)]
+    transition-all duration-300
+    hover:bg-[#2F5DE0]
+    hover:shadow-[0_16px_40px_rgba(59,111,245,0.6)]
+    active:scale-[0.98]
+  "
+>
+  Start Free Trial
+</Link>
           </div>
 
           {/* Right Image */}
@@ -45,9 +60,9 @@ const PowerfulFeatures = () => {
             <div className="absolute -inset-6 rounded-3xl bg-blue-100/40 blur-3xl"></div>
 
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766436864/Dashboard_pbexoo.png"
+              src={dashboard}
               alt="AdPortal Dashboard"
-              className="relative z-10 w-full max-w-3xl rounded-2xl shadow-xl"
+              className="relative z-10 w-full max-w-3xl rounded-2xl "
             />
           </div>
         </div>
@@ -66,9 +81,9 @@ const PowerfulFeatures = () => {
             <div className="absolute -inset-6 rounded-3xl bg-blue-100/40 blur-3xl"></div>
 
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766437421/Campaigns_ke6mjn.png"
+              src={dashboard1}
               alt="AdPortal Dashboard"
-              className="relative z-10 w-full max-w-3xl rounded-2xl shadow-xl"
+              className="relative z-10 w-full max-w-3xl rounded-2xl "
             />
           </div>
 
@@ -84,12 +99,23 @@ const PowerfulFeatures = () => {
              Effortlessly create, manage, and optimize campaigns across multiple platforms with a streamlined workflow designed for speed, clarity, and better results.
             </p>
 
-            <Link
-              to="/auth/signin"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
-            >
-              Start Free Trial
-            </Link>
+                     <Link
+  to="/auth/signin"
+  className="
+    inline-flex items-center justify-center
+    rounded-xl
+    bg-[#3B6FF5]
+    px-8 py-4
+    text-base font-semibold text-white
+    shadow-[0_12px_30px_rgba(59,111,245,0.45)]
+    transition-all duration-300
+    hover:bg-[#2F5DE0]
+    hover:shadow-[0_16px_40px_rgba(59,111,245,0.6)]
+    active:scale-[0.98]
+  "
+>
+  Start Free Trial
+</Link>
           </div>
         </div>
 
@@ -118,12 +144,23 @@ const PowerfulFeatures = () => {
               Leverage advanced AI to generate high-performing ad copy, improve targeting, optimize budgets, and automate smart decisions that boost your campaign performance.
             </p>
 
-            <Link
-              to="/auth/signin"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
-            >
-              Start Free Trial
-            </Link>
+                     <Link
+  to="/auth/signin"
+  className="
+    inline-flex items-center justify-center
+    rounded-xl
+    bg-[#3B6FF5]
+    px-8 py-4
+    text-base font-semibold text-white
+    shadow-[0_12px_30px_rgba(59,111,245,0.45)]
+    transition-all duration-300
+    hover:bg-[#2F5DE0]
+    hover:shadow-[0_16px_40px_rgba(59,111,245,0.6)]
+    active:scale-[0.98]
+  "
+>
+  Start Free Trial
+</Link>
           </div>
 
           {/* Right Image */}
@@ -132,9 +169,9 @@ const PowerfulFeatures = () => {
             <div className="absolute -inset-6 rounded-3xl bg-blue-100/40 blur-3xl"></div>
 
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766437526/AI_Tools_-_AI_Copy_Generator_wputiq.png"
+              src={dashboard2}
               alt="AdPortal Dashboard"
-              className="relative z-10 w-full max-w-3xl rounded-2xl shadow-xl"
+              className="relative z-10 w-full max-w-3xl rounded-2xl "
             />
           </div>
         </div>
@@ -159,9 +196,9 @@ const PowerfulFeatures = () => {
             <div className="absolute -inset-6 rounded-3xl bg-blue-100/40 blur-3xl"></div>
 
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766437420/Analytics_awncup.png"
+              src={dashboard3}
               alt="AdPortal Dashboard"
-              className="relative z-10 w-full max-w-3xl rounded-2xl shadow-xl"
+              className="relative z-10 w-full max-w-3xl rounded-2xl "
             />
           </div>
 
@@ -177,12 +214,24 @@ const PowerfulFeatures = () => {
              Dive deep into your ad performance with clear, actionable insights that help you track results, understand trends, and make smarter growth decisions.
             </p>
 
-            <Link
-              to="/auth/signin"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
-            >
-              Start Free Trial
-            </Link>
+           <Link
+  to="/auth/signin"
+  className="
+    inline-flex items-center justify-center
+    rounded-xl
+    bg-[#3B6FF5]
+    px-8 py-4
+    text-base font-semibold text-white
+    shadow-[0_12px_30px_rgba(59,111,245,0.45)]
+    transition-all duration-300
+    hover:bg-[#2F5DE0]
+    hover:shadow-[0_16px_40px_rgba(59,111,245,0.6)]
+    active:scale-[0.98]
+  "
+>
+  Start Free Trial
+</Link>
+
           </div>
         </div>
 

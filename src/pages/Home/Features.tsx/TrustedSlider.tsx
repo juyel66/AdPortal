@@ -2,22 +2,33 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { SwiperOptions } from "swiper/types";
 
-import "swiper/css";
-import "swiper/css/free-mode";
+import morganLogo from "../../../assets/morganLogo.svg";
+import potaka from "../../../assets/potaka.svg";
+import citi from "../../../assets/citi.svg";
+import ibm from "../../../assets/ibm.svg";
+import jmorgan from "../../../assets/jmorgan.svg";
+import sales from "../../../assets/sales.svg";
+import agun from "../../../assets/agun.svg";
+import pampers from "../../../assets/pampers.svg";
 
-import { FreeMode, Autoplay } from "swiper/modules";
+import "swiper/css";
+
+
+import { Autoplay } from "swiper/modules";
 
 type TrustedByLogo = string;
 
 const logos: TrustedByLogo[] = [
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433714/Logo_3_ek3m4b.png",
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433713/Logo_4_y3u3an.png",
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433710/Logo_7_bk1xns.png",
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433710/Logo_5_gv5zxt.png",
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433710/Logo_8_lix3lb.png",
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433710/Logo_6_akvmlj.png",
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433710/Logo_9_h7exsk.png",
-  "https://res.cloudinary.com/dqkczdjjs/image/upload/v1766433709/Logo_10_jgzugy.png",
+  morganLogo,
+  potaka,
+  citi,
+  ibm,
+  jmorgan,
+  sales,
+  agun,
+  pampers,
+  
+
 ];
 
 const swiperBreakpoints: SwiperOptions["breakpoints"] = {
@@ -42,24 +53,28 @@ const TrustedSlider: React.FC = () => {
 
         {/* Slider */}
         <Swiper
-          modules={[FreeMode, Autoplay]}
-          freeMode
+          modules={[Autoplay]}
           autoplay={{
-            delay: 2000,
+            delay: 0,
             disableOnInteraction: false,
           }}
+          speed={1500}
           loop
-          spaceBetween={20}
+          spaceBetween={30}
           slidesPerView={2}
           breakpoints={swiperBreakpoints}
         >
-          {logos.map((logo: TrustedByLogo, index: number) => (
+          {logos.map((logo, index) => (
             <SwiperSlide key={index}>
               <div className="flex items-center justify-center h-24 rounded-2xl border bg-white shadow-sm hover:shadow-md transition">
                 <img
                   src={logo}
                   alt={`Brand ${index + 1}`}
-                  className="h-15 object-contain"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.src = "/images/placeholder.png";
+                  }}
+                  className="h-12 object-contain"
                 />
               </div>
             </SwiperSlide>

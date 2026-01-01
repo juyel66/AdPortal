@@ -4,7 +4,7 @@ import {
   TrendingUp,
   Calendar,
   Download,
-  Plus,
+ 
   X,
 } from "lucide-react";
 import jsPDF from "jspdf";
@@ -114,9 +114,11 @@ const AdminReports: React.FC = () => {
           onClick={() => setOpenModal(true)}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white"
         >
-          <Plus size={16} />
+          <FileText size={16} />
           Create Reports
         </button>
+
+        
       </div>
 
       {/* REPORT TYPES */}

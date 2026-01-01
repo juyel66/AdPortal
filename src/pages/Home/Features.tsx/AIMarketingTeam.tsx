@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import marketing from "../../../assets/marketing.svg"
 
 const AIMarketingTeam = () => {
   return (
@@ -56,7 +57,7 @@ const AIMarketingTeam = () => {
             <div className="absolute -inset-8 rounded-3xl bg-blue-500/20 blur-3xl"></div>
 
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766436322/Frame_1000004626_ejkwbn.png"
+              src={marketing}
               alt="AI Dashboard"
               className="relative z-10 w-full max-w-2xl rounded-2xl "
             />

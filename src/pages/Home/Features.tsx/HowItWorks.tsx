@@ -10,7 +10,7 @@ const HowItWorks = () => {
             <img
               src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766437895/Image_8_cen8bi.png"
               alt="How it works"
-              className="w-full max-w-lg"
+              className=""
             />
           </div>
 
@@ -64,12 +64,23 @@ const HowItWorks = () => {
             </div>
 
             {/* CTA */}
-            <Link
-              to="/auth/signin"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
-            >
-              Start Free Trial
-            </Link>
+                                <Link
+  to="/auth/signin"
+  className="
+    inline-flex items-center justify-center
+    rounded-xl
+    bg-[#3B6FF5]
+    px-8 py-4
+    text-base font-semibold text-white
+    shadow-[0_12px_30px_rgba(59,111,245,0.45)]
+    transition-all duration-300
+    hover:bg-[#2F5DE0]
+    hover:shadow-[0_16px_40px_rgba(59,111,245,0.6)]
+    active:scale-[0.98]
+  "
+>
+  Start Free Trial
+</Link>
           </div>
         </div>
       </div>

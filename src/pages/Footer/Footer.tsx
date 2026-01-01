@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoo  from "../../assets/logoo.svg"
 
 const Footer = () => {
   return (
@@ -10,7 +11,7 @@ const Footer = () => {
           {/* Logo + Description */}
           <div className="flex flex-col items-center lg:items-start">
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765309106/Rectangle_ktqcsy.png"
+              src={logoo}
               alt="AdPortal"
               className="mx-auto lg:mx-0"
             />

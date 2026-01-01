@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import logo from "../../assets/whiteLogo.svg";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-2 text-[15px] font-medium transition-all ${
@@ -23,7 +24,7 @@ const Navbar = () => {
       
           <Link to="/" className="flex items-center gap-2">
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765309106/Rectangle_ktqcsy.png"
+              src={logo}
               alt="AdPortal Logo"
               className="h-14 w-auto"
             />

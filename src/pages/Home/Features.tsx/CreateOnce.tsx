@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import bannerImg from "../../../assets/bannerImg.svg"
 
 const CreateOnes = () => {
   return (
@@ -77,7 +78,7 @@ const CreateOnes = () => {
 
             {/* Dashboard Image */}
             <img
-              src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766426770/Frame_1000004621_yjekel.png"
+              src={bannerImg}
               alt="AdPortal Dashboard"
               className="relative z-10 w-full max-w-xl rounded-2xl mb-10 "
             />

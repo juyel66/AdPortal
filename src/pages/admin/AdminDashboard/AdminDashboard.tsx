@@ -134,12 +134,18 @@ const AdminDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* HEADER */}
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">
-          Admin Dashboard
-          <span className="ml-2 rounded-full bg-blue-600 px-2 py-0.5 text-xs text-white">
-            Real time
-          </span>
-        </h1>
+      <h1 className="flex items-center text-xl font-semibold text-slate-900">
+  Admin Dashboard
+  <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-blue-600 px-2 py-0.5 text-xs text-white">
+    <img
+      src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767287296/Icon_23_u6eirf.png"
+      alt=""
+      className="w-3 h-3"
+    />
+    Real time
+  </span>
+</h1>
+
         <p className="text-sm text-slate-500">
           Monitor platform performance and user activity
         </p>

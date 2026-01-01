@@ -54,13 +54,17 @@ const Frequently = () => {
               const isActive = activeIndex === index;
 
               return (
+                
                 <div
                   key={index}
-                  className={`rounded-xl p-5 cursor-pointer transition-all duration-300 ${
-                    isActive
-                      ? "bg-gradient-to-br from-[#0B1F5C] to-[#143A8B] text-white shadow-lg"
-                      : "bg-white border text-slate-900"
-                  }`}
+                  className={`rounded-xl p-5 cursor-pointer transition-all duration-300 border ${
+    isActive
+      ? "bg-gradient-to-b from-[#0A1B4D] to-[#123A8F] text-white border-blue-400/40 shadow-[0_0_0_1px_rgba(59,111,245,0.4)]"
+      : "bg-white border-slate-200 text-slate-900 hover:border-blue-300"
+  }`}
+
+
+
                   onClick={() => toggleFAQ(index)}
                 >
                   {/* Question */}
