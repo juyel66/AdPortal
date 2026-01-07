@@ -4,9 +4,9 @@ import React, { useState } from "react";
 
 const Profile: React.FC = () => {
   const [form, setForm] = useState({
-    fullName: "Sarah Chen",
-    email: "sarah.chen@example.com",
-    phone: "+1234565745",
+    fullName: "Md Juyel Rana",
+    email: "mdjuyelrana.com.bd1@gmail.com",
+    phone: "+8801747498166",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

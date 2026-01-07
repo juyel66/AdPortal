@@ -151,33 +151,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import { Link, useLocation } from "react-router-dom";
 // import {
 //   Home,
@@ -189,6 +162,8 @@
 //   Users,
 //   Settings,
 //   LogOut,
+//   Flag,
+//   DollarSign,
 // } from "lucide-react";
 
 // import {
@@ -236,13 +211,18 @@
 //   {
 //     title: "Content Moderation",
 //     url: "/admin-dashboard/content-moderation",
-//     icon: FileText,
+//     icon: Flag,
 //   },
-//   { title: "Finance", url: "/admin-dashboard/finance", icon: CreditCard },
+//   { title: "Finance", url: "/admin-dashboard/finance", icon: DollarSign },
 //   {
 //     title: "Platform Analytics",
 //     url: "/admin-dashboard/platform-analytics",
 //     icon: BarChart3,
+//   },
+//   {
+//     title: "Reports",
+//     url: "/admin-dashboard/reports",
+//     icon: FileText,
 //   },
 //   { title: "Settings", url: "/admin-dashboard/settings", icon: Settings },
 // ];
@@ -259,10 +239,13 @@
 //    COMPONENT
 // ========================= */
 
+
+// console.log(userItems);
+
 // export function AppSidebar() {
 //   const { pathname } = useLocation();
 
-//   const renderMenu = (items: typeof userItems) =>
+//   const renderMenu = (items: typeof adminItems) =>
 //     items.map((item) => {
 //       const isActive =
 //         pathname === item.url || pathname.startsWith(item.url + "/");
@@ -307,44 +290,32 @@
 //             />
 //           </div>
 
-//           {/* ================= USER MENU ================= */}
-//           <SidebarGroup>
-//             <SidebarGroupLabel className="">
-//             <span className="px-4 text-xs font-semibold uppercase text-gray-400">User </span> 
-//             </SidebarGroupLabel>
-//             <SidebarGroupContent>
-//               <SidebarMenu>{renderMenu(userItems)}</SidebarMenu>
-//             </SidebarGroupContent>
-//           </SidebarGroup>
-
-//           {/* ================= ADMIN MENU ================= */}
-//           <SidebarGroup className="mt-4">
-//             <SidebarGroupLabel className="">
-//               <span className="px-4 text-xs font-semibold uppercase text-gray-400">Admin </span>
+//           {/* ================= ADMIN MENU ONLY ================= */}
+//           <SidebarGroup className="mt-0">
+//             <SidebarGroupLabel>
+//               <span className="px-4 hidden text-xs font-semibold uppercase text-gray-400">
+//                 Admin
+//               </span>
 //             </SidebarGroupLabel>
 //             <SidebarGroupContent>
 //               <SidebarMenu>{renderMenu(adminItems)}</SidebarMenu>
 //             </SidebarGroupContent>
 //           </SidebarGroup>
 
-//           {/* PLAN CARD (USER DEMO) */}
-//           <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
-//             <div className="flex  items-center justify-between">
-//               <div className="mb-2 text-sm  text-gray-800">
-//                Current Plan 
-//               </div>
+//           {/* PLAN CARD */}
+//           <div className="mx-4 mt-6 hidden rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
+//             <div className="flex items-center justify-between">
+//               <div className="text-sm text-gray-800">Current Plan</div>
 //               <img
 //                 src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765998031/Icon_15_geshwh.png"
 //                 alt=""
 //               />
 //             </div>
 
-
-//              <div className="mb-2 text-sm font-semibold text-gray-800">
+//             <div className="mt-2 mb-2 text-sm font-semibold text-gray-800">
 //               Growth Plan
-//               </div>
+//             </div>
 
-          
 //             <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
 //               <div
 //                 className="h-full rounded-full bg-[#2D6FF8]"
@@ -352,15 +323,13 @@
 //               />
 //             </div>
 
-//               <div className="mb-2 text-[11px] text-gray-500">
+//             <div className="mb-2 text-[11px] text-gray-500">
 //               65 of 100 campaigns used
 //             </div>
 
 //             <button className="w-full rounded-lg bg-[#2D6FF8] py-1.5 text-xs font-medium text-white">
 //               Upgrade Plan
 //             </button>
-
-            
 //           </div>
 //         </div>
 
@@ -386,6 +355,24 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
@@ -397,8 +384,6 @@ import {
   Users,
   Settings,
   LogOut,
-  Flag,
-  DollarSign,
 } from "lucide-react";
 
 import {
@@ -446,18 +431,13 @@ const adminItems = [
   {
     title: "Content Moderation",
     url: "/admin-dashboard/content-moderation",
-    icon: Flag,
+    icon: FileText,
   },
-  { title: "Finance", url: "/admin-dashboard/finance", icon: DollarSign },
+  { title: "Finance", url: "/admin-dashboard/finance", icon: CreditCard },
   {
     title: "Platform Analytics",
     url: "/admin-dashboard/platform-analytics",
     icon: BarChart3,
-  },
-  {
-    title: "Reports",
-    url: "/admin-dashboard/reports",
-    icon: FileText,
   },
   { title: "Settings", url: "/admin-dashboard/settings", icon: Settings },
 ];
@@ -474,13 +454,10 @@ const INACTIVE_ICON = "#6B7280";
    COMPONENT
 ========================= */
 
-
-console.log(userItems);
-
 export function AppSidebar() {
   const { pathname } = useLocation();
 
-  const renderMenu = (items: typeof adminItems) =>
+  const renderMenu = (items: typeof userItems) =>
     items.map((item) => {
       const isActive =
         pathname === item.url || pathname.startsWith(item.url + "/");
@@ -525,32 +502,44 @@ export function AppSidebar() {
             />
           </div>
 
-          {/* ================= ADMIN MENU ONLY ================= */}
-          <SidebarGroup className="mt-0">
-            <SidebarGroupLabel>
-              <span className="px-4 hidden text-xs font-semibold uppercase text-gray-400">
-                Admin
-              </span>
+          {/* ================= USER MENU ================= */}
+          <SidebarGroup>
+            <SidebarGroupLabel className="">
+            <span className="px-4 text-xs font-semibold uppercase text-gray-400">User </span> 
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{renderMenu(userItems)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* ================= ADMIN MENU ================= */}
+          <SidebarGroup className="mt-4">
+            <SidebarGroupLabel className="">
+              <span className="px-4 text-xs font-semibold uppercase text-gray-400">Admin </span>
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>{renderMenu(adminItems)}</SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* PLAN CARD */}
-          <div className="mx-4 mt-6 hidden rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-800">Current Plan</div>
+          {/* PLAN CARD (USER DEMO) */}
+          <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
+            <div className="flex  items-center justify-between">
+              <div className="mb-2 text-sm  text-gray-800">
+               Current Plan 
+              </div>
               <img
                 src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765998031/Icon_15_geshwh.png"
                 alt=""
               />
             </div>
 
-            <div className="mt-2 mb-2 text-sm font-semibold text-gray-800">
-              Growth Plan
-            </div>
 
+             <div className="mb-2 text-sm font-semibold text-gray-800">
+              Growth Plan
+              </div>
+
+          
             <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
               <div
                 className="h-full rounded-full bg-[#2D6FF8]"
@@ -558,13 +547,15 @@ export function AppSidebar() {
               />
             </div>
 
-            <div className="mb-2 text-[11px] text-gray-500">
+              <div className="mb-2 text-[11px] text-gray-500">
               65 of 100 campaigns used
             </div>
 
             <button className="w-full rounded-lg bg-[#2D6FF8] py-1.5 text-xs font-medium text-white">
               Upgrade Plan
             </button>
+
+            
           </div>
         </div>
 
@@ -579,3 +570,12 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
+
+
+
+
+
+
+
+
