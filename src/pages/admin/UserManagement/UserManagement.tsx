@@ -84,9 +84,9 @@ const USERS: UserItem[] = [
    HELPERS
 ========================= */
 const planBadge = (plan: UserItem["plan"]) => {
-  if (plan === "Growth") return "bg-blue-100 text-blue-700";
-  if (plan === "Scale") return "bg-purple-100 text-purple-700";
-  return "bg-slate-100 text-slate-600";
+  if (plan === "Growth") return "bg-blue-100 border border-blue-500 text-blue-700";
+  if (plan === "Scale") return "bg-purple-100 border border-purple-500 text-purple-700";
+  return "bg-slate-100 border border-slate-300 text-slate-600";
 };
 
 const statusBadge = (status: UserStatus) => {
@@ -156,7 +156,7 @@ const UserManagement: React.FC = () => {
 
       {/* TOP STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Users" value={USER_STATS.total} sub="+52 this week" />
+        <StatCard title="Total Users" value={USER_STATS.total} sub="+52 this week " />
         <StatCard title="Active Users" value={USER_STATS.active} sub="90.6% of total" variant="green" />
         <StatCard title="Suspended" value={USER_STATS.suspended} sub="Requires attention" variant="yellow" />
         <StatCard title="Trial Users" value={USER_STATS.trial} sub="Converting well" variant="blue" />

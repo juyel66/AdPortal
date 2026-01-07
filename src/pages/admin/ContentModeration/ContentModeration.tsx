@@ -148,7 +148,7 @@ const ContentModeration: React.FC = () => {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-2">
           {["all", "pending", "approved", "rejected"].map((t) => (
             <button
               key={t}

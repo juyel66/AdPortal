@@ -234,7 +234,7 @@ const StatCard = ({
   return (
     <div className="rounded-xl border bg-white p-4">
       <div className="flex items-center justify-between">
-        <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center">
+        <div className="h-9 w-9 rounded-xl  bg-slate-100 flex items-center justify-center">
           {icon}
         </div>
 

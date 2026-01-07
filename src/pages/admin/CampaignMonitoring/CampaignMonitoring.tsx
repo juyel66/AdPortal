@@ -128,17 +128,17 @@ const CampaignMonitoring: React.FC = () => {
         {stats.map((s) => (
           <div
             key={s.title}
-            className={`rounded-xl border bg-white p-4 ${
+            className={`rounded-xl  border bg-white p-4 ${
               s.variant === "green"
-                ? "border-green-300 bg-green-50"
+                ? "border-green-300 text-green-500 bg-green-50"
                 : s.variant === "yellow"
-                ? "border-yellow-300 bg-yellow-50"
+                ? "border-yellow-300 bg-yellow-50 text-yellow-600"
                 : ""
             }`}
           >
-            <p className="text-sm text-slate-500">{s.title}</p>
-            <p className="mt-1 text-2xl font-semibold">{s.value}</p>
-            <p className="mt-1 text-xs text-green-500">{s.sub}</p>
+            <p className="text-sm text-slate-500  ">{s.title}</p>
+            <p className="mt-1 text-2xl  font-semibold">{s.value}</p>
+            <p className="mt-1 text-xs   text-green-500">{s.sub}</p>
           </div>
         ))}
       </div>
@@ -169,7 +169,7 @@ const CampaignMonitoring: React.FC = () => {
       {summaryData.map((item) => (
         <div
           key={item.title}
-          className="rounded-xl border bg-white p-5"
+          className="rounded-xl border  bg-white p-5"
         >
           <p className="text-sm text-slate-500">
             {item.title}
