@@ -29,7 +29,7 @@ const creatives: CreativeItem[] = [
     id: 2,
     type: "Video",
     image:
-      "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765757517/Image_Dont_Miss_Out_-_Shop_Now_voceln.png",
+      "https://res.cloudinary.com/dqkczdjjs/image/upload/v1767740837/Image_Your_Perfect_Summer_Starts_Here_r3mm4f.png",
     title: "Summer Sale - Up to 50% OFF",
     subtitle: "Limited time offer on all items",
     impressions: "89K",
@@ -67,7 +67,7 @@ const CreativePerformance: React.FC = () => {
             className="rounded-xl border bg-white p-3"
           >
             {/* Image */}
-            <div className="relative mb-3 h-40 w-full overflow-hidden rounded-lg">
+            <div className="relative mb-3  w-full overflow-hidden rounded-lg">
               <img
                 src={item.image}
                 alt={item.title}
