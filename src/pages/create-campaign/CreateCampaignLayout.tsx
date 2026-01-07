@@ -85,7 +85,7 @@ const CreateCampaignLayout: React.FC = () => {
           disabled={currentStep === TOTAL_STEPS}
           className="bg-blue-500 "
         >
-          {currentStep === TOTAL_STEPS ? "Finish" : "Continue"}
+          {currentStep === TOTAL_STEPS ? "Publish Campaign" : "Continue"}
         </Button>
       </div>
     </div>
