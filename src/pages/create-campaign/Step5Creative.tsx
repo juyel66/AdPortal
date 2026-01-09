@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Image as ImageIcon,
-  Video,
-  UploadCloud,
-  Sparkles,
-} from "lucide-react";
+import { Image as ImageIcon, Video, UploadCloud, Sparkles } from "lucide-react";
 import CopyGeneratePreview from "./CopyGeneratePreview";
 
 type AdFormat = "image" | "video";
@@ -35,7 +30,9 @@ const Step5Creative: React.FC = () => {
     if (product && audience && benefits) {
       setHeadline(`Discover ${product} for ${audience}`);
       setPrimaryText(`Experience the benefits: ${benefits}`);
-      setDescription(`Transform your workflow with our ${tone.toLowerCase()} solution.`);
+      setDescription(
+        `Transform your workflow with our ${tone.toLowerCase()} solution.`
+      );
       setCta("Shop Now");
       setShowPreview(true);
     }
@@ -47,9 +44,7 @@ const Step5Creative: React.FC = () => {
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Create Your Ad
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900">Create Your Ad</h2>
         <p className="text-sm text-gray-500">
           Upload creative assets and write compelling ad copy
         </p>
@@ -179,7 +174,7 @@ const Step5Creative: React.FC = () => {
             <option>Casual</option>
           </select>
 
-          <button 
+          <button
             onClick={handleGenerateCopy}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700 transition-colors"
           >
@@ -191,21 +186,15 @@ const Step5Creative: React.FC = () => {
 
       {/* Show preview only after generating copy */}
       {showPreview && (
-        <CopyGeneratePreview 
+        <CopyGeneratePreview
           data={{
             headline,
             primaryText,
             description,
             cta,
             mediaUrl: uploadedFile ? URL.createObjectURL(uploadedFile) : "",
-            isVideo: adFormat === "video"
+            isVideo: adFormat === "video",
           }}
-          adName={adName}
-          adFormat={adFormat}
-          product={product}
-          audience={audience}
-          benefits={benefits}
-          tone={tone}
         />
       )}
     </div>

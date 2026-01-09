@@ -4,8 +4,7 @@ import {
   MessageCircle,
   Share2,
   MoreHorizontal,
-  Heart,
-  Bookmark,
+
   Music,
 } from "lucide-react";
 import type { CopyGeneratePreviewData } from "../../types/copyGeneratePreview";
@@ -46,7 +45,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
               />
               <div>
                 <p className="text-sm font-semibold">Club Doggo</p>
-                <p className="text-xs text-gray-500">Sponsored · 🌐</p>
+                <p className="text-xs text-gray-500">Sponsored · <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917543/Vertical_container_kwvzmk.png" alt="" /></p>
               </div>
             </div>
             <MoreHorizontal size={18} />
@@ -74,7 +73,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           {/* Headline Bar */}
           <div className="flex items-center justify-between px-3 py-2 bg-gray-100">
             <p className="text-sm font-semibold">{data.headline}</p>
-            <button className="px-3 py-1 bg-gray-300 text-xs rounded">
+            <button className="px-3 py-2 font-bold bg-gray-300 text-xs rounded">
               {data.cta}
             </button>
           </div>
@@ -82,14 +81,14 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           {/* Reactions */}
           <div className="flex items-center justify-between px-3 py-2 text-xs text-gray-500">
             <div className="flex items-center gap-1">
-              <Heart size={16} />  <Bookmark size={16} /> 
-               <span>129</span>
+            <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917683/Container_14_masz7i.png" alt="" />
+               <span>507</span>
             </div>
             <div>12 Comments · 8 Shares</div>
           </div>
 
           {/* Actions */}
-          <div className="border-t flex justify-around py-2 text-sm text-gray-600">
+          <div className="border-t flex justify-between px-6 py-2 text-sm text-gray-600">
             <button className="flex items-center gap-1">
               <ThumbsUp size={16} /> Like
             </button>
@@ -113,6 +112,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
                 className="w-6 h-6 rounded-full"
               />
               <p className="text-xs text-gray-500">Club Doggo · Sponsored</p>
+                   <img  src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917950/Horizontal_container_dq8wfb.png" alt="" />
             </div>
 
       <div className="flex items-center gap-2 mb-2">
@@ -121,7 +121,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
             <p className="text-xs text-gray-600 mb-2">{data.primaryText}</p>
           </div>
             <div>
-              <button className="px-3 py-1 bg-gray-200 text-xs rounded">
+              <button className="px-3 py-2 font-bold bg-gray-300 text-xs rounded">
                 Shop Now
               </button>
             </div>
@@ -130,13 +130,14 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
 
          {data.isVideo ? (
             <video
+              
               src={data.mediaUrl}
-              className="w-44 h-28 rounded object-cover"
+              className="lg:w-4/12 h-72 rounded object-cover"
             />
           ) : (
             <img
               src={data.mediaUrl}
-              className="w-44 h-28 rounded object-cover"
+              className="lg:w-4/12 h-72 rounded object-cover"
             />
           )}
 
@@ -173,15 +174,16 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
 
           {/* Right actions */}
           <div className="absolute right-2 bottom-24 flex flex-col gap-4 items-center text-white text-xs">
-            <div className="w-10 h-10 rounded-full bg-gray-300 border-2" />
+           <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916526/Avatar_nhfhwe.png" alt="" />
             <div className="flex flex-col items-center">
-              <Heart size={22} /> 1.3M
+              <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916689/Vector_6_n1tznf.png" alt="" />
+               1.3M
             </div>
+           
             <div className="flex flex-col items-center">
-              <MessageCircle size={22} /> 10.7M
-            </div>
-            <div className="flex flex-col items-center">
-              <Bookmark size={22} /> 30.9K
+              <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916689/Group_2_3_yst4yy.png" alt="" />
+              
+               30.9K
             </div>
             <Music size={20} />
           </div>
@@ -191,11 +193,12 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
             <p className="text-xs mb-1">@JaneFisher</p>
             <p className="text-xs mb-2">{data.description}</p>
 
-            <button className="w-full bg-pink-500 text-white text-xs py-2 rounded">
+            <button className="w-full bg-red-500 text-white text-xs py-3 rounded">
               Learn More
             </button>
 
-            <span className="absolute right-4 bottom-4 bg-white text-black text-[10px] px-2 py-[2px] rounded">
+            <span className="absolute  right-4 bottom-5 bg-white/30 text-white font-semibold text-[10px] px-3 py-[4px] rounded">
+
               Ad
             </span>
           </div>
