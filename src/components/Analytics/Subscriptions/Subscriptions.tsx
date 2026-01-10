@@ -114,7 +114,7 @@ const SubscriptionBilling: React.FC = () => {
           Available Plans
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 hover:border-blue-500 hover:border">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6  ">
           {plans.map((plan) => {
             const isActive = plan.key === activePlan;
 
@@ -194,7 +194,7 @@ const SubscriptionBilling: React.FC = () => {
         {billingHistory.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between px-6 py-4 border-b last:border-b-0"
+            className="flex  items-center justify-between px-6 py-4 border-b last:border-b-0"
           >
             <div className="flex items-center gap-3">
               <FileText size={18} />
