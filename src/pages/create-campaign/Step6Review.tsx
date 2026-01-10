@@ -2,9 +2,7 @@ import React from "react";
 import {
   CheckCircle,
   AlertTriangle,
-  Send,
-  Save,
-  ChevronLeft,
+
 } from "lucide-react";
 
 const Step6Review: React.FC = () => {
@@ -122,18 +120,9 @@ const Step6Review: React.FC = () => {
 
         {/* Footer Buttons */}
         <div className="flex items-center justify-between pt-4">
-          <button className="flex items-center gap-2 text-sm px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50">
-            <ChevronLeft size={16} /> Previous
-          </button>
+         
 
-          <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 text-sm border rounded-lg text-gray-600 hover:bg-gray-50">
-              <Save size={16} /> Save as Draft
-            </button>
-            <button className="flex items-center gap-2 px-5 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-              Publish Campaign <Send size={16} />
-            </button>
-          </div>
+        
         </div>
       </div>
     </div>
