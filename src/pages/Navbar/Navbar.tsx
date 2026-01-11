@@ -44,7 +44,7 @@ const Navbar = () => {
             <NavLink to="/pricing" className={navLinkClass}>
               Pricing
             </NavLink>
-            <NavLink to="admin-dashboard/dashboard" className={navLinkClass}>
+            <NavLink to="user-dashboard/dashboard" className={navLinkClass}>
               Dashboard
             </NavLink>
           </nav>
