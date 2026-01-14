@@ -4,10 +4,6 @@
 import React, { useState } from "react";
 import { Sparkles, Wand2, RefreshCcw, Copy } from "lucide-react";
 
-/* =========================
-   Types
-========================= */
-
 type CopyType = "headlines" | "primary" | "descriptions" | "ctas";
 
 type GeneratedItem = {
@@ -30,19 +26,23 @@ type OptimizationItem = {
 const GENERATED_COPY: GeneratedItem[] = [
   {
     id: 1,
-    text: "Transform Your Business Today – Discover innovative solutions that drive real results. Limited time offer!",
+    text:
+      "Transform Your Business Today – Discover innovative solutions that drive real results. Limited time offer!",
   },
   {
     id: 2,
-    text: "Elevate Your Brand – Unleash the power of cutting-edge design and marketing strategies. Join us now!",
+    text:
+      "Elevate Your Brand – Unleash the power of cutting-edge design and marketing strategies. Join us now!",
   },
   {
     id: 3,
-    text: "Boost Your Sales – Explore our comprehensive training programs tailored for success. Enroll today!",
+    text:
+      "Boost Your Sales – Explore our comprehensive training programs tailored for success. Enroll today!",
   },
   {
     id: 4,
-    text: "Connect with Experts – Network with industry leaders and gain valuable insights. Reserve your spot!",
+    text:
+      "Connect with Experts – Network with industry leaders and gain valuable insights. Reserve your spot!",
   },
 ];
 
@@ -82,13 +82,23 @@ const AiTools: React.FC = () => {
   const [generated, setGenerated] = useState(false);
   const [copyType, setCopyType] = useState<CopyType>("headlines");
 
-  // ✅ Controlled form states
+  // Controlled form states
   const [product, setProduct] = useState("AdPortal");
   const [audience, setAudience] = useState("Ecommerce Businessman");
   const [benefits, setBenefits] = useState(
     "Ad run with AI for Google, Meta and Tiktok"
   );
   const [tone, setTone] = useState("Professional");
+
+  // ✅ Copy to clipboard logic (only feature added)
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("Copied to clipboard!");
+    } catch {
+      alert("Failed to copy");
+    }
+  };
 
   return (
     <div className="space-y-6 mt-5 ml-4">
@@ -100,10 +110,6 @@ const AiTools: React.FC = () => {
             Generate compelling ad copy and optimize your campaigns with AI
           </p>
         </div>
-
-        {/* <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-          <span className="text-lg">+</span> Add Campaign
-        </button> */}
       </div>
 
       {/* Tabs */}
@@ -168,9 +174,9 @@ const AiTools: React.FC = () => {
               <option>Friendly</option>
             </select>
 
-            {/* Copy Type (DESIGN UNCHANGED) */}
+            {/* Copy Type */}
             <div className="flex gap-2 flex-wrap">
-              {["headlines", "primary", "descriptions", "ctas"].map((t) => (
+              {["headlines", "primary", "descriptions", "CTAs"].map((t) => (
                 <button
                   key={t}
                   onClick={() => setCopyType(t as CopyType)}
@@ -198,7 +204,7 @@ const AiTools: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900">Generated Copy</h2>
               {generated && (
-                <button className="flex items-center gap-1 text-sm text-blue-600">
+                <button className="flex cursor-pointer items-center gap-1 text-sm text-blue-600">
                   <RefreshCcw size={14} /> Regenerate
                 </button>
               )}
@@ -206,7 +212,10 @@ const AiTools: React.FC = () => {
 
             {!generated ? (
               <div className="h-64 flex flex-col items-center justify-center text-slate-400">
-                <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765832904/Icon_13_tqqkug.png" alt="" />
+                <img
+                  src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765832904/Icon_13_tqqkug.png"
+                  alt=""
+                />
                 <p className="text-sm mt-2 text-center">
                   Fill in the form and click "Generate Copy" to see AI-generated
                   suggestions
@@ -220,7 +229,10 @@ const AiTools: React.FC = () => {
                     className="rounded-lg border bg-blue-50 p-3"
                   >
                     <p className="text-sm text-slate-700">{item.text}</p>
-                    <button className="mt-2 flex items-center gap-1 text-xs text-blue-600">
+                    <button
+                      onClick={() => handleCopy(item.text)}
+                      className="mt-2 flex items-center gap-1 text-xs text-blue-600"
+                    >
                       <Copy size={12} /> Copy to clipboard
                     </button>
                   </div>

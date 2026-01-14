@@ -4,7 +4,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import CampaignProgressBar from "@/components/campaign/CampaignProgressBar";
 import { Button } from "@/components/ui/button";
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const CreateCampaignLayout: React.FC = () => {
   const location = useLocation();
@@ -31,7 +31,7 @@ const CreateCampaignLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className=" bg-slate-50 flex flex-col">
      
       <div className="border-b bg-white px-6 py-4">
         <Button
@@ -57,6 +57,7 @@ const CreateCampaignLayout: React.FC = () => {
           </span>
         </div>
       </div>
+
 
      
       <div className="px-6 pt-6">

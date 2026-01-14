@@ -158,7 +158,7 @@ const Team: React.FC = () => {
               </select>
 
               {m.role !== "Owner" && (
-                <button className="text-red-500">
+                <button className="text-red-500 cursor-pointer ">
                   <Trash2 size={16} />
                 </button>
               )}

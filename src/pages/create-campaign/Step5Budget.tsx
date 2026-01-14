@@ -3,7 +3,7 @@ import { Calendar } from "lucide-react";
 
 type BudgetType = "daily" | "lifetime";
 
-const Step4Budget: React.FC = () => {
+const Step5Budget: React.FC = () => {
   const [budgetType, setBudgetType] = useState<BudgetType>("daily");
   const [budget, setBudget] = useState<number>(100);
   const [startDate, setStartDate] = useState<string>("");
@@ -39,12 +39,8 @@ const Step4Budget: React.FC = () => {
               }
             `}
           >
-            <p className="text-sm font-bold text-gray-900">
-              Daily Budget
-            </p>
-            <p className="text-xs text-gray-500">
-              Average amount per day
-            </p>
+            <p className="text-sm font-bold text-gray-900">Daily Budget</p>
+            <p className="text-xs text-gray-500">Average amount per day</p>
           </button>
 
           <button
@@ -57,12 +53,8 @@ const Step4Budget: React.FC = () => {
               }
             `}
           >
-            <p className="text-sm font-bold text-gray-900">
-              Lifetime Budget
-            </p>
-            <p className="text-xs text-gray-500">
-              Total for entire campaign
-            </p>
+            <p className="text-sm font-bold text-gray-900">Lifetime Budget</p>
+            <p className="text-xs text-gray-500">Total for entire campaign</p>
           </button>
         </div>
       </div>
@@ -147,16 +139,13 @@ const Step4Budget: React.FC = () => {
             </p>
           </div>
 
-          <p className="text-lg font-semibold text-gray-900">
-            ${budget}
-          </p>
+          <p className="text-lg font-semibold text-gray-900">${budget}</p>
         </div>
       </div>
 
       {/* Footer Buttons */}
-   
     </div>
   );
 };
 
-export default Step4Budget;
+export default Step5Budget;

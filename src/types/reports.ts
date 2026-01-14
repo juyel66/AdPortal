@@ -1,16 +1,8 @@
-// types/reports.ts
-
 export type ReportType = "Weekly" | "Monthly" | "Custom";
 
-export type Platform = "Meta" | "Google" | "TikTok";
+export type Platform = "Meta" | "TikTok" | "Google";
 
-export type Metric =
-  | "Spend"
-  | "Impressions"
-  | "Click"
-  | "CTR"
-  | "CPC"
-  | "ROAS";
+export type Metric = "Spend" | "Impressions" | "Click" | "CTR" | "CPC" | "ROAS";
 
 export type RecentReport = {
   id: number;

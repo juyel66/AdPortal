@@ -25,25 +25,25 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-4">Product</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link to="/features" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   Features
                 </Link>
               </li>
               <li>
-                <Link to="/pricing" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link to="/ai-tools" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   AI Tools
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/integrations" className="hover:text-white">
                   Integrations
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -52,22 +52,22 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-4">Company</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link to="/about" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   About
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   Blog
                 </Link>
               </li>
-              <li>
-                <Link to="/careers" className="hover:text-white">
+              {/* <li>
+                <Link to="/" className="hover:text-white">
                   Careers
                 </Link>
-              </li>
+              </li> */}
               <li>
-                <Link to="/contact" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   Contact
                 </Link>
               </li>
@@ -79,17 +79,17 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-4">Legal</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link to="/privacy" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   Privacy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   Terms
                 </Link>
               </li>
               <li>
-                <Link to="/security" className="hover:text-white">
+                <Link to="/" className="hover:text-white">
                   Security
                 </Link>
               </li>
@@ -99,7 +99,7 @@ const Footer = () => {
 
         {/* Divider */}
         <div className="mt-12 border-t border-white/10 pt-6 text-center text-sm text-slate-400">
-          © 2025 AdPortal. All rights reserved.
+          © 2026 AdPortal. All rights reserved.
         </div>
       </div>
     </footer>

@@ -3,13 +3,12 @@ import Icon from "../../assets/Icon.svg";
 
 type GenderType = "all" | "male" | "female";
 
-const Step3Audience: React.FC = () => {
+const Step4Audience: React.FC = () => {
   const [minAge, setMinAge] = useState<number>(19);
   const [maxAge, setMaxAge] = useState<string>("60+");
   const [gender, setGender] = useState<GenderType>("all");
   const [location, setLocation] = useState<string>("United States");
   const [interests, setInterests] = useState<string>("");
-
 
   const estimatedReach = useMemo(() => {
     let baseMin = 630;
@@ -36,15 +35,11 @@ const Step3Audience: React.FC = () => {
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Target Audience
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900">Target Audience</h2>
         <p className="text-sm text-gray-500">
           Define who you want to reach with your campaign
         </p>
       </div>
-
-  
 
       {/* Age Range */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
@@ -182,4 +177,4 @@ const Step3Audience: React.FC = () => {
   );
 };
 
-export default Step3Audience;
+export default Step4Audience;

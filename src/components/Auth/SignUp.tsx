@@ -10,7 +10,7 @@ type SignUpForm = {
 };
 
 const SignUp: React.FC = () => {
-//   const [role, setRole] = useState<"user" | "admin">("user");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState<SignUpForm>({
     name: "",
@@ -19,11 +19,8 @@ const SignUp: React.FC = () => {
     remember: false,
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -32,20 +29,13 @@ const SignUp: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // 🔐 API READY PAYLOAD
-    // const payload = {
-    //   ...form,
-    //   role,
-    // };
-
-    // console.log("SIGN UP PAYLOAD 👉", payload);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-     
+
+        {/* Left */}
         <div>
           <div className="flex items-center gap-3 mb-6">
             <img
@@ -67,6 +57,7 @@ const SignUp: React.FC = () => {
           </p>
         </div>
 
+        {/* Right */}
         <div className="flex justify-center">
           <form
             onSubmit={handleSubmit}
@@ -79,10 +70,8 @@ const SignUp: React.FC = () => {
               Sign up to get started with AdPortal
             </p>
 
-            {/* FULL NAME */}
-            <label className="text-sm font-medium">
-              Full Name
-            </label>
+            {/* Name */}
+            <label className="text-sm font-medium">Full Name</label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
               <User size={16} className="text-slate-400" />
               <input
@@ -95,10 +84,8 @@ const SignUp: React.FC = () => {
               />
             </div>
 
-            {/* EMAIL */}
-            <label className="text-sm font-medium">
-              Email Address
-            </label>
+            {/* Email */}
+            <label className="text-sm font-medium">Email Address</label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
               <Mail size={16} className="text-slate-400" />
               <input
@@ -111,14 +98,12 @@ const SignUp: React.FC = () => {
               />
             </div>
 
-            {/* PASSWORD */}
-            <label className="text-sm font-medium">
-              Password
-            </label>
+            {/* Password */}
+            <label className="text-sm font-medium">Password</label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
               <Lock size={16} className="text-slate-400" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={form.password}
                 onChange={handleChange}
@@ -126,9 +111,16 @@ const SignUp: React.FC = () => {
                 className="w-full text-sm outline-none"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420182/Vector_7_peacpf.png" alt="" /></> : <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420130/Icon_28_zew7xb.png" alt="" /></>}
+              </button>
             </div>
 
-            {/* REMEMBER */}
+            {/* Remember */}
             <div className="mb-4 flex items-center gap-2 text-xs text-slate-600">
               <input
                 type="checkbox"
@@ -139,7 +131,7 @@ const SignUp: React.FC = () => {
               Remember me
             </div>
 
-            {/* SIGN UP BUTTON */}
+            {/* Submit */}
             <button
               type="submit"
               className="mb-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -147,40 +139,14 @@ const SignUp: React.FC = () => {
               Create Account
             </button>
 
-           
-            {/* <div className="mb-4 flex gap-2">
-              <Link to="/user-dashboard/dashboard"
-                type="button"
-                onClick={() => setRole("user")}
-                className={`flex-1 flex items-center justify-center rounded-lg border py-2 text-sm font-medium ${
-                  role === "user"
-                    ? "border-blue-600 text-blue-600"
-                    : "text-slate-500"
-                }`}
-              >
-                User
-              </Link>
-
-              <Link to="/admin-dashboard/dashboard"
-                type="button"
-                onClick={() => setRole("admin")}
-                className={`flex-1 flex items-center justify-center rounded-lg border py-2 text-sm font-medium text-center${
-                  role === "admin"
-                    ? "border-emerald-500 text-emerald-600"
-                    : "text-slate-500"
-                }`}
-              >
-               Admin
-              </Link>
-            </div> */}
-
-            {/* LOGIN LINK */}
+            {/* Login */}
             <p className="text-center text-xs text-slate-500">
               Already have an account?{" "}
               <Link to="/auth/signin" className="text-blue-600">
                 Sign In
               </Link>
             </p>
+
           </form>
         </div>
       </div>

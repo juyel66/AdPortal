@@ -3,16 +3,15 @@ import { Mail, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const SignIn: React.FC = () => {
-  // const [role, setRole] = useState<"user" | "admin">("user");
+  const [showPassword, setShowPassword] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
     remember: false,
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
@@ -22,14 +21,13 @@ const SignIn: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-      
+        
+        {/* Left Side */}
         <div>
           <div className="flex items-center gap-3 mb-6">
             <img
@@ -37,7 +35,6 @@ const SignIn: React.FC = () => {
               alt="AdPortal Logo"
               className="h-20"
             />
-          
           </div>
 
           <h1 className="text-3xl font-semibold text-slate-900 leading-snug">
@@ -52,7 +49,7 @@ const SignIn: React.FC = () => {
           </p>
         </div>
 
-     
+        {/* Right Side */}
         <div className="flex justify-center">
           <form
             onSubmit={handleSubmit}
@@ -66,9 +63,7 @@ const SignIn: React.FC = () => {
             </p>
 
             {/* EMAIL */}
-            <label className="text-sm font-medium">
-              Email Address
-            </label>
+            <label className="text-sm font-medium">Email Address</label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
               <Mail size={16} className="text-slate-400" />
               <input
@@ -81,19 +76,24 @@ const SignIn: React.FC = () => {
             </div>
 
             {/* PASSWORD */}
-            <label className="text-sm font-medium">
-              Password
-            </label>
+            <label className="text-sm font-medium">Password</label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
               <Lock size={16} className="text-slate-400" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={form.password}
                 onChange={handleChange}
                 placeholder="••••••••"
                 className="w-full text-sm outline-none"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420182/Vector_7_peacpf.png" alt="" /></> : <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420130/Icon_28_zew7xb.png" alt="" /></>}
+              </button>
             </div>
 
             {/* REMEMBER + FORGOT */}
@@ -108,10 +108,7 @@ const SignIn: React.FC = () => {
                 Remember me
               </label>
 
-              <Link
-                to="/auth/forgot-password"
-                className="text-blue-600"
-              >
+              <Link to="/auth/forgot-password" className="text-blue-600">
                 Forgot password?
               </Link>
             </div>
@@ -124,15 +121,10 @@ const SignIn: React.FC = () => {
               Sign In
             </button>
 
-           
-          
             {/* SIGN UP */}
             <p className="text-center text-xs text-slate-500">
               Don’t have an account?{" "}
-              <Link
-                to="/auth/signup"
-                className="text-blue-600"
-              >
+              <Link to="/auth/signup" className="text-blue-600">
                 Sign Up
               </Link>
             </p>

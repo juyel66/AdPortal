@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  ShoppingCart,
-  Eye,
-  MessageCircle,
-  Users,
-} from "lucide-react";
+import { ShoppingCart, Eye, MessageCircle, Users } from "lucide-react";
 
 import type {
   CampaignObjective,
@@ -81,9 +76,8 @@ const ICONS: Record<ObjectiveKey, React.ReactNode> = {
    COMPONENT
 ================================ */
 
-const Step2Objective: React.FC = () => {
-  const [selected, setSelected] =
-    useState<ObjectiveKey>("conversions");
+const Step3Objective: React.FC = () => {
+  const [selected, setSelected] = useState<ObjectiveKey>("conversions");
 
   return (
     <div className="space-y-6">
@@ -155,4 +149,4 @@ const Step2Objective: React.FC = () => {
   );
 };
 
-export default Step2Objective;
+export default Step3Objective;

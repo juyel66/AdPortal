@@ -8,14 +8,15 @@ type NewPasswordForm = {
 };
 
 const NewPassword: React.FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [form, setForm] = useState<NewPasswordForm>({
     password: "",
     confirmPassword: "",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
@@ -31,7 +32,6 @@ const NewPassword: React.FC = () => {
       return;
     }
 
-    // 🔐 API READY PAYLOAD
     const payload = {
       newPassword: form.password,
     };
@@ -42,7 +42,8 @@ const NewPassword: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        
+
+        {/* Left */}
         <div>
           <div className="flex items-center gap-3 mb-6">
             <img
@@ -64,7 +65,7 @@ const NewPassword: React.FC = () => {
           </p>
         </div>
 
-     
+        {/* Right */}
         <div className="flex justify-center">
           <form
             onSubmit={handleSubmit}
@@ -77,14 +78,12 @@ const NewPassword: React.FC = () => {
               Your new password must be different from previously used passwords.
             </p>
 
-            {/* NEW PASSWORD */}
-            <label className="text-sm font-medium">
-              Create New Password
-            </label>
+            {/* New Password */}
+            <label className="text-sm font-medium">Create New Password</label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
               <Lock size={16} className="text-slate-400" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={form.password}
                 onChange={handleChange}
@@ -92,16 +91,21 @@ const NewPassword: React.FC = () => {
                 className="w-full text-sm outline-none"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ?<><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420182/Vector_7_peacpf.png" alt="" /></> : <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420130/Icon_28_zew7xb.png" alt="" /></>}
+              </button>
             </div>
 
-            {/* CONFIRM PASSWORD */}
-            <label className="text-sm font-medium">
-              Confirm Password
-            </label>
+            {/* Confirm Password */}
+            <label className="text-sm font-medium">Confirm Password</label>
             <div className="mt-1 mb-6 flex items-center gap-2 rounded-lg border px-3 py-2">
               <Lock size={16} className="text-slate-400" />
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={form.confirmPassword}
                 onChange={handleChange}
@@ -109,9 +113,16 @@ const NewPassword: React.FC = () => {
                 className="w-full text-sm outline-none"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                {showConfirmPassword ? <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420182/Vector_7_peacpf.png" alt="" /></> : <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420130/Icon_28_zew7xb.png" alt="" /></>}
+              </button>
             </div>
 
-            {/* RESET BUTTON */}
+            {/* Reset */}
             <button
               type="submit"
               className="mb-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -119,13 +130,14 @@ const NewPassword: React.FC = () => {
               Reset Password
             </button>
 
-            {/* SIGN IN LINK */}
+            {/* Sign In */}
             <p className="text-center text-xs text-slate-500">
               Remember your password?{" "}
               <Link to="/auth/signin" className="text-blue-600">
                 Sign In
               </Link>
             </p>
+
           </form>
         </div>
       </div>

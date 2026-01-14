@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { Check } from "lucide-react";
 
-import type {
-  PlatformItem,
-  PlatformKey,
-} from "@/types/createCampaignStep1";
+import type { PlatformItem, PlatformKey } from "@/types/createCampaignStep1";
 
 /* ===============================
    PLATFORM DATA
@@ -21,16 +18,14 @@ const PLATFORMS: PlatformItem[] = [
   {
     key: "google",
     name: "Google Ads",
-    description:
-      "Show ads on Google Search, YouTube, and Display Network",
+    description: "Show ads on Google Search, YouTube, and Display Network",
     connected: true,
     logo: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765754457/Container_11_bdja1x.png",
   },
   {
     key: "tiktok",
     name: "TikTok Ads",
-    description:
-      "Engage with Gen Z and millennials on TikTok",
+    description: "Engage with Gen Z and millennials on TikTok",
     connected: true,
     logo: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765754457/Container_12_siwhfp.png",
   },
@@ -40,17 +35,12 @@ const PLATFORMS: PlatformItem[] = [
    COMPONENT
 ================================ */
 
-const Step1Platforms: React.FC = () => {
-  const [selected, setSelected] = useState<PlatformKey[]>([
-    "google",
-    "tiktok",
-  ]);
+const Step2Platforms: React.FC = () => {
+  const [selected, setSelected] = useState<PlatformKey[]>(["google", "tiktok"]);
 
   const togglePlatform = (key: PlatformKey) => {
     setSelected((prev) =>
-      prev.includes(key)
-        ? prev.filter((p) => p !== key)
-        : [...prev, key]
+      prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
     );
   };
 
@@ -62,8 +52,8 @@ const Step1Platforms: React.FC = () => {
           Select Platforms
         </h2>
         <p className="text-sm text-slate-500">
-          Choose where you want to run your campaign. You can select
-          multiple platforms.
+          Choose where you want to run your campaign. You can select multiple
+          platforms.
         </p>
       </div>
 
@@ -124,9 +114,7 @@ const Step1Platforms: React.FC = () => {
                   }
                 `}
               >
-                {isSelected && (
-                  <Check size={14} className="text-white" />
-                )}
+                {isSelected && <Check size={14} className="text-white" />}
               </div>
             </div>
           );
@@ -154,4 +142,4 @@ const Step1Platforms: React.FC = () => {
   );
 };
 
-export default Step1Platforms;
+export default Step2Platforms;

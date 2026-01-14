@@ -1,6 +1,7 @@
 // SubscriptionBilling.tsx
 import React, { useState } from "react";
 import { Check, X, FileText } from "lucide-react";
+import jsPDF from "jspdf";
 
 import type {
   Plan,
@@ -10,7 +11,7 @@ import type {
 } from "@/types/subscription";
 
 /* =========================
-   FULL PLAN DATA (SAME AS UI)
+   FULL PLAN DATA
 ========================= */
 
 const plans: Plan[] = [
@@ -79,9 +80,7 @@ const billingHistory: BillingHistoryItem[] = [
   { id: 3, amount: 199, date: "2025-10-12", status: "Paid" },
 ];
 
-/* =========================
-   Component
-========================= */
+const BRAND_BLUE = "#2563EB"; // AdPortal Blue
 
 const SubscriptionBilling: React.FC = () => {
   const [activePlan, setActivePlan] = useState<PlanKey>("growth");
@@ -94,9 +93,51 @@ const SubscriptionBilling: React.FC = () => {
     cvv: "",
   });
 
+  console.log(cardForm);
+  console.log(setCardForm);
+
+  /* =========================
+     PDF DOWNLOAD
+  ========================= */
+
+  const downloadInvoice = (item: BillingHistoryItem) => {
+    const doc = new jsPDF();
+
+    doc.setTextColor(BRAND_BLUE);
+    doc.setFontSize(22);
+    doc.text("AdPortal Invoice", 20, 25);
+
+    doc.setTextColor("#000");
+    doc.setFontSize(12);
+    doc.text(`Invoice ID: INV-${item.id}`, 20, 45);
+    doc.text(`Billing Date: ${item.date}`, 20, 55);
+    doc.text(`Status: ${item.status}`, 20, 65);
+
+    doc.text("Billed To:", 20, 85);
+    doc.text("AdPortal User", 20, 95);
+    doc.text("support@adportal.ai", 20, 105);
+
+    doc.text("Plan:", 20, 125);
+    doc.text(activePlan.toUpperCase(), 80, 125);
+
+    doc.text("Amount Paid:", 20, 145);
+    doc.text(`$${item.amount}`, 80, 145);
+
+    doc.setDrawColor(BRAND_BLUE);
+    doc.line(20, 160, 190, 160);
+
+    doc.setFontSize(10);
+    doc.text(
+      "Thank you for using AdPortal. This invoice confirms your subscription payment.",
+      20,
+      175
+    );
+
+    doc.save(`AdPortal_Invoice_${item.id}.pdf`);
+  };
+
   return (
     <div className="space-y-6 mt-5">
-      {/* Header */}
       <div>
         <h1 className="text-xl font-semibold text-slate-900">
           Subscription & Billing
@@ -106,15 +147,13 @@ const SubscriptionBilling: React.FC = () => {
         </p>
       </div>
 
-      {/* =========================
-         AVAILABLE PLANS
-      ========================= */}
+      {/* PLANS */}
       <div>
         <h2 className="font-semibold text-slate-900 mb-4">
           Available Plans
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6  ">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map((plan) => {
             const isActive = plan.key === activePlan;
 
@@ -122,58 +161,51 @@ const SubscriptionBilling: React.FC = () => {
               <div
                 key={plan.key}
                 onClick={() => setActivePlan(plan.key)}
-                className={`relative cursor-pointer rounded-2xl border p-6 transition-all
-                  ${
-                    isActive
-                      ? "border-blue-600 shadow-lg scale-[1.02]"
-                      : "hover:border-slate-300"
-                  }`}
+                className={`relative cursor-pointer rounded-2xl border p-6 transition-all ${
+                  isActive
+                    ? "border-blue-600 shadow-lg scale-[1.02]"
+                    : "hover:border-slate-300"
+                }`}
               >
-                {/* Most Popular */}
                 {plan.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-600">
                     Most Popular
                   </span>
                 )}
 
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {plan.title}
-                </h3>
-
+                <h3 className="text-lg font-semibold">{plan.title}</h3>
                 <p className="mt-2 text-sm text-slate-500">
                   {plan.description}
                 </p>
 
-                {/* Price */}
                 <div className="mt-5 flex items-end gap-1">
-                  <span className="text-3xl font-semibold text-slate-900">
+                  <span className="text-3xl font-semibold">
                     ${plan.price}
                   </span>
-                  <span className="text-sm text-slate-500">/ month</span>
+                  <span className="text-sm text-slate-500">
+                    / month
+                  </span>
                 </div>
 
-                {/* Features */}
                 <ul className="mt-5 space-y-2 text-sm text-slate-600">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex gap-2">
                       <Check size={16} className="text-blue-600 mt-0.5" />
-                      {feature}
+                      {f}
                     </li>
                   ))}
                 </ul>
 
-                {/* BUTTON (ONLY THIS OPENS MODAL) */}
                 <button
                   onClick={(e) => {
-                    e.stopPropagation(); // 🔴 IMPORTANT FIX
+                    e.stopPropagation();
                     setOpenModal(true);
                   }}
-                  className={`mt-6 w-full rounded-lg px-4 py-2 text-sm font-medium transition
-                    ${
-                      isActive
-                        ? "bg-blue-600 text-white"
-                        : "border text-slate-600 hover:bg-slate-50"
-                    }`}
+                  className={`mt-6 w-full rounded-lg px-4 py-2 text-sm font-medium ${
+                    isActive
+                      ? "bg-blue-600 text-white"
+                      : "border text-slate-600 hover:bg-slate-50"
+                  }`}
                 >
                   {isActive ? "Current Plan" : "Upgrade"}
                 </button>
@@ -183,9 +215,7 @@ const SubscriptionBilling: React.FC = () => {
         </div>
       </div>
 
-      {/* =========================
-         BILLING HISTORY
-      ========================= */}
+      {/* BILLING HISTORY */}
       <div className="rounded-xl border bg-white">
         <h2 className="px-6 py-4 font-semibold border-b">
           Billing History
@@ -194,7 +224,7 @@ const SubscriptionBilling: React.FC = () => {
         {billingHistory.map((item) => (
           <div
             key={item.id}
-            className="flex  items-center justify-between px-6 py-4 border-b last:border-b-0"
+            className="flex items-center justify-between px-6 py-4 border-b last:border-b-0"
           >
             <div className="flex items-center gap-3">
               <FileText size={18} />
@@ -208,7 +238,10 @@ const SubscriptionBilling: React.FC = () => {
               <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
                 Paid
               </span>
-              <button className="rounded-md border px-3 py-1 text-xs">
+              <button
+                onClick={() => downloadInvoice(item)}
+                className="rounded-md border px-3 py-1 text-xs cursor-pointer"
+              >
                 Download
               </button>
             </div>
@@ -216,9 +249,7 @@ const SubscriptionBilling: React.FC = () => {
         ))}
       </div>
 
-      {/* =========================
-         ADD CARD MODAL
-      ========================= */}
+      {/* ADD CARD MODAL */}
       {openModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="w-full max-w-md rounded-xl bg-white p-6 relative">
@@ -229,64 +260,14 @@ const SubscriptionBilling: React.FC = () => {
               <X size={18} />
             </button>
 
-            <h2 className="text-lg font-semibold mb-4">Add New Card</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              Add New Card
+            </h2>
 
-            <label className="text-sm">Card Number</label>
             <input
-              value={cardForm.cardNumber}
-              onChange={(e) =>
-                setCardForm({ ...cardForm, cardNumber: e.target.value })
-              }
               placeholder="1234 5678 9012 3456"
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+              className="w-full border rounded-lg px-3 py-2 text-sm"
             />
-
-            <label className="mt-3 block text-sm">Card Holder Name</label>
-            <input
-              value={cardForm.cardHolder}
-              onChange={(e) =>
-                setCardForm({ ...cardForm, cardHolder: e.target.value })
-              }
-              placeholder="Jhon Doe"
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-            />
-
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm">Expiry Date</label>
-                <input
-                  value={cardForm.expiry}
-                  onChange={(e) =>
-                    setCardForm({ ...cardForm, expiry: e.target.value })
-                  }
-                  placeholder="MM/YY"
-                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-sm">CVV</label>
-                <input
-                  value={cardForm.cvv}
-                  onChange={(e) =>
-                    setCardForm({ ...cardForm, cvv: e.target.value })
-                  }
-                  placeholder="123"
-                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setOpenModal(false)}
-                className="rounded-lg border px-4 py-2 text-sm"
-              >
-                Cancel
-              </button>
-              <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white">
-                Add Card
-              </button>
-            </div>
           </div>
         </div>
       )}

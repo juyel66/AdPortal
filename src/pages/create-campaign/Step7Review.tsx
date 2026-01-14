@@ -1,11 +1,7 @@
 import React from "react";
-import {
-  CheckCircle,
-  AlertTriangle,
+import { CheckCircle, AlertTriangle } from "lucide-react";
 
-} from "lucide-react";
-
-const Step6Review: React.FC = () => {
+const Step7Review: React.FC = () => {
   return (
     <div className=" p-6">
       {/* Header */}
@@ -111,22 +107,18 @@ const Step6Review: React.FC = () => {
             <AlertTriangle className="text-yellow-600 mt-0.5" size={18} />
             <p className="text-sm text-yellow-800">
               <span className="font-medium">Before Publishing:</span> Once
-              published, your campaign will go through platform review
-              (usually 24 hours) before going live. You can still edit or
-              pause your campaign after publishing.
+              published, your campaign will go through platform review (usually
+              24 hours) before going live. You can still edit or pause your
+              campaign after publishing.
             </p>
           </div>
         </div>
 
         {/* Footer Buttons */}
-        <div className="flex items-center justify-between pt-4">
-         
-
-        
-        </div>
+        <div className="flex items-center justify-between pt-4"></div>
       </div>
     </div>
   );
 };
 
-export default Step6Review;
+export default Step7Review;

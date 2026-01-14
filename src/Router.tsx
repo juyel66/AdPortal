@@ -1,6 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-
 // Dashboard
 import UserDashboard from "./pages/Dashboard/UserDashboard/UserDashboard/Dashboard";
 import DashboardLayout from "./DashboardLayout";
@@ -10,12 +9,12 @@ import Campaigns from "./pages/Dashboard/UserDashboard/Campaigns/Campaigns";
 
 // Create Campaign (NEW)
 import CreateCampaignLayout from "./pages/create-campaign/CreateCampaignLayout";
-import Step1Platforms from "./pages/create-campaign/Step1Platforms";
-import Step2Objective from "./pages/create-campaign/Step2Objective";
-import Step3Audience from "./pages/create-campaign/Step3Audience";
-import Step4Budget from "./pages/create-campaign/Step4Budget";
-import Step5Creative from "./pages/create-campaign/Step5Creative";
-import Step6Review from "./pages/create-campaign/Step6Review";
+import Step2Platforms from "./pages/create-campaign/Step2Platforms";
+import Step3Objective from "./pages/create-campaign/Step3Objective";
+import Step4Audience from "./pages/create-campaign/Step4Audience";
+import Step5Budget from "./pages/create-campaign/Step5Budget";
+import Step5Creative from "./pages/create-campaign/Step6Creative";
+import Step7Review from "./pages/create-campaign/Step7Review";
 import CampaignsViewDetails from "./pages/Dashboard/UserDashboard/Campaigns/campaignsViewDetails/CampaignsViewDetails";
 import Root from "./pages/Root";
 import Home from "./pages/Home/Home";
@@ -29,10 +28,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement/UserManagement";
 import CampaignMonitoring from "./pages/admin/CampaignMonitoring/CampaignMonitoring";
 import ContentModeration from "./pages/admin/ContentModeration/ContentModeration";
-import  Finance from "./pages/admin/Finance/Finance";
+import Finance from "./pages/admin/Finance/Finance";
 import PlatformAnalytics from "./pages/admin/PlatformAnalytics/PlatformAnalytics";
 import AdminSetting from "./pages/admin/AdminSetting/AdminSetting";
-
 
 import Location from "./Location/Location";
 import AdminReports from "./pages/admin/AdminReport/AdminReports";
@@ -45,9 +43,7 @@ import HowItWorksPage from "./pages/Home/HowItWorksPage/HowItWorksPage";
 import Pricing from "./pages/Home/Pricing/Pricing";
 import FeaturesPage from "./pages/Home/Features.tsx/FeaturesPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
-
-
-
+import Step1CampaignName from "./pages/create-campaign/Step1CampaignName";
 
 export const router = createBrowserRouter([
   {
@@ -70,13 +66,11 @@ export const router = createBrowserRouter([
       {
         path: "pricing",
         element: <Pricing />,
-      }
-     
+      },
     ],
   },
 
-
-    {
+  {
     path: "/auth",
     children: [
       {
@@ -93,25 +87,21 @@ export const router = createBrowserRouter([
       },
       {
         path: "forgot-password",
-        element: <ForgetPassword />
-
+        element: <ForgetPassword />,
       },
       {
         path: "check-email",
-        element: <CheckEmail />
+        element: <CheckEmail />,
       },
       {
         path: "new-password",
-        element: <NewPassword />
+        element: <NewPassword />,
       },
       {
         path: "location",
-        element: <Location></Location>
-      }
+        element: <Location></Location>,
+      },
     ],
-
-    
-
   },
 
   {
@@ -159,7 +149,6 @@ export const router = createBrowserRouter([
         element: <Settings />,
       },
 
-    
       {
         path: "campaigns-create",
         element: <CreateCampaignLayout />,
@@ -170,33 +159,36 @@ export const router = createBrowserRouter([
           },
           {
             path: "step-1",
-            element: <Step1Platforms />,
+            element: <Step1CampaignName />,
           },
           {
             path: "step-2",
-            element: <Step2Objective />,
+            element: <Step2Platforms />,
           },
           {
             path: "step-3",
-            element: <Step3Audience />,
+            element: <Step3Objective />,
           },
           {
             path: "step-4",
-            element: <Step4Budget />,
+            element: <Step4Audience />,
           },
           {
             path: "step-5",
-            element: <Step5Creative />,
+            element: <Step5Budget />,
           },
           {
             path: "step-6",
-            element: <Step6Review />,
+            element: <Step5Creative />,
+          },
+          {
+            path: "step-7",
+            element: <Step7Review />,
           },
         ],
       },
     ],
   },
-
 
   {
     path: "/admin-dashboard",
@@ -224,21 +216,20 @@ export const router = createBrowserRouter([
       },
       {
         path: "finance",
-        element: <Finance />
+        element: <Finance />,
       },
       {
         path: "platform-analytics",
-        element: <PlatformAnalytics />
+        element: <PlatformAnalytics />,
       },
       {
         path: "settings",
-        element: <AdminSetting />
+        element: <AdminSetting />,
       },
       {
         path: "reports",
-        element: <AdminReports />
-      }
+        element: <AdminReports />,
+      },
     ],
   },
-
 ]);

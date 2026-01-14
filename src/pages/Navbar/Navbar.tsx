@@ -110,7 +110,7 @@ const Navbar = () => {
             Pricing
           </NavLink>
           <NavLink
-            to="/admin-dashboard/dashboard"
+            to="/user-dashboard/dashboard"
             className={navLinkClass}
             onClick={handleLinkClick}
           >

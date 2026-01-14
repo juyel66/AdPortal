@@ -439,6 +439,11 @@ const adminItems = [
     url: "/admin-dashboard/platform-analytics",
     icon: BarChart3,
   },
+  {
+    title: "Reports",
+    url: "/admin-dashboard/reports",
+    icon: FileText,
+  },
   { title: "Settings", url: "/admin-dashboard/settings", icon: Settings },
 ];
 
