@@ -44,6 +44,11 @@ import Pricing from "./pages/Home/Pricing/Pricing";
 import FeaturesPage from "./pages/Home/Features.tsx/FeaturesPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import Step1CampaignName from "./pages/create-campaign/Step1CampaignName";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions/TermsConditions";
+import SecurityPage from "./pages/SecurityPage/SecurityPage";
+import AboutUs from "./pages/AboutUs/AboutUs";
+import ContactUs from "./pages/Contact/ContactUs";
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +72,26 @@ export const router = createBrowserRouter([
         path: "pricing",
         element: <Pricing />,
       },
+      {
+        path: "privacy-policy",
+        element: <PrivacyPolicy />
+      },
+      {
+        path: "terms-and-conditions",
+        element: <TermsConditions />
+      },
+      {
+        path: "security",
+        element: <SecurityPage />
+      },
+      {
+        path: "about-us",
+        element: <AboutUs />
+      },
+      {
+        path: "contact-us",
+        element: <ContactUs />
+      }
     ],
   },
 
