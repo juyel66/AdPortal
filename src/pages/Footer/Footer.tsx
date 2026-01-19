@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
-import logoo  from "../../assets/logoo.svg"
+
+import logoo from "../../assets/logoo.svg";
 
 const Footer = () => {
   return (
     <footer className="w-full bg-gradient-to-br from-[#050B2C] via-[#07163D] to-[#081F4F] text-slate-300">
-      <div className=" container mx-auto px-6 py-16">
+      <div className="container mx-auto px-6 py-16">
         {/* Top Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center lg:text-left">
           
@@ -25,25 +25,19 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-4">Product</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link to="/" className="hover:text-white">
+                <a href="/features" className="hover:text-white">
                   Features
-                </Link>
+                </a>
               </li>
+
+              {/* ✅ PRICING (redirect home + scroll) */}
               <li>
-                <Link to="/" className="hover:text-white">
+                <a href="/pricing" className="hover:text-white">
                   Pricing
-                </Link>
+                </a>
               </li>
-              <li>
-                <Link to="/" className="hover:text-white">
-                  AI Tools
-                </Link>
-              </li>
-              {/* <li>
-                <Link to="/integrations" className="hover:text-white">
-                  Integrations
-                </Link>
-              </li> */}
+
+          
             </ul>
           </div>
 
@@ -52,24 +46,15 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-4">Company</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link to="/" className="hover:text-white">
+                <a href="/about-us" className="hover:text-white">
                   About
-                </Link>
+                </a>
               </li>
+            
               <li>
-                <Link to="/" className="hover:text-white">
-                  Blog
-                </Link>
-              </li>
-              {/* <li>
-                <Link to="/" className="hover:text-white">
-                  Careers
-                </Link>
-              </li> */}
-              <li>
-                <Link to="/" className="hover:text-white">
+                <a href="/contact-us" className="hover:text-white">
                   Contact
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -79,19 +64,19 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-4">Legal</h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link to="/" className="hover:text-white">
+                <a href="/privacy-policy" className="hover:text-white">
                   Privacy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/" className="hover:text-white">
+                <a href="/terms-and-conditions" className="hover:text-white">
                   Terms
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/" className="hover:text-white">
+                <a href="/security" className="hover:text-white">
                   Security
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
