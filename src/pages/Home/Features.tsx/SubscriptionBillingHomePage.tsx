@@ -93,7 +93,12 @@ const SubscriptionBillingHomePage: React.FC = () => {
       <div>
 
         <div className=" mb-10">
-            <p className="flex items-center justify-center lg:text-2xl text-2xl md:text-4xl font-extrabold text-slate-900">Simple, <span className="text-[#2D6FF8]">Transparent</span> Pricing</p>
+           <p className="flex flex-wrap items-center justify-center gap-2 lg:text-2xl text-2xl md:text-4xl font-extrabold text-slate-900">
+  Simple,
+  <span className="text-[#2D6FF8]">Transparent</span>
+  Pricing
+</p>
+
             <p className="flex items-center justify-center text-gray-500 mt-2 text-xl">Start free, upgrade as you grow.</p>
         </div>
      
