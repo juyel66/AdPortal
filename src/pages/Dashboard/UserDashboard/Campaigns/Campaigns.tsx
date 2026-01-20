@@ -216,11 +216,12 @@ const CampaignCard: React.FC<CampaignData> = ({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-        <Stat label="Budget" value={budget} />
+        <Stat label="Total Budget" value={budget} />
         <Stat label="Total Spend" value={spend} />
         <Stat label="Impressions" value={impressions} />
         <Stat label="Clicks" value={clicks} />
       </div>
+      
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         <Kpi label="CTR" value={ctr} />
@@ -229,7 +230,8 @@ const CampaignCard: React.FC<CampaignData> = ({
       </div>
 
       <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-        <span>{date}</span>
+        {/* <span>{date}</span> */}
+        <span></span>
         <Link to ="/user-dashboard/campaigns-view-details" className="text-blue-600 hover:underline">
           View Details →
         </Link>
