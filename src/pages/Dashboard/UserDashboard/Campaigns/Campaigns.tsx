@@ -20,7 +20,7 @@ import type {
   ChipProps,
   CampaignData,
 } from "@/types/campaign";
-import { Link } from "react-router";
+import {  Link } from "react-router";
 
 const ACTION_BTN =
   "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765671112/Button_2_upzjmx.png";
@@ -28,6 +28,7 @@ const ACTION_BTN =
 
 const Campaigns: React.FC = () => {
   const campaigns: CampaignData[] = [
+
     {
       id: 1,
       title: "Summer Sale 2024",
@@ -43,6 +44,8 @@ const Campaigns: React.FC = () => {
       roas: "3.8x",
       date: "2024-01-15 → 2024-02-15",
     },
+
+    
     {
       id: 2,
       title: "Winter Clearance 2024",
@@ -183,9 +186,11 @@ const CampaignCard: React.FC<CampaignData> = ({
   ctr,
   conversions,
   roas,
-  date,
+  
 }) => {
   const [open, setOpen] = useState(false);
+
+
 
   return (
     <div className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
@@ -221,7 +226,7 @@ const CampaignCard: React.FC<CampaignData> = ({
         <Stat label="Impressions" value={impressions} />
         <Stat label="Clicks" value={clicks} />
       </div>
-      
+
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         <Kpi label="CTR" value={ctr} />

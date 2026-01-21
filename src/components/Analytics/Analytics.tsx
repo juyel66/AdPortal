@@ -199,6 +199,8 @@ const Analytics: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
+
+              
               <Tooltip />
               <Line dataKey="clicks" stroke="#10B981" strokeWidth={2} />
               <Line dataKey="conversions" stroke="#F59E0B" strokeWidth={2} />
@@ -236,6 +238,12 @@ const Analytics: React.FC = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
+         
+
+        
+
+
+          
 
           <div className="mt-6 flex justify-around text-center">
             {spendPlatform.map((item) => (
