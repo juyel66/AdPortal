@@ -16,11 +16,7 @@ import {
 
 import type { PieLabelRenderProps } from "recharts";
 import AdminRecentCampaign from "./AdminManagementPages";
-// import ArrowUp from "../../../assets/rightGreen.svg";
 
-/* =========================
-   TYPES
-========================= */
 
 type StatCardType = {
   title: string;
@@ -90,9 +86,7 @@ const spendPlatform: PlatformData[] = [
   { name: "TikTok", value: 26, count: 267, color: "#A855F7" },
 ];
 
-/* =========================
-   PIE LABEL (TYPE SAFE)
-========================= */
+
 
 const renderPieLabel = (props: PieLabelRenderProps) => {
   const { cx, cy, midAngle, outerRadius, percent, name, fill } = props;

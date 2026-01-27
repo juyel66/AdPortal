@@ -8,9 +8,7 @@ import type {
 } from "@/types/campaignMonitoring";
 import RecentCampaignsTable from "./RecentCampaignsTable";
 
-/* =========================
-   STATS
-========================= */
+
 
 const stats: CampaignStat[] = [
   {
@@ -42,9 +40,7 @@ const stats: CampaignStat[] = [
   },
 ];
 
-/* =========================
-   CAMPAIGNS
-========================= */
+
 
 const campaigns: CampaignItem[] = [
   {
@@ -106,9 +102,7 @@ const summaryData: CampaignSummaryItem[] = [
 
 
 
-/* =========================
-   COMPONENT
-========================= */
+
 
 const CampaignMonitoring: React.FC = () => {
   return (

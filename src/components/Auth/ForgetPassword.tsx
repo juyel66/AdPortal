@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 
 const ForgetPassword: React.FC = () => {
-  // const [role, setRole] = useState<"user" | "admin">("user");
+  
   const [form, setForm] = useState({
     email: "",
     password: "",

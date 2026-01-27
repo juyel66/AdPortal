@@ -3,9 +3,7 @@ import { Check } from "lucide-react";
 
 import type { PlatformItem, PlatformKey } from "@/types/createCampaignStep1";
 
-/* ===============================
-   PLATFORM DATA
-================================ */
+
 
 const PLATFORMS: PlatformItem[] = [
   {
@@ -31,9 +29,6 @@ const PLATFORMS: PlatformItem[] = [
   },
 ];
 
-/* ===============================
-   COMPONENT
-================================ */
 
 const Step2Platforms: React.FC = () => {
   const [selected, setSelected] = useState<PlatformKey[]>(["google", "tiktok"]);

@@ -46,9 +46,7 @@ const platformIcon = (platform: PlatformType) => {
   );
 };
 
-/* =========================
-   COMPONENT
-========================= */
+
 
 interface Props {
   campaigns: CampaignItem[];

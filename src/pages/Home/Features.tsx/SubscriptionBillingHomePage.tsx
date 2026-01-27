@@ -151,10 +151,10 @@ const SubscriptionBillingHomePage: React.FC = () => {
                   ))}
                 </ul>
 
-                {/* BUTTON (ONLY THIS OPENS MODAL) */}
+
                 <button
                   onClick={(e) => {
-                    e.stopPropagation(); // 🔴 IMPORTANT FIX
+                    e.stopPropagation(); 
                     setOpenModal(true);
                   }}
                   className={`mt-6 w-full rounded-lg px-4 py-2 text-sm font-medium transition

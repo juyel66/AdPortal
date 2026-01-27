@@ -167,9 +167,7 @@ const Team: React.FC = () => {
         ))}
       </div>
 
-      {/* =========================
-         Invite Modal
-      ========================= */}
+     
       {open && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="w-full max-w-md rounded-xl bg-white p-6 relative">
@@ -230,9 +228,7 @@ const Team: React.FC = () => {
   );
 };
 
-/* =========================
-   Small Components
-========================= */
+
 
 const StatCard = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-xl border bg-white p-4">

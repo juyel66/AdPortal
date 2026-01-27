@@ -96,7 +96,7 @@ const SignIn: React.FC = () => {
               </button>
             </div>
 
-            {/* REMEMBER + FORGOT */}
+           
             <div className="mb-4 flex items-center justify-between text-xs">
               <label className="flex items-center gap-2 text-slate-600">
                 <input

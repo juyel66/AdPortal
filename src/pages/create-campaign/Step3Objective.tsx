@@ -6,9 +6,7 @@ import type {
   ObjectiveKey,
 } from "@/types/createCampaignStep2";
 
-/* ===============================
-   OBJECTIVES DATA
-================================ */
+
 
 const OBJECTIVES: CampaignObjective[] = [
   {
@@ -44,9 +42,7 @@ const OBJECTIVES: CampaignObjective[] = [
   },
 ];
 
-/* ===============================
-   ICONS (UPDATED)
-================================ */
+
 
 const ICONS: Record<ObjectiveKey, React.ReactNode> = {
   conversions: <ShoppingCart size={18} />,
@@ -72,9 +68,7 @@ const ICONS: Record<ObjectiveKey, React.ReactNode> = {
   ),
 };
 
-/* ===============================
-   COMPONENT
-================================ */
+
 
 const Step3Objective: React.FC = () => {
   const [selected, setSelected] = useState<ObjectiveKey>("conversions");

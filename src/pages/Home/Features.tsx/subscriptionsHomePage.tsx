@@ -1,12 +1,10 @@
-// SubscriptionBilling.tsx
+
 import React, { useState } from "react";
 import { Check, X, ArrowRight } from "lucide-react";
 
 import type { Plan, CardForm, PlanKey } from "@/types/subscription";
 
-/* =========================
-   PLAN DATA (UI MATCHED)
-========================= */
+
 
 const plans: Plan[] = [
   {

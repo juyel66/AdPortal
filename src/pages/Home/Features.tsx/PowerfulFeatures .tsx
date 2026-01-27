@@ -9,7 +9,7 @@ const PowerfulFeatures = () => {
    <div>
      <section className="w-full bg-white mt-10 ">
       <div className="container mx-auto px-6">
-        {/* ================= Header ================= */}
+
         <div className="mb-20 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">
             Powerful <span className="text-blue-600">Features</span>

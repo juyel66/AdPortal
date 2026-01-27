@@ -16,7 +16,7 @@ interface Props {
 const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6 space-y-10">
-      {/* ================= COPY INPUT PREVIEW ================= */}
+    
       <div className="space-y-4">
         <Field label="Headline" value={data.headline} limit={40} />
         <Field
@@ -33,7 +33,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
         <Field label="Call to Action" value={data.cta} limit={30} />
       </div>
 
-      {/* ================= FACEBOOK ================= */}
+    
       <Section title="Facebook Ad Preview">
         <div className="border rounded-lg overflow-hidden">
           {/* Header */}
@@ -102,7 +102,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
         </div>
       </Section>
 
-      {/* ================= GOOGLE ================= */}
+      
       <Section title="Google Ad Preview">
         <div className="border rounded-lg p-4 flex gap-4">
           <div className="flex-1">
@@ -148,7 +148,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
         </div>
       </Section>
 
-      {/* ================= TIKTOK ================= */}
+  
       <Section title="Tiktok Ad Preview">
         <div className="relative w-[240px] h-[440px] bg-black rounded-xl overflow-hidden">
           {/* Media */}
@@ -210,7 +210,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
 
 export default CopyGeneratePreview;
 
-/* ================= HELPERS ================= */
+
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,

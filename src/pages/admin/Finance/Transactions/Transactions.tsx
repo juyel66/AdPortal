@@ -5,9 +5,7 @@ import type {
   TransactionStatus,
 } from "@/types/transactions";
 
-/* =========================
-   FAKE DATA (API READY)
-========================= */
+
 
 const TRANSACTIONS: TransactionItem[] = [
   {
@@ -48,9 +46,7 @@ const TRANSACTIONS: TransactionItem[] = [
   },
 ];
 
-/* =========================
-   HELPERS
-========================= */
+
 
 const planBadge = (plan: PlanType) => {
   if (plan === "Growth")
@@ -68,9 +64,7 @@ const statusBadge = (status: TransactionStatus) => {
   return "bg-red-50 text-red-600 border-red-200";
 };
 
-/* =========================
-   COMPONENT
-========================= */
+
 
 const Transactions: React.FC = () => {
   return (

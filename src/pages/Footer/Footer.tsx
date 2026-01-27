@@ -8,7 +8,7 @@ const Footer = () => {
         {/* Top Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center lg:text-left">
           
-          {/* Logo + Description */}
+       
           <div className="flex flex-col items-center lg:items-start">
             <img
               src={logoo}
@@ -30,7 +30,6 @@ const Footer = () => {
                 </a>
               </li>
 
-              {/* ✅ PRICING (redirect home + scroll) */}
               <li>
                 <a href="/pricing" className="hover:text-white">
                   Pricing

@@ -80,9 +80,8 @@ const USERS: UserItem[] = [
   },
 ];
 
-/* =========================
-   HELPERS
-========================= */
+
+
 const planBadge = (plan: UserItem["plan"]) => {
   if (plan === "Growth") return "bg-blue-100 border border-blue-500 text-blue-700";
   if (plan === "Scale") return "bg-purple-100 border border-purple-500 text-purple-700";
@@ -95,9 +94,7 @@ const statusBadge = (status: UserStatus) => {
   return "bg-red-100 text-red-700";
 };
 
-/* =========================
-   COMPONENT
-========================= */
+
 const ITEMS_PER_PAGE = 4;
 
 const UserManagement: React.FC = () => {
@@ -286,9 +283,7 @@ const UserManagement: React.FC = () => {
   );
 };
 
-/* =========================
-   STAT CARD
-========================= */
+
 const StatCard = ({
   title,
   value,
@@ -315,9 +310,7 @@ const StatCard = ({
   );
 };
 
-/* =========================
-   ACTION
-========================= */
+
 const Action = ({
   label,
   icon,

@@ -3,20 +3,14 @@ import { Link } from "react-router-dom";
 import { OTP } from "./OTP";
 
 const CheckEmail: React.FC = () => {
-  // const [role, setRole] = useState<"user" | "admin">("user");
+
 
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🔐 API Ready Payload
-    // const payload = {
-    //   ...form,
-    //   role,
-    // };
 
-    // console.log("LOGIN PAYLOAD 👉", payload);
   };
 
   return (

@@ -1,4 +1,4 @@
-// SubscriptionBilling.tsx
+
 import React, { useState } from "react";
 import { Check, X, FileText } from "lucide-react";
 import jsPDF from "jspdf";
@@ -10,15 +10,11 @@ import type {
   PlanKey,
 } from "@/types/subscription";
 
-/* =========================
-   PLAN ORDER LOGIC
-========================= */
+
 
 const planOrder: PlanKey[] = ["starter", "growth", "scale"];
 
-/* =========================
-   FULL PLAN DATA
-========================= */
+
 
 const plans: Plan[] = [
   {
@@ -101,9 +97,7 @@ const SubscriptionBilling: React.FC = () => {
 
   console.log(setActivePlan);
 
-  /* =========================
-     CARD FORM HANDLERS
-  ========================= */
+
 
   const handleCardChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -125,9 +119,7 @@ const SubscriptionBilling: React.FC = () => {
     });
   };
 
-  /* =========================
-     PDF DOWNLOAD
-  ========================= */
+
 
   const downloadInvoice = (item: BillingHistoryItem) => {
     const doc = new jsPDF();

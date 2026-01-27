@@ -26,9 +26,6 @@ import {
   Legend,
 } from "recharts";
 
-/* =========================
-   Types
-========================= */
 
 type StatCard = {
   label: string;
@@ -44,9 +41,7 @@ type PlatformSpend = {
   color: string;
 };
 
-/* =========================
-   Fake Data
-========================= */
+
 
 const stats: StatCard[] = [
   {
@@ -101,9 +96,7 @@ const deviceData = [
   { device: "Tablet", impressions: 35000, clicks: 1400 },
 ];
 
-/* =========================
-   Custom Pie Label
-========================= */
+
 
 const renderPieLabel = (props: any) => {
   const { cx, cy, midAngle, outerRadius, percent, name, fill } = props;
@@ -128,10 +121,6 @@ const renderPieLabel = (props: any) => {
   );
 };
 
-/* =========================
-   Component
-========================= */
-
 const Analytics: React.FC = () => {
   return (
     <div className="space-y-6 mt-5">
@@ -143,21 +132,21 @@ const Analytics: React.FC = () => {
         </p>
       </div>
 
-      {/* ✅ Stat Cards – SAME TO SAME DESIGN */}
+ 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
             className="rounded-xl border bg-white p-4"
           >
-            {/* Top Row */}
+   
             <div className="flex items-center justify-between">
               {/* Icon */}
               <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center">
                 {stat.icon}
               </div>
 
-              {/* Percentage badge */}
+
               <div
                 className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
                   stat.positive

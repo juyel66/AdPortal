@@ -1,4 +1,4 @@
-// src/components/Settings/BusinessInfo.tsx
+
 
 import React, { useState } from "react";
 

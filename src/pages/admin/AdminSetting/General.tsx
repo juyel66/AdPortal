@@ -56,7 +56,7 @@ const General: React.FC = () => {
         </div>
       </div>
 
-      {/* ================= ACTIONS ================= */}
+     
       <div className="flex items-center gap-3 border-t pt-4">
         <button className="rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
           Cancel

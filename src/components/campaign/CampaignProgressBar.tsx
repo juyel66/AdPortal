@@ -53,20 +53,20 @@ const CampaignProgressBar: React.FC<CampaignProgressBarProps> = ({
 
   return (
     <div className="rounded-xl border bg-white p-4 md:p-6">
-      {/* MOBILE VIEW (CARD GRID) */}
+      
       <div className="space-y-3 md:hidden">
-        {/* Row 1: 4 items */}
+
         <div className="grid grid-cols-4 gap-3">
           {STEPS.slice(0, 4).map(renderStep)}
         </div>
 
-        {/* Row 2: 3 items */}
+   
         <div className="grid grid-cols-3 gap-3">
           {STEPS.slice(4).map(renderStep)}
         </div>
       </div>
 
-      {/* DESKTOP VIEW (UNCHANGED) */}
+      
       <div className="hidden md:flex md:items-center md:justify-between">
         {STEPS.map((step) => {
           const isCompleted = step.id < currentStep;

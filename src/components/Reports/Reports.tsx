@@ -53,9 +53,7 @@ const Reports: React.FC = () => {
     metrics: [],
   });
 
-  /* -------------------------
-     Handlers
-  ------------------------- */
+
 
   const togglePlatform = (p: Platform) => {
     setForm((prev) => ({
@@ -144,9 +142,7 @@ const Reports: React.FC = () => {
         ))}
       </div>
 
-      {/* =========================
-         Modal
-      ========================= */}
+
       {open && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="w-full max-w-md rounded-xl bg-white p-6 relative">
@@ -242,9 +238,7 @@ const Reports: React.FC = () => {
   );
 };
 
-/* =========================
-   Small Card Component
-========================= */
+
 
 const ReportCard = ({
   icon,

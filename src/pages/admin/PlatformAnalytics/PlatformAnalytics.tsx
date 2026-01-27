@@ -18,9 +18,7 @@ import type {
   FeatureUsageData,
 } from "@/types/PlatformAnalytics";
 
-/* =========================
-   FAKE DATA (API READY)
-========================= */
+
 
 const stats: StatCardType[] = [
   {

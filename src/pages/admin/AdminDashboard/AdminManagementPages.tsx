@@ -6,9 +6,7 @@ import type {
   SystemStatusItem,
 } from "@/types/recentCampaign";
 
-/* =========================
-   FAKE DATA (API READY)
-========================= */
+
 
 const recentCampaigns: RecentCampaignItem[] = [
   {
@@ -70,9 +68,7 @@ const systemStatus: SystemStatusItem[] = [
   },
 ];
 
-/* =========================
-   HELPERS
-========================= */
+
 
 const statusDot = (status: RecentCampaignItem["status"]) => {
   switch (status) {
@@ -87,16 +83,12 @@ const statusDot = (status: RecentCampaignItem["status"]) => {
   }
 };
 
-/* =========================
-   COMPONENT
-========================= */
+
 
 const AdminRecentCampaign: React.FC = () => {
   return (
     <div className="space-y-6">
-      {/* =========================
-         RECENT CAMPAIGNS
-      ========================= */}
+    
       <div className="rounded-xl border bg-white">
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-sm font-semibold text-slate-900">

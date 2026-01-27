@@ -5,7 +5,7 @@ const HowItWorks = () => {
     <section className="w-full bg-white py-24">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          {/* ================= LEFT IMAGE ================= */}
+
           <div className="flex justify-center lg:justify-start">
             <img
               src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766437895/Image_8_cen8bi.png"
@@ -14,7 +14,7 @@ const HowItWorks = () => {
             />
           </div>
 
-          {/* ================= RIGHT CONTENT ================= */}
+
           <div>
             {/* Step 1 */}
             <div className="flex items-start gap-4 mb-8">

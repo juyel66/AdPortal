@@ -1,5 +1,4 @@
-// AiTools.tsx
-// Full AI Tools Page (AI Copy Generator + AI Optimization)
+
 
 import React, { useState } from "react";
 import { Sparkles, Wand2, RefreshCcw, Copy } from "lucide-react";
@@ -19,9 +18,7 @@ type OptimizationItem = {
   impact: OptimizationImpact;
 };
 
-/* =========================
-   Fake Data
-========================= */
+
 
 const GENERATED_COPY: GeneratedItem[] = [
   {
@@ -73,9 +70,7 @@ const OPTIMIZATION_DATA: OptimizationItem[] = [
   },
 ];
 
-/* =========================
-   Component
-========================= */
+
 
 const AiTools: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"copy" | "optimization">("copy");

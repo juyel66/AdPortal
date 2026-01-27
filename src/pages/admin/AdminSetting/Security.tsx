@@ -7,14 +7,14 @@ const Security: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* ================= TITLE ================= */}
+      
       <div>
         <h2 className="text-base font-semibold text-slate-900">
           Change Password
         </h2>
       </div>
 
-      {/* ================= FORM ================= */}
+
       <div className="space-y-4">
         {/* Current Password */}
         <div>
@@ -59,7 +59,7 @@ const Security: React.FC = () => {
         </div>
       </div>
 
-      {/* ================= ACTIONS ================= */}
+      
       <div className="flex items-center gap-3">
         <button className="rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
           Cancel

@@ -6,7 +6,7 @@ const AIMarketingTeam = () => {
     <section className="relative overflow-hidden bg-gradient-to-br from-[#050B2C] via-[#0A1A4F] to-[#123C8C]">
       <div className="container mx-auto px-6 py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* ================= LEFT CONTENT ================= */}
+  
           <div className="text-white">
             <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">
               Meet your new
@@ -20,7 +20,7 @@ const AIMarketingTeam = () => {
               handle the heavy lifting of budget allocation.
             </p>
 
-            {/* Checklist */}
+    
             <ul className="mt-8 space-y-4">
               {[
                 "Automatic Budget Shifts based on Performance",
@@ -51,7 +51,7 @@ const AIMarketingTeam = () => {
             </div>
           </div>
 
-          {/* ================= RIGHT IMAGE ================= */}
+     
           <div className="relative flex justify-center lg:justify-end">
             {/* Glow */}
             <div className="absolute -inset-8 rounded-3xl bg-blue-500/20 blur-3xl"></div>
