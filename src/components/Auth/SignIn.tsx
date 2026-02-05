@@ -1,8 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
+import { login } from "../../features/auth/AuthThunks";
 
 const SignIn: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const { loading, error, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
@@ -21,12 +31,26 @@ const SignIn: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    dispatch(
+      login({
+        email: form.email,
+        password: form.password,
+      })
+    );
   };
+
+  
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+      alert("Login successful!");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
       <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        
         {/* Left Side */}
         <div>
           <div className="flex items-center gap-3 mb-6">
@@ -62,6 +86,13 @@ const SignIn: React.FC = () => {
               Sign in to access your dashboard
             </p>
 
+            {/* ERROR MESSAGE */}
+            {error && (
+              <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
             {/* EMAIL */}
             <label className="text-sm font-medium">Email Address</label>
             <div className="mt-1 mb-4 flex items-center gap-2 rounded-lg border px-3 py-2">
@@ -72,6 +103,7 @@ const SignIn: React.FC = () => {
                 onChange={handleChange}
                 placeholder="you@example.com"
                 className="w-full text-sm outline-none"
+                required
               />
             </div>
 
@@ -86,17 +118,27 @@ const SignIn: React.FC = () => {
                 onChange={handleChange}
                 placeholder="••••••••"
                 className="w-full text-sm outline-none"
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="text-slate-400 hover:text-slate-600"
               >
-                {showPassword ? <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420182/Vector_7_peacpf.png" alt="" /></> : <><img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420130/Icon_28_zew7xb.png" alt="" /></>}
+                {showPassword ? (
+                  <img
+                    src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420182/Vector_7_peacpf.png"
+                    alt="Hide"
+                  />
+                ) : (
+                  <img
+                    src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1768420130/Icon_28_zew7xb.png"
+                    alt="Show"
+                  />
+                )}
               </button>
             </div>
 
-           
             <div className="mb-4 flex items-center justify-between text-xs">
               <label className="flex items-center gap-2 text-slate-600">
                 <input
@@ -116,9 +158,10 @@ const SignIn: React.FC = () => {
             {/* SIGN IN */}
             <button
               type="submit"
-              className="mb-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              disabled={loading}
+              className="mb-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
 
             {/* SIGN UP */}
