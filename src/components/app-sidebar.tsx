@@ -387,6 +387,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import AccountDropdown from "./AccountDropdown/AccountDropdown";
 
 /* =========================
    MENU CONFIG
@@ -497,6 +498,11 @@ export function AppSidebar() {
               className="h-[66px] w-[200px] object-contain"
             />
           </div>
+
+
+        
+            <AccountDropdown  />
+         
 
           {/* ================= USER MENU ================= */}
           <SidebarGroup>

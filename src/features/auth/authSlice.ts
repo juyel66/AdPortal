@@ -9,7 +9,8 @@ import {
   changePassword,
   resetPasswordConfirm,
   verifyEmail,
-  resendOtp, 
+  resendOtp,
+  forgotPassword,
 } from "../../features/auth/AuthThunks";
 
 import type { UserProfile } from "../../types/auth";
@@ -22,6 +23,7 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
   message: string | null;
+  forgotPasswordEmail: string | null;
 }
 
 const initialState: AuthState = {
@@ -31,7 +33,8 @@ const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem("accessToken"),
   loading: false,
   error: null,
-  message: null, // ✅ নতুন state initialize
+  message: null,
+  forgotPasswordEmail: null,
 };
 
 const authSlice = createSlice({
@@ -40,14 +43,20 @@ const authSlice = createSlice({
   reducers: {
     clearAuthError(state) {
       state.error = null;
-      state.message = null; 
+      state.message = null;
     },
     clearAuthMessage(state) {
-      state.message = null; 
+      state.message = null;
+    },
+    setForgotPasswordEmail(state, action: PayloadAction<string>) {
+      state.forgotPasswordEmail = action.payload;
+    },
+    clearForgotPasswordEmail(state) {
+      state.forgotPasswordEmail = null;
     },
   },
   extraReducers: (builder) => {
-
+    // Login
     builder
       .addCase(login.pending, (state) => {
         state.loading = true;
@@ -72,7 +81,7 @@ const authSlice = createSlice({
           "Login failed";
       });
 
-    
+    // Register
     builder
       .addCase(register.pending, (state) => {
         state.loading = true;
@@ -91,7 +100,7 @@ const authSlice = createSlice({
           "Registration failed";
       });
 
- 
+    // Logout
     builder
       .addCase(logout.pending, (state) => {
         state.loading = true;
@@ -104,10 +113,10 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.error = null;
         state.message = "Logged out successfully!";
+        state.forgotPasswordEmail = null;
         localStorage.clear();
       })
       .addCase(logout.rejected, (state) => {
-        
         state.loading = false;
         state.user = null;
         state.accessToken = null;
@@ -115,10 +124,11 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.error = null;
         state.message = "Logged out successfully!";
+        state.forgotPasswordEmail = null;
         localStorage.clear();
       });
 
-
+    // Fetch Profile
     builder
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true;
@@ -140,7 +150,7 @@ const authSlice = createSlice({
           "Profile fetch failed";
       });
 
- 
+    // Change Password
     builder
       .addCase(changePassword.pending, (state) => {
         state.loading = true;
@@ -159,7 +169,7 @@ const authSlice = createSlice({
           "Password change failed";
       });
 
- 
+    // Reset Password Confirm
     builder
       .addCase(resetPasswordConfirm.pending, (state) => {
         state.loading = true;
@@ -178,7 +188,29 @@ const authSlice = createSlice({
           "Password reset failed";
       });
 
+    // Forgot Password - NEW
+    builder
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state, action: any) => {
+        state.loading = false;
+        state.message = 
+          action.payload?.message || 
+          action.payload?.detail || 
+          "Password reset email sent successfully!";
+      })
+      .addCase(forgotPassword.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error =
+          action.payload?.error ||
+          action.payload?.detail ||
+          "Failed to send password reset email";
+      });
 
+    // Verify Email
     builder
       .addCase(verifyEmail.pending, (state) => {
         state.loading = true;
@@ -197,7 +229,7 @@ const authSlice = createSlice({
           "OTP verification failed";
       });
 
-   
+    // Resend OTP
     builder
       .addCase(resendOtp.pending, (state) => {
         state.loading = true;
@@ -221,5 +253,10 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthError, clearAuthMessage } = authSlice.actions;
+export const { 
+  clearAuthError, 
+  clearAuthMessage, 
+  setForgotPasswordEmail,
+  clearForgotPasswordEmail 
+} = authSlice.actions;
 export default authSlice.reducer;

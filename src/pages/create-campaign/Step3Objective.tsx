@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ShoppingCart, Eye, MessageCircle, Users } from "lucide-react";
-
+import { useCampaign } from "../../../src/pages/create-campaign/CampaignContext";
 import type {
   CampaignObjective,
   ObjectiveKey,
 } from "@/types/createCampaignStep2";
-
-
 
 const OBJECTIVES: CampaignObjective[] = [
   {
@@ -42,8 +40,6 @@ const OBJECTIVES: CampaignObjective[] = [
   },
 ];
 
-
-
 const ICONS: Record<ObjectiveKey, React.ReactNode> = {
   conversions: <ShoppingCart size={18} />,
   awareness: <Eye size={18} />,
@@ -55,7 +51,7 @@ const ICONS: Record<ObjectiveKey, React.ReactNode> = {
     <img
       src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765755317/Icon_12_qrf7xm.png"
       alt="Traffic"
-      className="h-4 w-4  object-contain"
+      className="h-4 w-4 object-contain"
     />
   ),
 
@@ -68,10 +64,27 @@ const ICONS: Record<ObjectiveKey, React.ReactNode> = {
   ),
 };
 
-
-
 const Step3Objective: React.FC = () => {
-  const [selected, setSelected] = useState<ObjectiveKey>("conversions");
+  const { campaignData, updateCampaignData } = useCampaign();
+  
+  // Initialize with data from context
+  const [selected, setSelected] = useState<ObjectiveKey>(() => {
+    const savedObjective = campaignData.step3.objective;
+    const validObjective = OBJECTIVES.find(obj => obj.key === savedObjective);
+    return validObjective ? savedObjective as ObjectiveKey : "conversions";
+  });
+
+  // Update context when selection changes
+  const handleSelectObjective = (key: ObjectiveKey) => {
+    setSelected(key);
+    
+    // Update context immediately
+    updateCampaignData('step3', {
+      objective: key
+    });
+    
+    console.log("✅ Step 3 - Objective selected:", key);
+  };
 
   return (
     <div className="space-y-6">
@@ -81,7 +94,7 @@ const Step3Objective: React.FC = () => {
           Campaign Objective
         </h2>
         <p className="text-sm text-slate-500">
-          What’s your main goal for this campaign?
+          What's your main goal for this campaign?
         </p>
       </div>
 
@@ -93,7 +106,7 @@ const Step3Objective: React.FC = () => {
           return (
             <div
               key={objective.key}
-              onClick={() => setSelected(objective.key)}
+              onClick={() => handleSelectObjective(objective.key)}
               className={`cursor-pointer rounded-xl border p-4 transition
                 ${
                   isSelected
@@ -138,6 +151,33 @@ const Step3Objective: React.FC = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Selected Objective Info */}
+      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+        <p className="mb-2 text-sm font-medium text-slate-700">
+          Selected Objective:
+        </p>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600 text-white">
+            {ICONS[selected]}
+          </div>
+          <span className="font-medium text-blue-800">
+            {OBJECTIVES.find(obj => obj.key === selected)?.title}
+          </span>
+        </div>
+        
+        <p className="mt-2 text-sm text-slate-600">
+          {OBJECTIVES.find(obj => obj.key === selected)?.description}
+        </p>
+        
+        {/* Auto-save notification */}
+        <div className="mt-3 pt-3 border-t border-blue-100">
+          <p className="text-xs text-blue-600">
+            Your objective is automatically saved
+          </p>
+        </div>
       </div>
     </div>
   );

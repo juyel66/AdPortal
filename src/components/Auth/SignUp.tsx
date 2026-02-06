@@ -293,15 +293,7 @@ const SignUp: React.FC = () => {
           </p>
 
           {/* Security Features */}
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
-            <h3 className="font-medium text-blue-800 mb-2">🔒 Secure Registration</h3>
-            <ul className="text-xs text-blue-700 space-y-1">
-              <li>• End-to-end encryption</li>
-              <li>• Password strength requirements</li>
-              <li>• Email verification required</li>
-              <li>• No password storage in plain text</li>
-            </ul>
-          </div>
+        
         </div>
 
         {/* Right Section - Sign Up Form */}

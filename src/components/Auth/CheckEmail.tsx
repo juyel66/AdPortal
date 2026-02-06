@@ -41,10 +41,17 @@ const CheckEmail: React.FC = () => {
       }
     }
   }, []);
-
   
+  
+
+ 
+  
+
+
+
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: any;
+    
     
     if (resendTimer > 0 && !canResend) {
       timer = setTimeout(() => {

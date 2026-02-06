@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
-
+import { useCampaign } from "../../pages/create-campaign/CampaignContext";
 import type { PlatformItem, PlatformKey } from "@/types/createCampaignStep1";
-
-
 
 const PLATFORMS: PlatformItem[] = [
   {
@@ -29,14 +27,34 @@ const PLATFORMS: PlatformItem[] = [
   },
 ];
 
-
 const Step2Platforms: React.FC = () => {
-  const [selected, setSelected] = useState<PlatformKey[]>(["google", "tiktok"]);
+  const { campaignData, updateCampaignData } = useCampaign();
+  
+  // Initialize with data from context
+  const [selected, setSelected] = useState<PlatformKey[]>(() => {
+    const savedSelection = campaignData.step2.selectedPlatforms;
+    return savedSelection && savedSelection.length > 0 
+      ? savedSelection 
+      : ["google", "tiktok"];
+  });
 
+  // Update context when selection changes
   const togglePlatform = (key: PlatformKey) => {
-    setSelected((prev) =>
-      prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
-    );
+    setSelected((prev) => {
+      const newSelected = prev.includes(key) 
+        ? prev.filter((p) => p !== key) 
+        : [...prev, key];
+      
+      // Update context immediately
+      updateCampaignData('step2', {
+        platforms: PLATFORMS,
+        selectedPlatforms: newSelected
+      });
+      
+      console.log("✅ Step 2 - Platforms updated:", newSelected);
+      
+      return newSelected;
+    });
   };
 
   return (
@@ -75,7 +93,7 @@ const Step2Platforms: React.FC = () => {
                   <img
                     src={platform.logo}
                     alt={platform.name}
-                    className=" object-contain"
+                    className="object-contain"
                   />
                 </div>
 
@@ -131,6 +149,19 @@ const Step2Platforms: React.FC = () => {
               {PLATFORMS.find((p) => p.key === key)?.name.split(" ")[0]}
             </span>
           ))}
+          
+          {selected.length === 0 && (
+            <p className="text-sm text-slate-500 italic">
+              No platforms selected yet
+            </p>
+          )}
+        </div>
+        
+        {/* Auto-save notification */}
+        <div className="mt-3 pt-3 border-t border-blue-100">
+          <p className="text-xs text-blue-600">
+            Your selection is automatically saved
+          </p>
         </div>
       </div>
     </div>

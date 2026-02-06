@@ -5,6 +5,7 @@ import logo from "../../assets/whiteLogo.svg";
 
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { logout } from "../../features/auth/AuthThunks"; 
+import { toast } from "sonner";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-2 text-[15px] font-medium transition-all ${
@@ -32,6 +33,7 @@ const handleLogout = async () => {
     await dispatch(logout()).unwrap();
   } finally {
     navigate("/auth/signin", { replace: true });
+    toast.success("Logged out successfully!");
   }
 };
 

@@ -7,11 +7,11 @@ import type {
   ChangePasswordPayload,
   ResetPasswordConfirmPayload,
   VerifyEmailPayload,
+
   UserProfile,
 } from "../../types/auth";
 
-
-
+// Login
 export const login = createAsyncThunk<
   any,
   LoginPayload,
@@ -27,8 +27,7 @@ export const login = createAsyncThunk<
   }
 });
 
-
-
+// Register
 export const register = createAsyncThunk<
   any,
   RegisterPayload,
@@ -44,8 +43,7 @@ export const register = createAsyncThunk<
   }
 });
 
-
-
+// Logout
 export const logout = createAsyncThunk<
   boolean,
   void,
@@ -63,7 +61,7 @@ export const logout = createAsyncThunk<
     await api.post(
       "/accounts/logout/",
       {
-        refresh_token: refreshToken, 
+        refresh_token: refreshToken,
       },
       {
         headers: {
@@ -80,8 +78,7 @@ export const logout = createAsyncThunk<
   }
 });
 
-
-
+// Fetch Profile
 export const fetchProfile = createAsyncThunk<
   UserProfile,
   void,
@@ -97,8 +94,7 @@ export const fetchProfile = createAsyncThunk<
   }
 });
 
-
-
+// Change Password
 export const changePassword = createAsyncThunk<
   void,
   ChangePasswordPayload,
@@ -113,8 +109,7 @@ export const changePassword = createAsyncThunk<
   }
 });
 
-
-
+// Reset Password Confirm
 export const resetPasswordConfirm = createAsyncThunk<
   void,
   ResetPasswordConfirmPayload,
@@ -129,8 +124,27 @@ export const resetPasswordConfirm = createAsyncThunk<
   }
 });
 
+// Forgot Password - NEW
+export const forgotPassword = createAsyncThunk<
+  any,
+  { email: string },
+  { rejectValue: any }
+>("auth/forgot-password", async (payload, { rejectWithValue }) => {
+  try {
+    const res = await api.post("/accounts/password-reset/", {
+      email: payload.email,
+    });
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data || { 
+        error: "Failed to send password reset email" 
+      }
+    );
+  }
+});
 
-
+// Verify Email
 export const verifyEmail = createAsyncThunk<
   any,
   VerifyEmailPayload,
@@ -152,8 +166,7 @@ export const verifyEmail = createAsyncThunk<
   }
 });
 
-
-
+// Resend OTP
 export const resendOtp = createAsyncThunk<
   any,
   { email: string },
