@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { login } from "../../features/auth/AuthThunks";
 import {  toast, Toaster } from "sonner";
+import Swal from "sweetalert2";
 
 const SignIn: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -14,6 +15,7 @@ const SignIn: React.FC = () => {
     (state) => state.auth
   );
 
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
@@ -21,6 +23,13 @@ const SignIn: React.FC = () => {
     password: "",
     remember: false,
   });
+
+  // Swal.fire({
+  //   title: 'Error',
+  //   text: "Login Failed",
+  //   icon: 'warning',
+
+  // })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
