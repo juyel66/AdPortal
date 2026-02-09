@@ -355,16 +355,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   Megaphone,
@@ -376,6 +367,8 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../../src/hooks/reduxHooks";
+import { logout } from "../../src/features/auth/AuthThunks";
 
 import {
   Sidebar,
@@ -389,10 +382,7 @@ import {
 } from "@/components/ui/sidebar";
 import AccountDropdown from "./AccountDropdown/AccountDropdown";
 
-/* =========================
-   MENU CONFIG
-========================= */
-
+// Menu items
 const userItems = [
   { title: "Dashboard", url: "/user-dashboard/dashboard", icon: Home },
   { title: "Campaigns", url: "/user-dashboard/campaigns", icon: Megaphone },
@@ -439,20 +429,34 @@ const adminItems = [
   { title: "Settings", url: "/admin-dashboard/settings", icon: Settings },
 ];
 
-/* =========================
-   STYLES
-========================= */
 const ACTIVE_BG = "#2D6FF8";
 const ACTIVE_TEXT = "#FFFFFF";
 const INACTIVE_TEXT = "#4B5563";
 const INACTIVE_ICON = "#6B7280";
 
-/* =========================
-   COMPONENT
-========================= */
-
 export function AppSidebar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  
+  const { user, organizations, selectedOrganization } = useAppSelector((state) => state.auth);
+  
+  const isAdmin = user?.is_admin || false;
+  const userName = user?.first_name && user?.last_name 
+    ? `${user.first_name} ${user.last_name}`
+    : user?.email || "User";
+  
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      navigate("/auth/signin");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      navigate("/auth/signin");
+    }
+  };
 
   const renderMenu = (items: typeof userItems) =>
     items.map((item) => {
@@ -499,71 +503,55 @@ export function AppSidebar() {
             />
           </div>
 
+          {/* Account Dropdown */}
+          <div className="px-1 py-1">
+            <AccountDropdown 
+              userName={userName}
+              userInitial={userInitial}
+              email={user?.email || ""}
+              organizations={organizations}
+              selectedOrganization={selectedOrganization}
+            />
+          </div>
 
-        
-            <AccountDropdown  />
-         
-
-          {/* ================= USER MENU ================= */}
+          {/* Dynamic Menu based on user role */}
           <SidebarGroup>
             <SidebarGroupLabel className="">
-            <span className="px-4 text-xs font-semibold uppercase text-gray-400">User </span> 
+              <span className="px-4 text-xs font-semibold uppercase text-gray-400">
+                {isAdmin ? "Admin" : "User"} 
+              </span> 
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>{renderMenu(userItems)}</SidebarMenu>
+              <SidebarMenu>
+                {isAdmin ? renderMenu(adminItems) : renderMenu(userItems)}
+              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* ================= ADMIN MENU ================= */}
-          <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="">
-              <span className="px-4 text-xs font-semibold uppercase text-gray-400">Admin </span>
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>{renderMenu(adminItems)}</SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          {/* PLAN CARD (USER DEMO) */}
+          {/* PLAN CARD */}
           <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
-            <div className="flex  items-center justify-between">
-              <div className="mb-2 text-sm  text-gray-800">
-               Current Plan 
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-semibold text-gray-800">
+                Current Plan: Free
               </div>
               <img
                 src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765998031/Icon_15_geshwh.png"
-                alt=""
+                alt="Plan Icon"
               />
             </div>
 
-
-             <div className="mb-2 text-sm font-semibold text-gray-800">
-              Growth Plan
-              </div>
-
-          
-            <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
-              <div
-                className="h-full rounded-full bg-[#2D6FF8]"
-                style={{ width: "65%" }}
-              />
-            </div>
-
-              <div className="mb-2 text-[11px] text-gray-500">
-              65 of 100 campaigns used
-            </div>
-
-            <button className="w-full rounded-lg bg-[#2D6FF8] py-1.5 text-xs font-medium text-white">
+            <button className="w-full rounded-lg bg-[#2D6FF8] py-1.5 text-xs font-medium text-white hover:bg-[#1E5FD8] transition-colors">
               Upgrade Plan
             </button>
-
-            
           </div>
         </div>
 
         {/* LOGOUT */}
         <div className="mt-4 border-t border-gray-100 pt-4">
-          <button className="mx-4 flex w-[calc(100%-2rem)] items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-[#EF4444] hover:bg-red-50">
+          <button 
+            onClick={handleLogout}
+            className="mx-4 flex w-[calc(100%-2rem)] items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-[#EF4444] hover:bg-red-50 transition-colors"
+          >
             <LogOut className="h-4 w-4" />
             <span>Log out</span>
           </button>
@@ -572,12 +560,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
-
-
-
-
-
-
-
-
