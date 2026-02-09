@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Check } from "lucide-react";
 import { useCampaign } from "../../pages/create-campaign/CampaignContext";
 import type { PlatformItem, PlatformKey } from "@/types/createCampaignStep1";
