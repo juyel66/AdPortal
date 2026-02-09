@@ -28,7 +28,9 @@ interface Step3Data {
 }
 
 interface Step4Data {
-  audienceAge: [number, number];
+  min_age: number;           // ✅ নতুন: API-তে পাঠানোর জন্য
+  max_age: number;           // ✅ নতুন: API-তে পাঠানোর জন্য
+  audienceAge: [number, number]; // পুরানো (compatibility জন্য)
   audienceGender: string[];
   audienceInterests: string[];
   audienceLocation: string;
@@ -57,6 +59,12 @@ interface Step6Data {
   destinationUrl: string;
   brandName: string;
   primaryText: string;
+  adName: string;           // ✅ নতুন: API-তে পাঠানোর জন্য
+  product: string;          // ✅ নতুন: AI জেনারেট করার জন্য
+  audience: string;         // ✅ নতুন: AI জেনারেট করার জন্য
+  benefits: string;         // ✅ নতুন: AI জেনারেট করার জন্য
+  tone: string;            // ✅ নতুন: AI জেনারেট করার জন্য
+  uploadedFile: string;    // ✅ নতুন: আপলোড করা ফাইল
 }
 
 interface Step7Data {
@@ -64,6 +72,32 @@ interface Step7Data {
   termsAccepted: boolean;
   campaignStatus: 'draft' | 'ready' | 'published';
   publishDate?: string;
+}
+
+// API ফরম্যাটের জন্য Type
+export interface ApiCampaignData {
+  platforms: string[];
+  campaign_name: string;
+  objective: string;
+  budgets: Array<{
+    platform: string;
+    budget_type: string;
+    start_date: string;
+    end_date: string;
+    budget: number;
+    run_continuously: boolean;
+  }>;
+  min_age: number;
+  max_age: number;
+  gender: string;
+  locations: string[];
+  keywords: string;
+  ad_name: string;
+  headline: string;
+  primary_text: string;
+  description: string;
+  call_to_action: string;
+  destination_url: string;
 }
 
 // Main Campaign Data interface
@@ -98,6 +132,7 @@ interface CampaignContextType {
   validateAllSteps: () => Record<keyof CampaignData, boolean>;
   exportCampaignData: () => string;
   importCampaignData: (jsonString: string) => boolean;
+  getApiFormattedData: () => ApiCampaignData; // ✅ নতুন: API ফরম্যাটে ডেটা পাওয়ার জন্য
 }
 
 const CampaignContext = createContext<CampaignContextType | undefined>(undefined);
@@ -156,8 +191,10 @@ const initialCampaignData: CampaignData = {
     kpis: []
   },
   step4: { 
+    min_age: 18,                     // ✅ নতুন ডিফল্ট
+    max_age: 65,                     // ✅ নতুন ডিফল্ট
     audienceAge: [18, 65],
-    audienceGender: ['male', 'female'],
+    audienceGender: ['all'],
     audienceInterests: [],
     audienceLocation: '',
     audienceLanguages: ['en'],
@@ -182,7 +219,13 @@ const initialCampaignData: CampaignData = {
     callToAction: 'Learn More',
     destinationUrl: '',
     brandName: '',
-    primaryText: ''
+    primaryText: '',
+    adName: '',            // ✅ নতুন ডিফল্ট
+    product: '',           // ✅ নতুন ডিফল্ট
+    audience: '',          // ✅ নতুন ডিফল্ট
+    benefits: '',          // ✅ নতুন ডিফল্ট
+    tone: 'Professional',  // ✅ নতুন ডিফল্ট
+    uploadedFile: ''       // ✅ নতুন ডিফল্ট
   },
   step7: { 
     reviewNotes: '',
@@ -211,15 +254,53 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (savedData) {
         const parsedData = JSON.parse(savedData);
         console.log('📂 Campaign Context: Data loaded from localStorage');
-        return {
+        
+        // Merge with initial data, ensuring all fields exist
+        const mergedData = {
           ...initialCampaignData,
-          ...parsedData,
+          step1: { ...initialCampaignData.step1, ...parsedData.step1 },
+          step2: { 
+            ...initialCampaignData.step2, 
+            platforms: parsedData.step2?.platforms || initialCampaignData.step2.platforms,
+            selectedPlatforms: parsedData.step2?.selectedPlatforms || initialCampaignData.step2.selectedPlatforms
+          },
+          step3: { ...initialCampaignData.step3, ...parsedData.step3 },
+          step4: { 
+            ...initialCampaignData.step4, 
+            ...parsedData.step4,
+            // ✅ min_age এবং max_age সেট করুন যদি না থাকে
+            min_age: parsedData.step4?.min_age || initialCampaignData.step4.min_age,
+            max_age: parsedData.step4?.max_age || initialCampaignData.step4.max_age
+          },
+          step5: { 
+            ...initialCampaignData.step5, 
+            ...parsedData.step5,
+            schedule: {
+              ...initialCampaignData.step5.schedule,
+              ...parsedData.step5?.schedule
+            }
+          },
+          step6: { 
+            ...initialCampaignData.step6, 
+            ...parsedData.step6,
+            // ✅ নতুন ফিল্ডগুলো সেট করুন
+            adName: parsedData.step6?.adName || initialCampaignData.step6.adName,
+            product: parsedData.step6?.product || initialCampaignData.step6.product,
+            audience: parsedData.step6?.audience || initialCampaignData.step6.audience,
+            benefits: parsedData.step6?.benefits || initialCampaignData.step6.benefits,
+            tone: parsedData.step6?.tone || initialCampaignData.step6.tone,
+            uploadedFile: parsedData.step6?.uploadedFile || initialCampaignData.step6.uploadedFile
+          },
+          step7: { ...initialCampaignData.step7, ...parsedData.step7 },
           metadata: {
             ...initialCampaignData.metadata,
             ...parsedData.metadata,
             updatedAt: new Date().toISOString()
           }
         };
+        
+        console.log('📦 Campaign Context: Merged data:', mergedData);
+        return mergedData;
       }
     } catch (error) {
       console.error('❌ Campaign Context: Error loading from localStorage:', error);
@@ -232,6 +313,7 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
     try {
       localStorage.setItem(CAMPAIGN_STORAGE_KEY, JSON.stringify(campaignData));
       console.log('💾 Campaign Context: Data saved to localStorage');
+      console.log('📋 Campaign Context: Current data structure:', campaignData);
     } catch (error) {
       console.error('❌ Campaign Context: Error saving to localStorage:', error);
     }
@@ -247,9 +329,14 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
           updatedAt: new Date().toISOString()
         }
       };
+
+      console.log(`🔄 Campaign Context: Updated ${step}`, data);
+      console.log('📦 Campaign Context: Full data after update:', updatedData);
       
-      console.log(`📝 Campaign Context: Updated ${step}`, data);
-      console.log('📊 Campaign Context: Full data after update:', updatedData);
+      // Specifically log Step5 data if it's step5
+      if (step === 'step5') {
+        console.log('💰 Step5 Data Details:', updatedData.step5);
+      }
       
       return updatedData;
     });
@@ -264,14 +351,17 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
         updatedAt: new Date().toISOString()
       }
     }));
+    console.log('🔄 Campaign Context: Updated metadata', metadata);
   };
 
   const getAllCampaignData = () => {
     console.log('📋 Campaign Context: Getting all campaign data');
+    console.log('📋 Campaign Context: Full data dump:', campaignData);
     return campaignData;
   };
 
   const getStepData = <K extends keyof CampaignData>(step: K) => {
+    console.log(`📋 Campaign Context: Getting step ${step} data:`, campaignData[step]);
     return campaignData[step];
   };
 
@@ -282,7 +372,7 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   const loadCampaignData = (data: Partial<CampaignData>) => {
-    console.log('📥 Campaign Context: Loading external campaign data');
+    console.log('📥 Campaign Context: Loading external campaign data:', data);
     setCampaignData(prev => ({
       ...prev,
       ...data,
@@ -296,32 +386,58 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const isStepValid = (step: keyof CampaignData): boolean => {
     const stepData = campaignData[step];
+    console.log(`✅ Campaign Context: Validating step ${step}`, stepData);
     
     switch (step) {
       case 'step1':
-        return (stepData as Step1Data).campaignName.trim().length > 0;
+        const isValid1 = (stepData as Step1Data).campaignName.trim().length > 0;
+        console.log(`✅ Step1 validation: ${isValid1 ? 'VALID' : 'INVALID'}`);
+        return isValid1;
       
       case 'step2':
-        return (stepData as Step2Data).selectedPlatforms.length > 0;
+        const isValid2 = (stepData as Step2Data).selectedPlatforms.length > 0;
+        console.log(`✅ Step2 validation: ${isValid2 ? 'VALID' : 'INVALID'}`);
+        return isValid2;
       
       case 'step3':
-        return (stepData as Step3Data).objective.trim().length > 0;
+        const isValid3 = (stepData as Step3Data).objective.trim().length > 0;
+        console.log(`✅ Step3 validation: ${isValid3 ? 'VALID' : 'INVALID'}`);
+        return isValid3;
       
       case 'step4':
-        return (stepData as Step4Data).audienceLocation.trim().length > 0;
+        const step4Data = stepData as Step4Data;
+        // ✅ min_age এবং max_age validation
+        const isMinAgeValid = step4Data.min_age >= 18 && step4Data.min_age <= 65;
+        const isMaxAgeValid = step4Data.max_age >= step4Data.min_age && step4Data.max_age <= 100;
+        const isLocationValid = step4Data.audienceLocation.trim().length > 0;
+        
+        const isValid4 = isMinAgeValid && isMaxAgeValid && isLocationValid;
+        console.log(`✅ Step4 validation: ${isValid4 ? 'VALID' : 'INVALID'}`);
+        console.log(`   Min Age: ${step4Data.min_age} (valid: ${isMinAgeValid})`);
+        console.log(`   Max Age: ${step4Data.max_age} (valid: ${isMaxAgeValid})`);
+        console.log(`   Location: "${step4Data.audienceLocation}" (valid: ${isLocationValid})`);
+        return isValid4;
       
       case 'step5':
-        return (stepData as Step5Data).budget > 0;
+        const isValid5 = (stepData as Step5Data).budget > 0;
+        console.log(`✅ Step5 validation: ${isValid5 ? 'VALID' : 'INVALID'}`);
+        console.log(`✅ Step5 budget value: ${(stepData as Step5Data).budget}`);
+        return isValid5;
       
       case 'step6':
         const step6Data = stepData as Step6Data;
-        return step6Data.headline.trim().length > 0 && 
+        const isValid6 = step6Data.headline.trim().length > 0 && 
                step6Data.description.trim().length > 0;
+        console.log(`✅ Step6 validation: ${isValid6 ? 'VALID' : 'INVALID'}`);
+        return isValid6;
       
       case 'step7':
-        return (stepData as Step7Data).termsAccepted === true;
+        const isValid7 = (stepData as Step7Data).termsAccepted === true;
+        console.log(`✅ Step7 validation: ${isValid7 ? 'VALID' : 'INVALID'}`);
+        return isValid7;
       
       default:
+        console.log(`❌ Step ${step} validation: UNKNOWN STEP`);
         return false;
     }
   };
@@ -329,6 +445,8 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
   const validateAllSteps = () => {
     const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'] as const;
     const validationResults: Record<keyof CampaignData, boolean> = {} as Record<keyof CampaignData, boolean>;
+    
+    console.log('✅ Campaign Context: Starting validation of all steps');
     
     steps.forEach(step => {
       validationResults[step] = isStepValid(step);
@@ -346,12 +464,14 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
         exportedAt: new Date().toISOString()
       }
     };
+    console.log('📤 Campaign Context: Exporting data', exportData);
     return JSON.stringify(exportData, null, 2);
   };
 
   const importCampaignData = (jsonString: string): boolean => {
     try {
       const importedData = JSON.parse(jsonString);
+      console.log('📤 Campaign Context: Importing data', importedData);
       loadCampaignData(importedData);
       console.log('📤 Campaign Context: Data imported successfully');
       return true;
@@ -359,6 +479,84 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
       console.error('❌ Campaign Context: Error importing data:', error);
       return false;
     }
+  };
+
+  // ✅ নতুন: API ফরম্যাটে ডেটা কনভার্ট করার ফাংশন
+  const getApiFormattedData = (): ApiCampaignData => {
+    console.log("🎯 Campaign Context: Converting to API format");
+    
+    // Platform mapping
+    const platformMapping: Record<string, string> = {
+      "facebook": "META",
+      "google": "GOOGLE",
+      "tiktok": "TIKTOK",
+      "instagram": "META",
+      "linkedin": "LINKEDIN",
+      "twitter": "TWITTER",
+      "pinterest": "PINTEREST"
+    };
+
+    // Objective mapping
+    const objectiveMapping: Record<string, string> = {
+      "conversions": "CONVERSIONS",
+      "traffic": "TRAFFIC",
+      "awareness": "AWARENESS",
+      "engagement": "ENGAGEMENT",
+      "lead_generation": "LEAD_GENERATION",
+      "app_promotion": "APP_PROMOTION"
+    };
+
+    // Budget type mapping
+    const budgetTypeMapping: Record<string, string> = {
+      "daily": "DAILY",
+      "lifetime": "ONETIME"
+    };
+
+    // Gender mapping
+    const genderMapping: Record<string, string> = {
+      "all": "all",
+      "male": "male",
+      "female": "female"
+    };
+
+    // Step4-এর audienceGender array থেকে প্রথম gender নিন
+    const selectedGender = campaignData.step4.audienceGender.length > 0 
+      ? campaignData.step4.audienceGender[0] 
+      : "all";
+
+    const apiData: ApiCampaignData = {
+      platforms: campaignData.step2.selectedPlatforms.map(
+        (p: string) => platformMapping[p] || p.toUpperCase()
+      ),
+      campaign_name: campaignData.step1.campaignName,
+      objective: objectiveMapping[campaignData.step3.objective] || 
+                campaignData.step3.objective.toUpperCase(),
+      budgets: campaignData.step2.selectedPlatforms.map((platform: string) => ({
+        platform: platformMapping[platform] || platform.toUpperCase(),
+        budget_type: budgetTypeMapping[campaignData.step5.budgetType] || "ONETIME",
+        start_date: campaignData.step5.schedule.startDate,
+        end_date: campaignData.step5.schedule.isScheduled ? "" : campaignData.step5.schedule.endDate,
+        budget: campaignData.step5.budget,
+        run_continuously: campaignData.step5.schedule.isScheduled
+      })),
+      // ✅ min_age এবং max_age আলাদা ফিল্ড হিসেবে
+      min_age: campaignData.step4.min_age,
+      max_age: campaignData.step4.max_age,
+      gender: genderMapping[selectedGender] || "all",
+      locations: campaignData.step4.audienceLocation 
+        ? [campaignData.step4.audienceLocation]
+        : [],
+      keywords: campaignData.step4.audienceInterests.join(", "),
+      ad_name: campaignData.step6.adName || campaignData.step6.headline,
+      headline: campaignData.step6.headline,
+      primary_text: campaignData.step6.primaryText,
+      description: campaignData.step6.description,
+      call_to_action: campaignData.step6.callToAction,
+      destination_url: campaignData.step6.destinationUrl
+    };
+
+    console.log("📤 API Formatted Data:", apiData);
+    return apiData;
   };
 
   const contextValue: CampaignContextType = {
@@ -372,7 +570,8 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
     isStepValid,
     validateAllSteps,
     exportCampaignData,
-    importCampaignData
+    importCampaignData,
+    getApiFormattedData // ✅ নতুন মেথড যোগ করুন
   };
 
   return (
@@ -399,11 +598,19 @@ export const useCampaignStep = (stepNumber: number) => {
   
   const stepKey = `step${stepNumber}` as keyof CampaignData;
   
+  console.log(`🔍 useCampaignStep(${stepNumber}): Accessing ${stepKey}`, context.campaignData[stepKey]);
+  
   return {
     stepData: context.campaignData[stepKey],
-    updateStepData: (data: Partial<CampaignData[typeof stepKey]>) => 
-      context.updateCampaignData(stepKey, data),
-    isStepValid: () => context.isStepValid(stepKey),
+    updateStepData: (data: Partial<CampaignData[typeof stepKey]>) => {
+      console.log(`🔧 useCampaignStep(${stepNumber}): Updating ${stepKey}`, data);
+      return context.updateCampaignData(stepKey, data);
+    },
+    isStepValid: () => {
+      const isValid = context.isStepValid(stepKey);
+      console.log(`✅ useCampaignStep(${stepNumber}): Step ${stepNumber} validity: ${isValid}`);
+      return isValid;
+    },
     ...context
   };
 };
@@ -414,8 +621,8 @@ export const useCampaignNavigation = () => {
   
   const goToStep = (step: number) => {
     if (step >= 1 && step <= campaignData.metadata.totalSteps) {
-      updateCampaignMetadata({ currentStep: step });
       console.log(`🚀 Campaign Navigation: Moving to step ${step}`);
+      updateCampaignMetadata({ currentStep: step });
     }
   };
   
