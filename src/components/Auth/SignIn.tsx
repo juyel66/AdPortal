@@ -4,17 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { login } from "../../features/auth/AuthThunks";
-import {  toast, Toaster } from "sonner";
-import Swal from "sweetalert2";
+import { toast, Toaster } from "sonner";
 
 const SignIn: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, isAuthenticated } = useAppSelector(
+  const { loading, error, isAuthenticated, user, organizations } = useAppSelector(
     (state) => state.auth
   );
-
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -23,13 +21,6 @@ const SignIn: React.FC = () => {
     password: "",
     remember: false,
   });
-
-  // Swal.fire({
-  //   title: 'Error',
-  //   text: "Login Failed",
-  //   icon: 'warning',
-
-  // })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -50,19 +41,25 @@ const SignIn: React.FC = () => {
     );
   };
 
-  
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
+      // Show success message with organization count
+      const orgCount = organizations.length;
+      let message = "Logged in successfully!";
+      
+      if (orgCount > 0) {
+        message += ``;
+      }
+      
+      toast.success(message);
       navigate("/");
-
-      toast.success("Logged in successfully!");
-  
-
-      
-      
-      
     }
-  }, [isAuthenticated, navigate]);
+    
+    // Show error if exists
+    if (error && !loading) {
+      toast.error(error);
+    }
+  }, [isAuthenticated, user, error, loading, navigate, organizations]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
@@ -120,6 +117,7 @@ const SignIn: React.FC = () => {
                 placeholder="you@example.com"
                 className="w-full text-sm outline-none"
                 required
+                type="email"
               />
             </div>
 
@@ -135,6 +133,7 @@ const SignIn: React.FC = () => {
                 placeholder="••••••••"
                 className="w-full text-sm outline-none"
                 required
+                minLength={5}
               />
               <button
                 type="button"
@@ -175,14 +174,14 @@ const SignIn: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="mb-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+              className="mb-4 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
 
             {/* SIGN UP */}
             <p className="text-center text-xs text-slate-500">
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <Link to="/auth/signup" className="text-blue-600">
                 Sign Up
               </Link>
