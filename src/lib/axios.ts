@@ -1,3 +1,4 @@
+// src/lib/axios.ts
 import axios from "axios";
 
 const api = axios.create({
@@ -7,7 +8,6 @@ const api = axios.create({
   },
 });
 
-// access token attach
 api.interceptors.request.use((config) => {
   const access = localStorage.getItem("accessToken");
   if (access) {
