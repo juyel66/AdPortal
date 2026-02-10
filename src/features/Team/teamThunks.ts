@@ -1,19 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../lib/axios";
+
 import type {
   TeamMember,
   Team,
   InviteTeamMemberPayload,
 } from "../../types/team";
 
-
-const authHeader = () => ({
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  },
-});
-
-
+// Fetch team members
 export const fetchTeamMembers = createAsyncThunk<
   TeamMember[],
   { org_id: string },
@@ -21,8 +15,7 @@ export const fetchTeamMembers = createAsyncThunk<
 >("team/fetch-members", async ({ org_id }, { rejectWithValue }) => {
   try {
     const res = await api.get(
-      `/api/v1/main/team-members/?org_id=${org_id}`,
-      authHeader()
+      `/main/team-members/?org_id=${org_id}`
     );
     return res.data;
   } catch (err: any) {
@@ -32,8 +25,6 @@ export const fetchTeamMembers = createAsyncThunk<
   }
 });
 
-
-
 // Invite team member
 export const inviteTeamMember = createAsyncThunk<
   any,
@@ -42,9 +33,8 @@ export const inviteTeamMember = createAsyncThunk<
 >("team/invite-member", async ({ org_id, payload }, { rejectWithValue }) => {
   try {
     const res = await api.post(
-      `/api/v1/main/invite-team-member/?org_id=${org_id}`,
-      payload,
-      authHeader()
+      `/main/invite-team-member/?org_id=${org_id}`,
+      payload
     );
     return res.data;
   } catch (err: any) {
@@ -54,7 +44,7 @@ export const inviteTeamMember = createAsyncThunk<
   }
 });
 
-
+// Fetch team info
 export const fetchTeam = createAsyncThunk<
   Team,
   { org_id: string },
@@ -62,8 +52,7 @@ export const fetchTeam = createAsyncThunk<
 >("team/fetch-team", async ({ org_id }, { rejectWithValue }) => {
   try {
     const res = await api.get(
-      `/api/v1/main/team/?org_id=${org_id}`,
-      authHeader()
+      `/main/team/?org_id=${org_id}`
     );
     return res.data;
   } catch (err: any) {
@@ -73,8 +62,7 @@ export const fetchTeam = createAsyncThunk<
   }
 });
 
-
-
+// Delete team member
 export const deleteTeamMember = createAsyncThunk<
   number,
   { org_id: string; member_id: number },
@@ -82,8 +70,7 @@ export const deleteTeamMember = createAsyncThunk<
 >("team/delete-member", async ({ org_id, member_id }, { rejectWithValue }) => {
   try {
     await api.delete(
-      `/api/v1/main/team-member/${member_id}/?org_id=${org_id}`,
-      authHeader()
+      `/main/team-member/${member_id}/?org_id=${org_id}`
     );
     return member_id;
   } catch (err: any) {
