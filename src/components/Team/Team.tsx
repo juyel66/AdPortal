@@ -1,5 +1,5 @@
 // TeamCollaboration.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   UserPlus,
   Shield,
@@ -9,10 +9,48 @@ import {
   X,
   Mail,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
+
+import { useAppDispatch, useAppSelector } from "../../../src/hooks/reduxHooks";
+import {
+  inviteTeamMember,
+  fetchTeam,
+  
+} from "../../../src/features/Team/teamThunks";
 
 import type { TeamMember, Role, InviteForm } from "@/types/team";
+import { clearTeamError, clearTeamMessage } from "@/features/Team/teamSlice";
 
+/* =========================
+   Helpers
+========================= */
 
+// org_id resolver (priority based)
+const getOrgId = (): string | null => {
+  const selectedOrg = localStorage.getItem("selectedOrganization");
+  if (selectedOrg) {
+    try {
+      const parsed = JSON.parse(selectedOrg);
+      if (parsed?.id) return parsed.id;
+    } catch {}
+  }
+
+  const orgs = localStorage.getItem("organizations");
+  if (orgs) {
+    try {
+      const parsed = JSON.parse(orgs);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed[0][0];
+      }
+    } catch {}
+  }
+
+  return null;
+};
+
+/* =========================
+   Static members (UNCHANGED)
+========================= */
 
 const members: TeamMember[] = [
   {
@@ -51,12 +89,74 @@ const members: TeamMember[] = [
 ========================= */
 
 const Team: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { loading, message, error, team } = useAppSelector(
+    (state) => state.team
+  );
+
   const [open, setOpen] = useState(false);
 
   const [invite, setInvite] = useState<InviteForm>({
     email: "",
-    role: "Admin",
+    role: "ADMIN",
   });
+
+  /* =========================
+     Fetch team stats
+  ========================= */
+  useEffect(() => {
+    const org_id = getOrgId();
+    if (org_id) {
+      dispatch(fetchTeam({ org_id }));
+    }
+  }, [dispatch]);
+
+  /* =========================
+     Toast handling
+  ========================= */
+  useEffect(() => {
+    if (message) {
+      toast.success(message);
+      dispatch(clearTeamMessage());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearTeamError());
+    }
+  }, [message, error, dispatch]);
+
+  /* =========================
+     Invite handler
+  ========================= */
+  const handleInvite = () => {
+    const org_id = getOrgId();
+
+    if (!org_id) {
+      toast.error("Organization not found");
+      return;
+    }
+
+    if (!invite.email) {
+      toast.error("Email is required");
+      return;
+    }
+
+    dispatch(
+      inviteTeamMember({
+        org_id,
+        payload: {
+          email: invite.email,
+          role: invite.role,
+        },
+      })
+    ).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        setInvite({ email: "", role: "ADMIN" });
+        setOpen(false);
+        dispatch(fetchTeam({ org_id })); // refresh stats
+      }
+    });
+  };
 
   return (
     <div className="space-y-6 mt-5">
@@ -79,11 +179,24 @@ const Team: React.FC = () => {
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Total Members" value="4" />
-        <StatCard label="Active Users" value="3" />
-        <StatCard label="Pending Invites" value="1" />
+      {/* Stats (Redux data) */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Members"
+          value={team?.total_members ?? 0}
+        />
+        <StatCard
+          label="Active Users"
+          value={team?.active_members ?? 0}
+        />
+        <StatCard
+          label="Pending Invites"
+          value={team?.pending_invitations ?? 0}
+        />
+        <StatCard
+          label="Inactive Members"
+          value={team?.pending_invitations ?? 0}
+        />
       </div>
 
       {/* Roles */}
@@ -109,7 +222,7 @@ const Team: React.FC = () => {
         />
       </div>
 
-      {/* Team Members */}
+      {/* Team Members (static as requested) */}
       <div className="rounded-xl border bg-white">
         <h2 className="px-6 py-4 font-semibold border-b">
           Team Members
@@ -121,7 +234,6 @@ const Team: React.FC = () => {
             className="flex items-center justify-between px-6 py-4 border-b last:border-b-0"
           >
             <div className="flex items-center gap-3">
-              {/* Avatar */}
               <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium">
                 {m.name
                   .split(" ")
@@ -156,7 +268,7 @@ const Team: React.FC = () => {
               </select>
 
               {m.role !== "Owner" && (
-                <button className="text-red-500 cursor-pointer ">
+                <button className="text-red-500">
                   <Trash2 size={16} />
                 </button>
               )}
@@ -165,7 +277,7 @@ const Team: React.FC = () => {
         ))}
       </div>
 
-     
+      {/* Invite Modal */}
       {open && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="w-full max-w-md rounded-xl bg-white p-6 relative">
@@ -200,12 +312,15 @@ const Team: React.FC = () => {
             <select
               value={invite.role}
               onChange={(e) =>
-                setInvite({ ...invite, role: e.target.value as Role })
+                setInvite({
+                  ...invite,
+                  role: e.target.value as Role,
+                })
               }
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
             >
-              <option>Admin</option>
-              <option>Member</option>
+              <option value="ADMIN">Admin</option>
+              <option value="MEMBER">Member</option>
             </select>
 
             <div className="mt-6 flex justify-end gap-3">
@@ -215,8 +330,12 @@ const Team: React.FC = () => {
               >
                 Cancel
               </button>
-              <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white">
-                Send Invite
+              <button
+                disabled={loading}
+                onClick={handleInvite}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {loading ? "Sending..." : "Send Invite"}
               </button>
             </div>
           </div>
@@ -226,12 +345,22 @@ const Team: React.FC = () => {
   );
 };
 
+/* =========================
+   Small Components
+========================= */
 
-
-const StatCard = ({ label, value }: { label: string; value: string }) => (
+const StatCard = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) => (
   <div className="rounded-xl border bg-white p-4">
     <p className="text-sm text-slate-500">{label}</p>
-    <p className="text-xl font-semibold text-slate-900 mt-1">{value}</p>
+    <p className="text-xl font-semibold text-slate-900 mt-1">
+      {value}
+    </p>
   </div>
 );
 
