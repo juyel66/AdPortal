@@ -63,7 +63,7 @@ const SignIn: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-6">
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="w-full max-w-4xl grid grid-cols-1  md:grid-cols-2 gap-16 items-center">
         {/* Left Side */}
         <div>
           <div className="flex items-center gap-3 mb-6">
@@ -189,7 +189,7 @@ const SignIn: React.FC = () => {
           </form>
         </div>
       </div>
-      <Toaster />
+     
     </div>
   );
 };
