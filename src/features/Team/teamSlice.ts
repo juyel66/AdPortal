@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+
 
 import type { TeamState, TeamMember, Team } from "../../types/team";
 import {
