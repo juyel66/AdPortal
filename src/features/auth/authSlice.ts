@@ -13,7 +13,7 @@ import {
   forgotPassword,
 } from "../../features/auth/AuthThunks";
 
-import type { UserProfile } from "../../types/auth";
+import type { UserProfile, LoginResponse } from "../../types/auth";
 
 export interface AuthState {
   user: UserProfile | null;
@@ -24,10 +24,63 @@ export interface AuthState {
   error: string | null;
   message: string | null;
   forgotPasswordEmail: string | null;
+  organizations: string[]; // New field
+  currentPlan: any | null; // New field
+  selectedOrganization: string | null; // New field for selected organization
 }
 
+// Function to save auth data to localStorage
+const saveAuthDataToLocalStorage = (data: {
+  user: UserProfile;
+  organizations?: string[];
+  currentPlan?: any;
+  selectedOrganization?: string | null;
+}) => {
+  try {
+    localStorage.setItem("user", JSON.stringify(data.user));
+    if (data.organizations) {
+      localStorage.setItem("organizations", JSON.stringify(data.organizations));
+    }
+    if (data.currentPlan) {
+      localStorage.setItem("currentPlan", JSON.stringify(data.currentPlan));
+    }
+    if (data.selectedOrganization) {
+      localStorage.setItem("selectedOrganization", data.selectedOrganization);
+    }
+  } catch (error) {
+    console.error("Error saving auth data to localStorage:", error);
+  }
+};
+
+// Function to get auth data from localStorage
+const getAuthDataFromLocalStorage = () => {
+  try {
+    const userStr = localStorage.getItem("user");
+    const organizationsStr = localStorage.getItem("organizations");
+    const currentPlanStr = localStorage.getItem("currentPlan");
+    const selectedOrganization = localStorage.getItem("selectedOrganization");
+
+    return {
+      user: userStr ? JSON.parse(userStr) : null,
+      organizations: organizationsStr ? JSON.parse(organizationsStr) : [],
+      currentPlan: currentPlanStr ? JSON.parse(currentPlanStr) : null,
+      selectedOrganization: selectedOrganization,
+    };
+  } catch (error) {
+    console.error("Error getting auth data from localStorage:", error);
+    return {
+      user: null,
+      organizations: [],
+      currentPlan: null,
+      selectedOrganization: null,
+    };
+  }
+};
+
+const authData = getAuthDataFromLocalStorage();
+
 const initialState: AuthState = {
-  user: null,
+  user: authData.user,
   accessToken: localStorage.getItem("accessToken"),
   refreshToken: localStorage.getItem("refreshToken"),
   isAuthenticated: !!localStorage.getItem("accessToken"),
@@ -35,6 +88,9 @@ const initialState: AuthState = {
   error: null,
   message: null,
   forgotPasswordEmail: null,
+  organizations: authData.organizations,
+  currentPlan: authData.currentPlan,
+  selectedOrganization: authData.selectedOrganization,
 };
 
 const authSlice = createSlice({
@@ -54,6 +110,38 @@ const authSlice = createSlice({
     clearForgotPasswordEmail(state) {
       state.forgotPasswordEmail = null;
     },
+    // New action to update user profile
+    updateUserProfile(state, action: PayloadAction<Partial<UserProfile>>) {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+        saveAuthDataToLocalStorage({
+          user: state.user,
+          organizations: state.organizations,
+          currentPlan: state.currentPlan,
+          selectedOrganization: state.selectedOrganization,
+        });
+      }
+    },
+    // New action to set selected organization
+    setSelectedOrganization(state, action: PayloadAction<string>) {
+      state.selectedOrganization = action.payload;
+      localStorage.setItem("selectedOrganization", action.payload);
+    },
+    // New action to clear selected organization
+    clearSelectedOrganization(state) {
+      state.selectedOrganization = null;
+      localStorage.removeItem("selectedOrganization");
+    },
+    // New action to update organizations
+    updateOrganizations(state, action: PayloadAction<string[]>) {
+      state.organizations = action.payload;
+      localStorage.setItem("organizations", JSON.stringify(action.payload));
+    },
+    // New action to update current plan
+    updateCurrentPlan(state, action: PayloadAction<any>) {
+      state.currentPlan = action.payload;
+      localStorage.setItem("currentPlan", JSON.stringify(action.payload));
+    },
   },
   extraReducers: (builder) => {
     // Login
@@ -63,15 +151,27 @@ const authSlice = createSlice({
         state.error = null;
         state.message = null;
       })
-      .addCase(login.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(login.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
         state.loading = false;
         state.accessToken = action.payload.access;
         state.refreshToken = action.payload.refresh;
+        state.user = action.payload.user;
+        state.organizations = action.payload.organizations || [];
+        state.currentPlan = action.payload.current_plan || null;
         state.isAuthenticated = true;
         state.message = "Login successful!";
 
+        // Save tokens to localStorage
         localStorage.setItem("accessToken", action.payload.access);
         localStorage.setItem("refreshToken", action.payload.refresh);
+        
+        // Save all auth data to localStorage
+        saveAuthDataToLocalStorage({
+          user: action.payload.user,
+          organizations: action.payload.organizations || [],
+          currentPlan: action.payload.current_plan || null,
+          selectedOrganization: state.selectedOrganization,
+        });
       })
       .addCase(login.rejected, (state, action: any) => {
         state.loading = false;
@@ -114,7 +214,17 @@ const authSlice = createSlice({
         state.error = null;
         state.message = "Logged out successfully!";
         state.forgotPasswordEmail = null;
-        localStorage.clear();
+        state.organizations = [];
+        state.currentPlan = null;
+        state.selectedOrganization = null;
+        
+        // Clear all auth data from localStorage
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("organizations");
+        localStorage.removeItem("currentPlan");
+        localStorage.removeItem("selectedOrganization");
       })
       .addCase(logout.rejected, (state) => {
         state.loading = false;
@@ -125,7 +235,17 @@ const authSlice = createSlice({
         state.error = null;
         state.message = "Logged out successfully!";
         state.forgotPasswordEmail = null;
-        localStorage.clear();
+        state.organizations = [];
+        state.currentPlan = null;
+        state.selectedOrganization = null;
+        
+        // Clear all auth data from localStorage even on error
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("organizations");
+        localStorage.removeItem("currentPlan");
+        localStorage.removeItem("selectedOrganization");
       });
 
     // Fetch Profile
@@ -140,6 +260,13 @@ const authSlice = createSlice({
         (state, action: PayloadAction<UserProfile>) => {
           state.loading = false;
           state.user = action.payload;
+          // Update localStorage with fresh user data
+          saveAuthDataToLocalStorage({
+            user: action.payload,
+            organizations: state.organizations,
+            currentPlan: state.currentPlan,
+            selectedOrganization: state.selectedOrganization,
+          });
         }
       )
       .addCase(fetchProfile.rejected, (state, action: any) => {
@@ -257,6 +384,11 @@ export const {
   clearAuthError, 
   clearAuthMessage, 
   setForgotPasswordEmail,
-  clearForgotPasswordEmail 
+  clearForgotPasswordEmail,
+  updateUserProfile,
+  setSelectedOrganization,
+  clearSelectedOrganization,
+  updateOrganizations,
+  updateCurrentPlan
 } = authSlice.actions;
 export default authSlice.reducer;

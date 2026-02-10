@@ -24,6 +24,8 @@ const Navbar = () => {
     (state) => state.auth
   );
 
+  
+
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
   };

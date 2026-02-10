@@ -7,18 +7,18 @@ import type {
   ChangePasswordPayload,
   ResetPasswordConfirmPayload,
   VerifyEmailPayload,
-
   UserProfile,
+
 } from "../../types/auth";
 
 // Login
 export const login = createAsyncThunk<
-  any,
+  
   LoginPayload,
   { rejectValue: any }
 >("auth/login", async (payload, { rejectWithValue }) => {
   try {
-    const res = await api.post("/accounts/login/", payload);
+    const res = await api.post<LoginResponse>("/accounts/login/", payload);
     return res.data;
   } catch (err: any) {
     return rejectWithValue(
