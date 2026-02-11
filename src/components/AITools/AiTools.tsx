@@ -1,7 +1,7 @@
-
-
-import React, { useState } from "react";
+import React, { useState, } from "react";
 import { Sparkles, Wand2, RefreshCcw, Copy } from "lucide-react";
+import { toast } from "sonner";
+import api from "../../lib/axios";
 
 type CopyType = "headlines" | "primary" | "descriptions" | "ctas";
 
@@ -17,31 +17,6 @@ type OptimizationItem = {
   description: string;
   impact: OptimizationImpact;
 };
-
-
-
-const GENERATED_COPY: GeneratedItem[] = [
-  {
-    id: 1,
-    text:
-      "Transform Your Business Today – Discover innovative solutions that drive real results. Limited time offer!",
-  },
-  {
-    id: 2,
-    text:
-      "Elevate Your Brand – Unleash the power of cutting-edge design and marketing strategies. Join us now!",
-  },
-  {
-    id: 3,
-    text:
-      "Boost Your Sales – Explore our comprehensive training programs tailored for success. Enroll today!",
-  },
-  {
-    id: 4,
-    text:
-      "Connect with Experts – Network with industry leaders and gain valuable insights. Reserve your spot!",
-  },
-];
 
 const OPTIMIZATION_DATA: OptimizationItem[] = [
   {
@@ -70,12 +45,25 @@ const OPTIMIZATION_DATA: OptimizationItem[] = [
   },
 ];
 
-
+const getOrgId = (): string | null => {
+  const selectedOrg = localStorage.getItem("selectedOrganization");
+  if (selectedOrg) {
+    try {
+      const parsed = JSON.parse(selectedOrg);
+      if (parsed?.id) return parsed.id;
+    } catch (error) {
+      console.error("Error parsing organization:", error);
+    }
+  }
+  return null;
+};
 
 const AiTools: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"copy" | "optimization">("copy");
   const [generated, setGenerated] = useState(false);
   const [copyType, setCopyType] = useState<CopyType>("headlines");
+  const [generatedCopies, setGeneratedCopies] = useState<GeneratedItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // Controlled form states
   const [product, setProduct] = useState("AdPortal");
@@ -85,14 +73,108 @@ const AiTools: React.FC = () => {
   );
   const [tone, setTone] = useState("Professional");
 
-  // ✅ Copy to clipboard logic (only feature added)
+  // Copy to clipboard logic
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("Copied to clipboard!");
+      toast.success("Copied to clipboard!");
     } catch {
-      alert("Failed to copy");
+      toast.error("Failed to copy");
     }
+  };
+
+  // Generate AI copy function
+  const generateAICopy = async (isRegenerate: boolean = false) => {
+    const org_id = getOrgId();
+    if (!org_id) {
+      toast.error("Please select an organization first");
+      return;
+    }
+
+    if (!product.trim() || !audience.trim() || !benefits.trim()) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Map UI copy_type to API copy_type
+      const copyTypeMap: Record<CopyType, string> = {
+        "headlines": "Headlines",
+        "primary": "Primary",
+        "descriptions": "Descriptions",
+        "ctas": "CTAs"
+      };
+
+      const apiCopyType = copyTypeMap[copyType] || "Descriptions";
+
+      const payload = {
+        product: product.trim(),
+        audience: audience.trim(),
+        benefits: benefits.trim(),
+        tone: tone.trim(),
+        copy_type: apiCopyType
+      };
+
+      const response = await api.post(
+        `/main/generate-ai-copy/?org_id=${org_id}`,
+        payload
+      );
+
+      const generatedTexts = response.data.generated_copies || [];
+      
+      // Transform API response to GeneratedItem format
+      const generatedItems: GeneratedItem[] = generatedTexts.map((text: string, index: number) => ({
+        id: index + 1,
+        text: text
+      }));
+
+      setGeneratedCopies(generatedItems);
+      setGenerated(true);
+      
+      if (isRegenerate) {
+        toast.success("Copy regenerated successfully!");
+      } else {
+        toast.success("AI copy generated successfully!");
+      }
+
+    } catch (error: any) {
+      console.error("Error generating AI copy:", error);
+      
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please log in again.");
+      } else if (error.response?.status === 400) {
+        const errorData = error.response.data;
+        if (errorData.detail) {
+          toast.error(errorData.detail);
+        } else if (errorData.message) {
+          toast.error(errorData.message);
+        } else if (errorData.error) {
+          toast.error(errorData.error);
+        } else {
+          toast.error("Invalid request. Please check your inputs.");
+        }
+      } else if (error.response?.status === 429) {
+        toast.error("Too many requests. Please try again later.");
+      } else if (error.response?.status >= 500) {
+        toast.error("Server error. Please try again later.");
+      } else if (error.message === "Network Error") {
+        toast.error("Network error. Please check your connection.");
+      } else {
+        toast.error("Failed to generate AI copy. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerate = () => {
+    generateAICopy(false);
+  };
+
+  const handleRegenerate = () => {
+    generateAICopy(true);
   };
 
   return (
@@ -142,55 +224,68 @@ const AiTools: React.FC = () => {
               value={product}
               onChange={(e) => setProduct(e.target.value)}
               placeholder="Product / Service"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
 
             <input
               value={audience}
               onChange={(e) => setAudience(e.target.value)}
               placeholder="Target Audience"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
 
             <textarea
               value={benefits}
               onChange={(e) => setBenefits(e.target.value)}
               placeholder="Key Benefits"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              rows={3}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
             />
 
             <select
               value={tone}
               onChange={(e) => setTone(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option>Professional</option>
-              <option>Casual</option>
-              <option>Friendly</option>
+              <option value="Professional">Professional</option>
+              <option value="Casual">Casual</option>
+              <option value="Friendly">Friendly</option>
+              <option value="Formal">Formal</option>
+              <option value="Informal">Informal</option>
             </select>
 
             {/* Copy Type */}
             <div className="flex gap-2 flex-wrap">
-              {["headlines", "primary", "descriptions", "CTAs"].map((t) => (
+              {["headlines", "primary", "descriptions", "ctas"].map((t) => (
                 <button
                   key={t}
                   onClick={() => setCopyType(t as CopyType)}
-                  className={`rounded-lg px-3 py-1.5 text-xs border ${
+                  className={`rounded-lg px-3 py-1.5 text-xs border transition-colors ${
                     copyType === t
                       ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white"
+                      : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                   }`}
                 >
-                  {t}
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}
             </div>
 
             <button
-              onClick={() => setGenerated(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              onClick={handleGenerate}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Sparkles size={16} /> Generate Copy
+              {loading ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} /> Generate Copy
+                </>
+              )}
             </button>
           </div>
 
@@ -199,7 +294,11 @@ const AiTools: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900">Generated Copy</h2>
               {generated && (
-                <button className="flex cursor-pointer items-center gap-1 text-sm text-blue-600">
+                <button 
+                  onClick={handleRegenerate}
+                  disabled={loading}
+                  className="flex cursor-pointer items-center gap-1 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <RefreshCcw size={14} /> Regenerate
                 </button>
               )}
@@ -209,24 +308,35 @@ const AiTools: React.FC = () => {
               <div className="h-64 flex flex-col items-center justify-center text-slate-400">
                 <img
                   src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765832904/Icon_13_tqqkug.png"
-                  alt=""
+                  alt="AI Copy Generator"
+                  className="w-26 h-26 "
                 />
                 <p className="text-sm mt-2 text-center">
-                  Fill in the form and click "Generate Copy" to see AI-generated
-                  suggestions
+                  Fill in the form and click "Generate Copy" to see AI-generated suggestions
+                </p>
+              </div>
+            ) : generatedCopies.length === 0 ? (
+              <div className="h-64 flex flex-col items-center justify-center ">
+                <img
+                  src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765832904/Icon_13_tqqkug.png"
+                  alt="No results"
+                  className="w-26 h-26 "
+                />
+                <p className="text-sm mt-2 text-center">
+                  No copy generated. Please try again.
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
-                {GENERATED_COPY.map((item) => (
+                {generatedCopies.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-lg border bg-blue-50 p-3"
+                    className="rounded-lg border border-blue-200 bg-blue-50 p-3 hover:bg-blue-100 transition-colors"
                   >
                     <p className="text-sm text-slate-700">{item.text}</p>
                     <button
                       onClick={() => handleCopy(item.text)}
-                      className="mt-2 flex items-center gap-1 text-xs text-blue-600"
+                      className="mt-2 flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 transition-colors"
                     >
                       <Copy size={12} /> Copy to clipboard
                     </button>
@@ -248,16 +358,16 @@ const AiTools: React.FC = () => {
           {OPTIMIZATION_DATA.map((item, idx) => (
             <div
               key={idx}
-              className="rounded-xl border p-4 flex items-start justify-between"
+              className="rounded-xl border border-slate-200 p-4 flex items-start justify-between hover:border-slate-300 transition-colors"
             >
-              <div>
+              <div className="flex-1">
                 <h3 className="font-medium text-slate-900">{item.title}</h3>
                 <p className="text-sm text-slate-600 mt-1">
                   {item.description}
                 </p>
               </div>
               <span
-                className={`text-xs px-2 py-1 rounded-full h-fit ${
+                className={`text-xs px-2 py-1 rounded-full h-fit ml-4 ${
                   item.impact === "High Impact"
                     ? "bg-green-100 border border-green-500 text-green-700"
                     : "bg-yellow-100 border border-yellow-500 text-yellow-700"
