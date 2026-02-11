@@ -49,6 +49,7 @@ import TermsConditions from "./pages/TermsConditions/TermsConditions";
 import SecurityPage from "./pages/SecurityPage/SecurityPage";
 import AboutUs from "./pages/AboutUs/AboutUs";
 import ContactUs from "./pages/Contact/ContactUs";
+import NotificationsPage from "./pages/NotificationsPage/Notificationspage";
 
 export const router = createBrowserRouter([
   {
@@ -173,6 +174,10 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         element: <Settings />,
+      },
+      {
+        path: "notification",
+        element: <NotificationsPage />,
       },
 
       {

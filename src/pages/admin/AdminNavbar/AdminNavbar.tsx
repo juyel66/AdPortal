@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 
 
 const AdminNavbar = () => {
@@ -17,9 +18,9 @@ const AdminNavbar = () => {
   </div>
   <div className="navbar-end">
   <div className='flex items-center gap-4'>
-    <div>
+    <Link to="notification">
         <img className='w-10 h-10 rounded-full' src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766353699/Button_3_jqwyyc.png" alt="" />
-    </div>
+    </Link>
      <div>
     <p className='text-xl'>Md Juyel Rana</p>
     <p className='text-gray-500'>mdjuyelrana.com.bd1@gmail.com</p>

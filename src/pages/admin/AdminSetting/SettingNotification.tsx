@@ -63,6 +63,14 @@ const SettingNotification: React.FC = () => {
               </p>
             </div>
 
+            <div className="now more then about our self and the another something is more the absolute
+            bangladesh open in the more the about more then bangladesh open in the more something is more 
+            Bangladesh open in the more then about our self  and ">
+
+            </div>
+
+            
+
             {/* TOGGLE */}
             <button
               onClick={() => toggle(item.id)}
