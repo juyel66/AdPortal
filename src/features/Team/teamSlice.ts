@@ -1,7 +1,6 @@
+// teamSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-
-import type { TeamState, TeamMember, Team } from "../../types/team";
+import type { TeamState, TeamMember } from "../../types/team";
 import {
   fetchTeamMembers,
   inviteTeamMember,
@@ -27,12 +26,18 @@ const teamSlice = createSlice({
     clearTeamMessage(state) {
       state.message = null;
     },
-    // Optional: For immediate UI updates (optimistic updates)
+    // For immediate UI updates (optimistic updates)
     removeMemberLocally(state, action: PayloadAction<number>) {
       state.members = state.members.filter(m => m.id !== action.payload);
     },
     addMemberLocally(state, action: PayloadAction<TeamMember>) {
       state.members.push(action.payload);
+    },
+    updateTeamMemberRole(state, action: PayloadAction<{ id: number; role: string }>) {
+      const member = state.members.find(m => m.id === action.payload.id);
+      if (member) {
+        member.role = action.payload.role;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -115,6 +120,7 @@ export const {
   clearTeamError, 
   clearTeamMessage,
   removeMemberLocally,
-  addMemberLocally 
+  addMemberLocally,
+  updateTeamMemberRole 
 } = teamSlice.actions;
 export default teamSlice.reducer;

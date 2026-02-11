@@ -1,6 +1,6 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../lib/axios";
+import { toast } from "sonner";
 
 const BusinessInfo: React.FC = () => {
   const [form, setForm] = useState({
@@ -9,6 +9,65 @@ const BusinessInfo: React.FC = () => {
     industry: "",
     companySize: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [initialForm, setInitialForm] = useState({
+    companyName: "",
+    website: "",
+    industry: "",
+    companySize: "",
+  });
+
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getOrgIdFromLocalStorage = () => {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        try {
+          const parsed = JSON.parse(selectedOrg);
+          if (parsed?.id) {
+            setOrganizationId(parsed.id);
+            return parsed.id;
+          }
+        } catch (error) {
+          console.error("Error parsing selected organization:", error);
+        }
+      }
+      return null;
+    };
+
+    const orgId = getOrgIdFromLocalStorage();
+    if (orgId) {
+      fetchOrganizationData(orgId);
+    }
+  }, []);
+
+  const fetchOrganizationData = async (orgId: string) => {
+    try {
+      setFetching(true);
+      const response = await api.get(`/main/organization?org_id=${orgId}`);
+     
+      
+      const orgData = response.data;
+      
+      const formattedData = {
+        companyName: orgData.name || "",
+        website: orgData.website || "",
+        industry: orgData.industry || "",
+        companySize: orgData.company_size || "",
+      };
+      
+      setForm(formattedData);
+      setInitialForm(formattedData);
+    } catch (error) {
+      console.error("Error fetching organization data:", error);
+    } finally {
+      setFetching(false);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -19,16 +78,79 @@ const BusinessInfo: React.FC = () => {
     });
   };
 
+  const handleSave = async () => {
+    if (!organizationId) return;
+    
+    try {
+      setLoading(true);
+      
+      const updateData = {
+        name: form.companyName,
+        website: form.website,
+        industry: form.industry,
+        company_size: form.companySize,
+      };
+
+      await api.patch(`/main/organization/?org_id=${organizationId}`, updateData);
+      
+      setEditing(false);
+      setInitialForm(form);
+      toast.success("Business information updated successfully!");
+      
+    } catch (error) {
+      console.error("Error updating organization data:", error);
+      toast.error("Update failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setForm(initialForm);
+    setEditing(false);
+  };
+
+  const hasChanges = () => {
+    return (
+      form.companyName !== initialForm.companyName ||
+      form.website !== initialForm.website ||
+      form.industry !== initialForm.industry ||
+      form.companySize !== initialForm.companySize
+    );
+  };
+
+  const handleEditClick = () => {
+    setEditing(true);
+  };
+
+  if (fetching) {
+    return (
+      <div className="rounded-xl bg-white p-6">
+        <div className="flex justify-center items-center py-10">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-xl  bg-white p-6">
+    <div className="rounded-xl bg-white p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-base font-semibold text-slate-900">
+          Business Information
+        </h2>
+        
+        {!editing && (
+          <button
+            onClick={handleEditClick}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Edit Business Info
+          </button>
+        )}
+      </div>
 
-      <h2 className="text-base font-semibold text-slate-900 mb-6">
-        Business Information
-      </h2>
-
-      {/* Form */}
       <div className="space-y-5">
-   
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
             Company Name
@@ -39,11 +161,11 @@ const BusinessInfo: React.FC = () => {
             placeholder="Company Name"
             value={form.companyName}
             onChange={handleChange}
-            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!editing}
+            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
           />
         </div>
 
-    
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
             Website
@@ -54,11 +176,11 @@ const BusinessInfo: React.FC = () => {
             placeholder="https://yourcompany.com"
             value={form.website}
             onChange={handleChange}
-            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!editing}
+            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
           />
         </div>
 
-       
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
             Industry
@@ -67,7 +189,8 @@ const BusinessInfo: React.FC = () => {
             name="industry"
             value={form.industry}
             onChange={handleChange}
-            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!editing}
+            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <option value="" disabled>
               Select industry
@@ -80,7 +203,6 @@ const BusinessInfo: React.FC = () => {
           </select>
         </div>
 
-
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
             Company Size
@@ -89,7 +211,8 @@ const BusinessInfo: React.FC = () => {
             name="companySize"
             value={form.companySize}
             onChange={handleChange}
-            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!editing}
+            className="w-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <option value="" disabled>
               Select company size
@@ -103,25 +226,38 @@ const BusinessInfo: React.FC = () => {
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="my-6 border-t" />
+      {editing && (
+        <>
+          <div className="my-6 border-t" />
 
-   
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
-        >
-          Cancel
-        </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={loading}
+              className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
+            >
+              Cancel
+            </button>
 
-        <button
-          type="button"
-          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
-        >
-          Save Changes
-        </button>
-      </div>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={loading || !hasChanges()}
+              className={`rounded-lg px-5 py-2 text-sm font-medium transition flex items-center gap-2 ${
+                hasChanges() 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+              }`}
+            >
+              {loading && (
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
+              )}
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

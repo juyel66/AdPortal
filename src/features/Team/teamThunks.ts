@@ -1,9 +1,9 @@
+// teamThunks.ts
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../lib/axios";
-
 import type {
   TeamMember,
-  Team,
+  
   InviteTeamMemberPayload,
 } from "../../types/team";
 
@@ -40,6 +40,25 @@ export const inviteTeamMember = createAsyncThunk<
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data || { error: "Failed to invite team member" }
+    );
+  }
+});
+
+// Update team member role
+export const updateTeamMemberRole = createAsyncThunk<
+  TeamMember,
+  { org_id: string; member_id: number; role: string },
+  { rejectValue: any }
+>("team/update-role", async ({ org_id, member_id, role }, { rejectWithValue }) => {
+  try {
+    const res = await api.patch(
+      `/main/team-member/${member_id}/?org_id=${org_id}`,
+      { role }
+    );
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data || { error: "Failed to update role" }
     );
   }
 });

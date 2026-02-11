@@ -1,8 +1,6 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-
+import api from "../../lib/axios";
 
 type PlatformKey = "meta" | "google" | "tiktok";
 
@@ -11,8 +9,8 @@ type Platform = {
   name: string;
   description: string;
   logo: string;
+  endpoint: string;
 };
-
 
 const platforms: Platform[] = [
   {
@@ -20,69 +18,120 @@ const platforms: Platform[] = [
     name: "Meta (Facebook)",
     description: "Reach billions of users across Facebook",
     logo: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765754457/Container_10_m3mnnq.png",
+    endpoint: "/auth/meta/connect/",
   },
   {
     key: "google",
     name: "Google Ads",
-    description:
-      "Show ads on Google Search, YouTube, and Display Network",
+    description: "Show ads on Google Search, YouTube, and Display Network",
     logo: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765754457/Container_11_bdja1x.png",
+    endpoint: "/auth/google/connect/",
   },
   {
     key: "tiktok",
     name: "TikTok Ads",
     description: "Engage with Gen Z and millennials on TikTok",
     logo: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765754457/Container_12_siwhfp.png",
+    endpoint: "/auth/tiktok/connect/",
   },
 ];
 
-
-
 const ConnectedPlatforms: React.FC = () => {
   const [connected, setConnected] = useState<Record<PlatformKey, boolean>>({
-    meta: true,
-    google: true,
+    meta: false,
+    google: false,
     tiktok: false,
   });
 
   const [loading, setLoading] = useState<PlatformKey | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
 
-  const handleConnect = (key: PlatformKey) => {
-    setLoading(key);
+  useEffect(() => {
+    const getOrgIdFromLocalStorage = () => {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        try {
+          const parsed = JSON.parse(selectedOrg);
+          if (parsed?.id) {
+            setOrganizationId(parsed.id);
+            return parsed.id;
+          }
+        } catch (error) {
+          console.error("Error parsing selected organization:", error);
+        }
+      }
+      return null;
+    };
 
+    getOrgIdFromLocalStorage();
+    
+    // You can add a function here to check which platforms are already connected
+    // For example: fetchConnectedPlatforms();
+  }, []);
 
-    setTimeout(() => {
-      setConnected((prev) => ({
-        ...prev,
-        [key]: true,
-      }));
+  const handleConnect = async (platform: Platform) => {
+    if (!organizationId) {
+      console.error("No organization selected");
+      return;
+    }
+
+    setLoading(platform.key);
+
+    try {
+      const response = await api.get(
+        `${platform.endpoint}?org_id=${organizationId}`
+      );
+
+      if (response.data.redirect_url) {
+        window.open(response.data.redirect_url, "_blank");
+        
+        // Optionally, you can set connected to true after successful connection
+        // This would require polling or webhook to check connection status
+        // For now, we'll keep it optimistic or implement polling
+        setTimeout(() => {
+          setConnected((prev) => ({
+            ...prev,
+            [platform.key]: true,
+          }));
+          setLoading(null);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error(`Error connecting to ${platform.name}:`, error);
       setLoading(null);
-    }, 1500);
+    }
   };
 
   const handleDisconnect = (key: PlatformKey) => {
+    // Note: You might need to implement disconnect API endpoint
+    // For now, just update the local state
     setConnected((prev) => ({
       ...prev,
       [key]: false,
     }));
   };
 
+  const getPlatformConnectionStatus = (key: PlatformKey) => {
+    // This function should check actual connection status from your backend
+    // For now, returning the local state
+    return connected[key];
+  };
+
   return (
-    <div className="rounded-xl  bg-white p-6">
-      {/* Title */}
+    <div className="rounded-xl bg-white p-6">
       <h2 className="text-base font-semibold text-slate-900 mb-6">
         Connected Platforms
       </h2>
 
       <div className="space-y-4">
         {platforms.map((platform) => {
-          const isConnected = connected[platform.key];
+          const isConnected = getPlatformConnectionStatus(platform.key);
           const isLoading = loading === platform.key;
 
           return (
             <div
               key={platform.key}
-              className="flex items-center justify-between rounded-xl  p-4"
+              className="flex items-center justify-between rounded-xl p-4 hover:bg-slate-50 transition-colors"
             >
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
@@ -122,17 +171,18 @@ const ConnectedPlatforms: React.FC = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleConnect(platform.key)}
-                    disabled={isLoading}
+                    onClick={() => handleConnect(platform)}
+                    disabled={isLoading || !organizationId}
                     className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition disabled:opacity-70"
                   >
-                    {isLoading && (
-                      <Loader2
-                        size={16}
-                        className="animate-spin"
-                      />
+                    {isLoading && <Loader2 size={16} className="animate-spin" />}
+                    {!organizationId ? (
+                      "No Org Selected"
+                    ) : isLoading ? (
+                      "Connecting..."
+                    ) : (
+                     <p>Connect</p>
                     )}
-                    {isLoading ? "Connecting..." : "Connect"}
                   </button>
                 )}
               </div>
@@ -140,6 +190,14 @@ const ConnectedPlatforms: React.FC = () => {
           );
         })}
       </div>
+
+      {!organizationId && (
+        <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+          <p className="text-sm text-yellow-700">
+            Please select an organization first to connect platforms.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

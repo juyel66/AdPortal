@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { login } from "../../features/auth/AuthThunks";
-import { toast, Toaster } from "sonner";
+import { toast,  } from "sonner";
 
 const SignIn: React.FC = () => {
   const dispatch = useAppDispatch();
