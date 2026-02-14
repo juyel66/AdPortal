@@ -5,15 +5,15 @@ import type {
   LoginPayload,
   RegisterPayload,
   ChangePasswordPayload,
-  ResetPasswordConfirmPayload,
+ 
   VerifyEmailPayload,
   UserProfile,
-
+  LoginResponse
 } from "../../types/auth";
 
 // Login
 export const login = createAsyncThunk<
-  
+  LoginResponse,
   LoginPayload,
   { rejectValue: any }
 >("auth/login", async (payload, { rejectWithValue }) => {
@@ -109,22 +109,63 @@ export const changePassword = createAsyncThunk<
   }
 });
 
-// Reset Password Confirm
+// Reset Password Confirm - TRY DIFFERENT PAYLOAD STRUCTURES
 export const resetPasswordConfirm = createAsyncThunk<
-  void,
-  ResetPasswordConfirmPayload,
+  any,
+  { email: string; otp: string; password: string },
   { rejectValue: any }
 >("auth/reset-password-confirm", async (payload, { rejectWithValue }) => {
   try {
-    await api.post("/accounts/password-reset-confirm/", payload);
+    // Try different payload structures that APIs commonly expect
+    
+    // Option 1: email, otp, new_password
+    // const res = await api.post("/accounts/password-reset-confirm/", {
+    //   email: payload.email,
+    //   otp: payload.otp,
+    //   new_password: payload.password
+    // });
+    
+    // Option 2: email, token, password
+    // const res = await api.post("/accounts/password-reset-confirm/", {
+    //   email: payload.email,
+    //   token: payload.otp,
+    //   password: payload.password
+    // });
+    
+    // Option 3: uid, token, new_password (common in Django)
+    // const res = await api.post("/accounts/password-reset-confirm/", {
+    //   uid: payload.email, // or some encoded uid
+    //   token: payload.otp,
+    //   new_password: payload.password
+    // });
+    
+    // Option 4: Just password and token (email from session)
+    // const res = await api.post("/accounts/password-reset-confirm/", {
+    //   token: payload.otp,
+    //   password: payload.password
+    // });
+    
+    // For now, let's try the most common structure
+    const res = await api.post("/accounts/password-reset-confirm/", {
+      email: payload.email,
+      otp: payload.otp,
+      new_password: payload.password
+    });
+    
+    return res.data;
   } catch (err: any) {
+    // Log the full error response to see what the API expects
+    console.log("Password reset error response:", err.response?.data);
+    console.log("Status:", err.response?.status);
+    console.log("Headers:", err.response?.headers);
+    
     return rejectWithValue(
       err.response?.data || { error: "Password reset failed" }
     );
   }
 });
 
-// Forgot Password - NEW
+// Forgot Password
 export const forgotPassword = createAsyncThunk<
   any,
   { email: string },
@@ -144,7 +185,7 @@ export const forgotPassword = createAsyncThunk<
   }
 });
 
-// Verify Email
+// Verify Email (for signup verification)
 export const verifyEmail = createAsyncThunk<
   any,
   VerifyEmailPayload,
@@ -152,6 +193,28 @@ export const verifyEmail = createAsyncThunk<
 >("auth/verify-email", async (payload, { rejectWithValue }) => {
   try {
     const res = await api.post("/accounts/verify-email/", {
+      email: payload.email,
+      otp: payload.otp,
+    });
+
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data || {
+        error: "Invalid or expired verification code",
+      }
+    );
+  }
+});
+
+// Check OTP (for password reset)
+export const checkOTP = createAsyncThunk<
+  any,
+  VerifyEmailPayload,
+  { rejectValue: any }
+>("auth/check-otp", async (payload, { rejectWithValue }) => {
+  try {
+    const res = await api.post("/accounts/check-otp/", {
       email: payload.email,
       otp: payload.otp,
     });

@@ -1,30 +1,39 @@
 export interface TeamMember {
   id: number;
-  name: string;
-  email: string;
-  role: Role;
-  joined: string;
-  status?: "Active" | "Pending" | "Inactive";
+  user: {
+    id: string;
+    full_name: string;
+    email: string;
+    phone_number: string | null;
+    is_admin: boolean;
+  };
+  role: 'OWNER' | 'ADMIN' | 'MEMBER';
+  status: 'ACTIVE' | 'PENDING' | 'INACTIVE';
+  joined?: string;
+  created_at?: string;
 }
 
-export type Role = "Owner" | "Admin" | "Member";
+export interface Team {
+  total_members: number;
+  active_members: number;
+  pending_invitations: number;
+  inactive_members: number;
+  id?: string;
+  name?: string;
+}
 
 export interface InviteTeamMemberPayload {
   email: string;
-  role: Role;
-}
-
-export interface TeamStats {
-  total_members: number;
-  active_members: number;
-  inactive_members: number;
-  pending_invitations: number;
+  role: 'ADMIN' | 'MEMBER';
 }
 
 export interface TeamState {
   members: TeamMember[];
-  stats: TeamStats | null;
+  team: Team | null;
   loading: boolean;
   error: string | null;
   message: string | null;
+  updateLoading: boolean;
+  deleteLoading: boolean;
+  inviteLoading: boolean;
 }

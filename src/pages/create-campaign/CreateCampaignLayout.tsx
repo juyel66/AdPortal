@@ -139,7 +139,7 @@ const CreateCampaignLayout: React.FC = () => {
 
     return {
       platforms: data.step2.selectedPlatforms.map((p: string) => platformMapping[p] || p.toUpperCase()),
-      campaign_name: data.step1.campaignName,
+      campaign_name: data.step1.campaign_name,
       objective: objectiveMapping[data.step3.objective] || data.step3.objective.toUpperCase(),
       budgets: data.step2.selectedPlatforms.map((platform: string) => ({
         platform: platformMapping[platform] || platform.toUpperCase(),

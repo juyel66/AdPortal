@@ -8,9 +8,7 @@ import toast from "react-hot-toast";
 import type { 
   ForgotPasswordFormData, 
   ForgotPasswordValidationErrors,
-
 } from "@/types/forgotPassword";
-
 
 // Import Redux types and actions
 import type { AppDispatch, RootState } from "@/store";
@@ -161,10 +159,11 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
         // Show success toast
         toast.success(successMessage);
         
-        // Navigate to check-email page with email as state
+        // Navigate to check-email page with email and flow='forgot-password'
         navigate(onSuccessRedirect, { 
           state: { 
             email: formData.email,
+            flow: "forgot-password",
             timestamp: new Date().toISOString(),
             success: true,
             message: successMessage
@@ -253,7 +252,6 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                 alt="AdPortal Logo"
                 className="h-16 lg:h-20"
               />
-           
             </div>
 
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight mb-4">
@@ -264,9 +262,6 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
               Create once, publish everywhere. Let AI handle your ad campaigns
               across Meta, Google Ads, and TikTok from one unified dashboard.
             </p>
-
-           
-             
           </div>
         )}
 
@@ -285,7 +280,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                   Forgot Password?
                 </h1>
                 <p className="text-gray-600 mt-2" id="forgot-password-description">
-                  No worries! Enter your email and we'll send you a link to reset your password.
+                  No worries! Enter your email and we'll send you a verification code to reset your password.
                 </p>
               </div>
 
@@ -343,11 +338,11 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                   id="email-help" 
                   className="text-xs text-gray-500 mt-2"
                 >
-                  We'll send a password reset link to this email
+                  We'll send a 6-digit verification code to this email
                 </p>
               </div>
 
-              {/* Terms Checkbox (optional) */}
+              {/* Terms Checkbox */}
               <div className="mt-4 flex items-center">
                 <input
                   id="termsAccepted"
@@ -370,7 +365,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                 type="submit"
                 disabled={isSubmitting || !formData.termsAccepted}
                 className="mt-8 w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
-                aria-label={isSubmitting ? "Sending reset link..." : "Send reset link"}
+                aria-label={isSubmitting ? "Sending OTP..." : "Send OTP"}
               >
                 {isSubmitting ? (
                   <>
@@ -378,7 +373,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                       className="h-4 w-4 animate-spin" 
                       aria-hidden="true"
                     />
-                    Sending Reset Link...
+                    Sending OTP...
                   </>
                 ) : (
                   <>
@@ -386,7 +381,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                       size={16} 
                       aria-hidden="true"
                     />
-                    Send Reset Link
+                    Send OTP
                   </>
                 )}
               </button>
@@ -397,7 +392,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                   <p className="text-sm text-gray-600">
                     Remember your password?{" "}
                     <Link 
-                      to="/auth/login" 
+                      to="/auth/signIn" 
                       className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
                       aria-label="Back to login page"
                     >
@@ -408,13 +403,13 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
               </div>
 
               {/* Security Note */}
-              {showSecurityTips && (
+              {/* {showSecurityTips && (
                 <div className="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
                   <p className="text-xs text-blue-800 text-center">
                     <span className="font-medium">Security Tip:</span> We'll never ask for your password via email.
                   </p>
                 </div>
-              )}
+              )} */}
 
               {/* Error Display from Redux */}
               {reduxError && (
@@ -439,7 +434,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
                   <div>
                     <h3 className="font-medium text-gray-900">Secure & Fast</h3>
                     <p className="text-xs text-gray-600 mt-1">
-                      Reset link expires in 15 minutes for your security.
+                      Reset code expires in 15 minutes for your security.
                     </p>
                   </div>
                 </div>

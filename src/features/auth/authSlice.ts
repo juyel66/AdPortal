@@ -9,6 +9,7 @@ import {
   changePassword,
   resetPasswordConfirm,
   verifyEmail,
+  checkOTP,
   resendOtp,
   forgotPassword,
 } from "../../features/auth/AuthThunks";
@@ -24,9 +25,11 @@ export interface AuthState {
   error: string | null;
   message: string | null;
   forgotPasswordEmail: string | null;
-  organizations: string[]; // New field
-  currentPlan: any | null; // New field
-  selectedOrganization: string | null; // New field for selected organization
+  organizations: string[];
+  currentPlan: any | null;
+  selectedOrganization: string | null;
+  otpVerified: boolean; // New field to track OTP verification status
+  resetPasswordEmail: string | null; // New field to store email for password reset
 }
 
 // Function to save auth data to localStorage
@@ -59,12 +62,14 @@ const getAuthDataFromLocalStorage = () => {
     const organizationsStr = localStorage.getItem("organizations");
     const currentPlanStr = localStorage.getItem("currentPlan");
     const selectedOrganization = localStorage.getItem("selectedOrganization");
+    const resetPasswordEmail = localStorage.getItem("resetPasswordEmail");
 
     return {
       user: userStr ? JSON.parse(userStr) : null,
       organizations: organizationsStr ? JSON.parse(organizationsStr) : [],
       currentPlan: currentPlanStr ? JSON.parse(currentPlanStr) : null,
       selectedOrganization: selectedOrganization,
+      resetPasswordEmail: resetPasswordEmail,
     };
   } catch (error) {
     console.error("Error getting auth data from localStorage:", error);
@@ -73,6 +78,7 @@ const getAuthDataFromLocalStorage = () => {
       organizations: [],
       currentPlan: null,
       selectedOrganization: null,
+      resetPasswordEmail: null,
     };
   }
 };
@@ -91,6 +97,8 @@ const initialState: AuthState = {
   organizations: authData.organizations,
   currentPlan: authData.currentPlan,
   selectedOrganization: authData.selectedOrganization,
+  otpVerified: false,
+  resetPasswordEmail: authData.resetPasswordEmail,
 };
 
 const authSlice = createSlice({
@@ -141,6 +149,21 @@ const authSlice = createSlice({
     updateCurrentPlan(state, action: PayloadAction<any>) {
       state.currentPlan = action.payload;
       localStorage.setItem("currentPlan", JSON.stringify(action.payload));
+    },
+    // New action to set OTP verification status
+    setOTPVerified(state, action: PayloadAction<boolean>) {
+      state.otpVerified = action.payload;
+    },
+    // New action to set reset password email
+    setResetPasswordEmail(state, action: PayloadAction<string>) {
+      state.resetPasswordEmail = action.payload;
+      localStorage.setItem("resetPasswordEmail", action.payload);
+    },
+    // New action to clear reset password data
+    clearResetPasswordData(state) {
+      state.otpVerified = false;
+      state.resetPasswordEmail = null;
+      localStorage.removeItem("resetPasswordEmail");
     },
   },
   extraReducers: (builder) => {
@@ -217,6 +240,8 @@ const authSlice = createSlice({
         state.organizations = [];
         state.currentPlan = null;
         state.selectedOrganization = null;
+        state.otpVerified = false;
+        state.resetPasswordEmail = null;
         
         // Clear all auth data from localStorage
         localStorage.removeItem("accessToken");
@@ -225,6 +250,7 @@ const authSlice = createSlice({
         localStorage.removeItem("organizations");
         localStorage.removeItem("currentPlan");
         localStorage.removeItem("selectedOrganization");
+        localStorage.removeItem("resetPasswordEmail");
       })
       .addCase(logout.rejected, (state) => {
         state.loading = false;
@@ -238,6 +264,8 @@ const authSlice = createSlice({
         state.organizations = [];
         state.currentPlan = null;
         state.selectedOrganization = null;
+        state.otpVerified = false;
+        state.resetPasswordEmail = null;
         
         // Clear all auth data from localStorage even on error
         localStorage.removeItem("accessToken");
@@ -246,6 +274,7 @@ const authSlice = createSlice({
         localStorage.removeItem("organizations");
         localStorage.removeItem("currentPlan");
         localStorage.removeItem("selectedOrganization");
+        localStorage.removeItem("resetPasswordEmail");
       });
 
     // Fetch Profile
@@ -296,16 +325,19 @@ const authSlice = createSlice({
           "Password change failed";
       });
 
-    // Reset Password Confirm
+    // Reset Password Confirm - UPDATED
     builder
       .addCase(resetPasswordConfirm.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
       })
-      .addCase(resetPasswordConfirm.fulfilled, (state) => {
+      .addCase(resetPasswordConfirm.fulfilled, (state, action: any) => {
         state.loading = false;
-        state.message = "Password reset successful! You can now login.";
+        state.message = action.payload?.message || "Password reset successful! You can now login.";
+        state.otpVerified = false;
+        state.resetPasswordEmail = null;
+        localStorage.removeItem("resetPasswordEmail");
       })
       .addCase(resetPasswordConfirm.rejected, (state, action: any) => {
         state.loading = false;
@@ -315,7 +347,7 @@ const authSlice = createSlice({
           "Password reset failed";
       });
 
-    // Forgot Password - NEW
+    // Forgot Password
     builder
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
@@ -337,7 +369,7 @@ const authSlice = createSlice({
           "Failed to send password reset email";
       });
 
-    // Verify Email
+    // Verify Email (for signup verification)
     builder
       .addCase(verifyEmail.pending, (state) => {
         state.loading = true;
@@ -350,6 +382,27 @@ const authSlice = createSlice({
       })
       .addCase(verifyEmail.rejected, (state, action: any) => {
         state.loading = false;
+        state.error =
+          action.payload?.error ||
+          action.payload?.detail ||
+          "OTP verification failed";
+      });
+
+    // Check OTP (for password reset)
+    builder
+      .addCase(checkOTP.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(checkOTP.fulfilled, (state, action: any) => {
+        state.loading = false;
+        state.otpVerified = true;
+        state.message = action.payload?.message || "OTP verified successfully!";
+      })
+      .addCase(checkOTP.rejected, (state, action: any) => {
+        state.loading = false;
+        state.otpVerified = false;
         state.error =
           action.payload?.error ||
           action.payload?.detail ||
@@ -389,6 +442,9 @@ export const {
   setSelectedOrganization,
   clearSelectedOrganization,
   updateOrganizations,
-  updateCurrentPlan
+  updateCurrentPlan,
+  setOTPVerified,
+  setResetPasswordEmail,
+  clearResetPasswordData
 } = authSlice.actions;
 export default authSlice.reducer;

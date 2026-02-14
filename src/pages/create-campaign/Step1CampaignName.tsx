@@ -3,19 +3,19 @@ import { useCampaign } from "../../../src/pages/create-campaign/CampaignContext"
 
 const Step1CampaignName: React.FC = () => {
   const { campaignData, updateCampaignData } = useCampaign();
-  const [campaignName, setCampaignName] = React.useState(campaignData.step1.campaignName);
+  const [campaign_name, setCampaignName] = React.useState(campaignData.step1.campaign_name);
 
 
   useEffect(() => {
-    setCampaignName(campaignData.step1.campaignName);
-  }, [campaignData.step1.campaignName]);
+    setCampaignName(campaignData.step1.campaign_name);
+  }, [campaignData.step1.campaign_name]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setCampaignName(newValue);
     
  
-    updateCampaignData('step1', { campaignName: newValue });
+    updateCampaignData('step1', { campaign_name: newValue });
     
     console.log(" Step 1 - Campaign Name updated:", newValue);
   };
@@ -40,7 +40,7 @@ const Step1CampaignName: React.FC = () => {
             type="text"
             placeholder="Transform Your Business Today"
             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={campaignName}
+            value={campaign_name}
             onChange={handleInputChange}
           />
         </div>

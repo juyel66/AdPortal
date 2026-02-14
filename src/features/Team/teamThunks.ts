@@ -1,9 +1,8 @@
-// teamThunks.ts
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../lib/axios";
 import type {
   TeamMember,
-  
+  Team,
   InviteTeamMemberPayload,
 } from "../../types/team";
 
@@ -14,9 +13,7 @@ export const fetchTeamMembers = createAsyncThunk<
   { rejectValue: any }
 >("team/fetch-members", async ({ org_id }, { rejectWithValue }) => {
   try {
-    const res = await api.get(
-      `/main/team-members/?org_id=${org_id}`
-    );
+    const res = await api.get(`/main/team-members/?org_id=${org_id}`);
     return res.data;
   } catch (err: any) {
     return rejectWithValue(
@@ -44,7 +41,7 @@ export const inviteTeamMember = createAsyncThunk<
   }
 });
 
-// Update team member role
+// Update team member role - USING PATCH METHOD
 export const updateTeamMemberRole = createAsyncThunk<
   TeamMember,
   { org_id: string; member_id: number; role: string },
@@ -63,16 +60,14 @@ export const updateTeamMemberRole = createAsyncThunk<
   }
 });
 
-// Fetch team info
+// Fetch team info/stats
 export const fetchTeam = createAsyncThunk<
   Team,
   { org_id: string },
   { rejectValue: any }
 >("team/fetch-team", async ({ org_id }, { rejectWithValue }) => {
   try {
-    const res = await api.get(
-      `/main/team/?org_id=${org_id}`
-    );
+    const res = await api.get(`/main/team/?org_id=${org_id}`);
     return res.data;
   } catch (err: any) {
     return rejectWithValue(
@@ -88,10 +83,8 @@ export const deleteTeamMember = createAsyncThunk<
   { rejectValue: any }
 >("team/delete-member", async ({ org_id, member_id }, { rejectWithValue }) => {
   try {
-    await api.delete(
-      `/main/team-member/${member_id}/?org_id=${org_id}`
-    );
-    return member_id;
+    await api.delete(`/main/team-member/${member_id}/?org_id=${org_id}`);
+    return member_id; // Return the ID of deleted member for state update
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data || { error: "Failed to delete team member" }

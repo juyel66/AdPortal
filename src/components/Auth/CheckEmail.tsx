@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { OTP } from "./OTP";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
-import { verifyEmail, resendOtp } from "../../features/auth/AuthThunks"; 
-import {  Clock, RefreshCw } from "lucide-react";
+import { checkOTP, verifyEmail, resendOtp } from "../../features/auth/AuthThunks"; 
+import { Clock, RefreshCw } from "lucide-react";
+import { setResetPasswordEmail } from "@/features/auth/authSlice";
 
 const CheckEmail: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -14,20 +15,25 @@ const CheckEmail: React.FC = () => {
 
   
   const locationEmail = location.state?.email || "";
+  const locationOTP = location.state?.otp || "";
+  const flow = location.state?.flow || "register"; // 'register' or 'forgot-password'
   
   
   const localStorageEmail = localStorage.getItem("pendingVerifyEmail") || "";
+  const storedResetEmail = localStorage.getItem("resetPasswordEmail") || "";
   
   
-  const email = locationEmail || localStorageEmail;
+  const email = locationEmail || localStorageEmail || storedResetEmail;
 
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState(locationOTP || "");
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState(60); 
   const [canResend, setCanResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
+  // Determine which OTP verification function to use
+  const verifyOTP = flow === "register" ? verifyEmail : checkOTP;
 
   useEffect(() => {
     const savedTimer = localStorage.getItem("otpResendTimer");
@@ -39,16 +45,11 @@ const CheckEmail: React.FC = () => {
       } else {
         setCanResend(true);
       }
+    } else {
+      setCanResend(true);
     }
   }, []);
   
-  
-
- 
-  
-
-
-
   useEffect(() => {
     let timer: any;
     
@@ -70,8 +71,11 @@ const CheckEmail: React.FC = () => {
   useEffect(() => {
     if (email) {
       localStorage.setItem("pendingVerifyEmail", email);
+      if (flow === "forgot-password") {
+        dispatch(setResetPasswordEmail(email));
+      }
     }
-  }, [email]);
+  }, [email, flow, dispatch]);
 
   
   const handleOtpChange = (value: string) => {
@@ -96,31 +100,44 @@ const CheckEmail: React.FC = () => {
     e.preventDefault();
     setFormError(null);
     setSuccessMessage(null);
-    
 
-    
     if (!otp || otp.length !== 6) {
-      setFormError("Please enter the 6-digit verification code");
+      setFormError("");
       return;
     }
 
     try {
-   
-      await dispatch(
-        verifyEmail({
+      const result = await dispatch(
+        verifyOTP({
           email,
           otp,
         })
       ).unwrap();
 
-      
+      // Clear storage
       localStorage.removeItem("pendingVerifyEmail");
       localStorage.removeItem("otpResendTimer");
       
-      
-      navigate("/auth/signin", { 
-        state: { email } 
-      });
+      // Redirect based on flow
+      if (flow === "register") {
+        // Registration flow - go to sign in
+        navigate("/auth/signin", { 
+          state: { 
+            email: email,
+            message: "Email verified successfully! Please login with your credentials."
+          } 
+        });
+      } else {
+        // Forgot password flow - go to new password
+        localStorage.setItem("resetPasswordEmail", email);
+        navigate("/auth/new-password", { 
+          state: { 
+            email: email,
+            otp: otp,
+            message: "OTP verified successfully! Please set your new password."
+          } 
+        });
+      }
       
     } catch (err: any) {
       setFormError(
@@ -201,9 +218,14 @@ const CheckEmail: React.FC = () => {
             Email Not Found
           </h2>
           <p className="text-slate-600 mb-6">
-            Please complete the signup process first.
+            Please start the {flow === "register" ? "signup" : "password reset"} process first.
           </p>
-         
+          <Link
+            to={flow === "register" ? "/auth/signup" : "/auth/forgot-password"}
+            className="inline-flex justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            {flow === "register" ? "Sign Up" : "Forgot Password"}
+          </Link>
         </div>
       </div>
     );
@@ -223,18 +245,14 @@ const CheckEmail: React.FC = () => {
           </div>
 
           <h1 className="text-3xl font-semibold text-slate-900 leading-snug">
-            The Only Platform You Need for Multi-Channel Ads
+            {flow === "register" ? "Verify Your Email" : "Reset Your Password"}
           </h1>
 
           <p className="mt-4 max-w-md text-sm text-slate-500 leading-relaxed">
-            Create once, publish everywhere. Let AI handle your ad campaigns
-            across Meta, Google Ads, and TikTok from one unified dashboard.
+            {flow === "register" 
+              ? "Enter the 6-digit verification code sent to your email to complete your registration."
+              : "Enter the 6-digit verification code sent to your email to proceed with password reset."}
           </p>
-
-         
-          <div className="mt-8">
-           
-          </div>
         </div>
 
         
@@ -253,7 +271,16 @@ const CheckEmail: React.FC = () => {
               Enter the code below.
             </p>
 
-           
+            {/* Flow indicator */}
+            {/* <div className="mb-4 p-2 bg-blue-50 rounded-lg">
+              <p className="text-xs text-blue-700 text-center">
+                {flow === "register" 
+                  ? "Completing registration" 
+                  : "Resetting password"}
+              </p>
+            </div> */}
+
+            {/* SUCCESS MESSAGE */}
             {successMessage && (
               <div className="mb-6 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
                 {successMessage}
@@ -272,13 +299,12 @@ const CheckEmail: React.FC = () => {
               <label className="block text-sm font-medium text-slate-900 mb-3">
                 Verification Code
               </label>
-              <div className="flex justify-center ">
+              <div className="flex justify-center">
                 <OTP value={otp} onChange={handleOtpChange} />
               </div>
-             
             </div>
 
-            {/* VERIFY BUTTON */}
+            {/* VERIFY OTP BUTTON */}
             <button
               type="submit"
               disabled={loading || otp.length !== 6}
@@ -297,7 +323,7 @@ const CheckEmail: React.FC = () => {
             {/* RESEND OTP SECTION */}
             <div className="mb-8 text-center">
               <p className="text-sm text-slate-600 mb-3">
-                Didn't receive the email?
+                Didn't receive the code?
               </p>
               
               <div className="flex items-center justify-center gap-3">
@@ -321,39 +347,22 @@ const CheckEmail: React.FC = () => {
                     ) : (
                       <>
                         <RefreshCw size={14} />
-                        Resend Verification Code
+                        Resend Code
                       </>
                     )}
                   </button>
                 )}
               </div>
-              
-              <p className="text-xs text-slate-500 mt-3">
-                New code will be sent to {email}
-              </p>
             </div>
 
-            {/* DIVIDER */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-slate-500">or</span>
-              </div>
-            </div>
-
-            {/* BACK TO SIGN IN */}
+            {/* BACK LINK - changes based on flow */}
             <div className="text-center">
-              <p className="text-sm text-slate-600">
-                Use another email?{" "}
-                <Link
-                  to="/auth/signup"
-                  className="text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Sign Up
-                </Link>
-              </p>
+              <Link
+                to={flow === "register" ? "/auth/signup" : "/auth/forgot-password"}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                ← Back to {flow === "register" ? "Sign Up" : "Forgot Password"}
+              </Link>
             </div>
           </form>
         </div>

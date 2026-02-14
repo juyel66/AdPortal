@@ -215,9 +215,12 @@ const SignUp: React.FC = () => {
         })
       ).unwrap();
 
-      // Navigate to CheckEmail with email as state
+      // Navigate to CheckEmail with email and flow='register'
       navigate("/auth/check-email", { 
-        state: { email: form.email } 
+        state: { 
+          email: form.email,
+          flow: "register"
+        } 
       });
     } catch (err: any) {
       setErrors({
@@ -291,9 +294,6 @@ const SignUp: React.FC = () => {
             Create once, publish everywhere. Let AI handle your ad campaigns
             across Meta, Google Ads, and TikTok from one unified dashboard.
           </p>
-
-          {/* Security Features */}
-        
         </div>
 
         {/* Right Section - Sign Up Form */}

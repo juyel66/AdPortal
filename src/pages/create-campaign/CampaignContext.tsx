@@ -13,7 +13,7 @@ export interface PlatformItem {
 
 // Step-specific interfaces
 interface Step1Data {
-  campaignName: string;
+  campaign_name: string;
 }
 
 interface Step2Data {
@@ -179,7 +179,7 @@ const defaultPlatforms: PlatformItem[] = [
 // Initial data structure
 const initialCampaignData: CampaignData = {
   step1: { 
-    campaignName: '' 
+    campaign_name: '' 
   },
   step2: { 
     platforms: defaultPlatforms,
@@ -390,7 +390,7 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
     
     switch (step) {
       case 'step1':
-        const isValid1 = (stepData as Step1Data).campaignName.trim().length > 0;
+        const isValid1 = (stepData as Step1Data).campaign_name.trim().length > 0;
         console.log(`✅ Step1 validation: ${isValid1 ? 'VALID' : 'INVALID'}`);
         return isValid1;
       
@@ -528,7 +528,7 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
       platforms: campaignData.step2.selectedPlatforms.map(
         (p: string) => platformMapping[p] || p.toUpperCase()
       ),
-      campaign_name: campaignData.step1.campaignName,
+      campaign_name: campaignData.step1.campaign_name,
       objective: objectiveMapping[campaignData.step3.objective] || 
                 campaignData.step3.objective.toUpperCase(),
       budgets: campaignData.step2.selectedPlatforms.map((platform: string) => ({

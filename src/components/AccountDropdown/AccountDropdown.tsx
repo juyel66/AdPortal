@@ -235,7 +235,7 @@ export default function AccountDropdown({
                         {getOrganizationInitial(org)}
                       </div>
 
-                      <div className="flex-1 min-w-0">
+                      <a href="" className="flex-1 min-w-0">
                         <div className={`text-xs font-medium truncate
                           ${isSelected ? "text-blue-600" : "text-gray-800"}`}>
                           {getOrganizationDisplayName(org)}
@@ -245,7 +245,7 @@ export default function AccountDropdown({
                             ID: {formatOrganizationId(org.id)}
                           </span>
                         </div>
-                      </div>
+                      </a>
                     </div>
                   );
                 })}

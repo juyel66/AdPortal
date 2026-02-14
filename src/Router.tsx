@@ -50,6 +50,7 @@ import SecurityPage from "./pages/SecurityPage/SecurityPage";
 import AboutUs from "./pages/AboutUs/AboutUs";
 import ContactUs from "./pages/Contact/ContactUs";
 import NotificationsPage from "./pages/NotificationsPage/Notificationspage";
+import AcceptInvite from "./components/Team/AcceptInvite";
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +63,12 @@ export const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
+
+      
+            {
+        path: "accept-invite/:token",
+        element: <AcceptInvite />,
+      },
       {
         path: "features",
         element: <FeaturesPage />,
@@ -70,6 +77,7 @@ export const router = createBrowserRouter([
         path: "how-it-works",
         element: <HowItWorksPage />,
       },
+      
       {
         path: "pricing",
         element: <Pricing />,
@@ -179,6 +187,7 @@ export const router = createBrowserRouter([
         path: "notification",
         element: <NotificationsPage />,
       },
+
 
       {
         path: "campaigns-create",
