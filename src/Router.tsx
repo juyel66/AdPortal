@@ -51,6 +51,7 @@ import AboutUs from "./pages/AboutUs/AboutUs";
 import ContactUs from "./pages/Contact/ContactUs";
 import NotificationsPage from "./pages/NotificationsPage/Notificationspage";
 import AcceptInvite from "./components/Team/AcceptInvite";
+import UpdateCampaignLayout from "./pages/update-campaign/UpdateCampaignLayout";
 
 export const router = createBrowserRouter([
   {
@@ -227,6 +228,48 @@ export const router = createBrowserRouter([
           },
         ],
       },
+
+
+         {
+        path: "campaigns-update/:id",
+        element: <UpdateCampaignLayout />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="step-1" replace />,
+          },
+          {
+            path: "step-1",
+            element: <Step1CampaignName />,
+          },
+          {
+            path: "step-2",
+            element: <Step2Platforms />,
+          },
+          {
+            path: "step-3",
+            element: <Step3Objective />,
+          },
+          {
+            path: "step-4",
+            element: <Step4Audience />,
+          },
+          {
+            path: "step-5",
+            element: <Step5Budget />,
+          },
+          {
+            path: "step-6",
+            element: <Step6Creative />,
+          },
+          {
+            path: "step-7",
+            element: <Step7Review />,
+          },
+        ],
+      },
+
+
     ],
   },
 
