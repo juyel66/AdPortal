@@ -106,6 +106,7 @@ const initialState: AuthState = {
   resetPasswordEmail: authData.resetPasswordEmail,
 };
 
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
