@@ -1,59 +1,62 @@
-// CampaignsTable.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import type { Campaign } from "@/types";
 
-export default function CampaignsTable() {
-  const initial: Campaign[] = [
-    {
-      id: 1,
-      name: "Summer Sale 2024",
-      status: "active",
-      platforms: ["facebook", "google", "tiktok"],
-      spend: "$1,245",
-      performance: { impressions: "324K", ctr: "3.8%" },
-    },
-    {
-      id: 2,
-      name: "Product Launch - New Collection",
-      status: "active",
-      platforms: ["facebook", "google", "tiktok"],
-      spend: "$1,245",
-      performance: { impressions: "324K", ctr: "3.8%" },
-    },
-    {
-      id: 3,
-      name: "Summer Sale 2024",
-      status: "paused",
-      platforms: ["facebook", "google", "tiktok"],
-      spend: "$1,245",
-      performance: { impressions: "324K", ctr: "3.8%" },
-    },
-    {
-      id: 4,
-      name: "Summer Sale 2024",
-      status: "draft",
-      platforms: ["facebook", "google", "tiktok"],
-      spend: "$1,245",
-      performance: { impressions: "324K", ctr: "3.8%" },
-    },
-    {
-      id: 5,
-      name: "Holiday Promo 2024",
-      status: "active",
-      platforms: ["facebook", "google", "tiktok"],
-      spend: "$2,100",
-      performance: { impressions: "420K", ctr: "4.1%" },
-    },
-    {
-      id: 6,
-      name: "Back to School",
-      status: "paused",
-      platforms: ["facebook", "google", "tiktok"],
-      spend: "$980",
-      performance: { impressions: "210K", ctr: "2.9%" },
-    },
-  ];
+interface Campaign {
+  id: number;
+  name: string;
+  status: string;
+  platforms: string[];
+  created_at: string;
+  spend: number;
+  performance: {
+    impressions: number;
+    clicks: number;
+    conversions: number;
+    ctr: number;
+    roas: number;
+  };
+}
+
+interface CampaignsTableProps {
+  campaigns?: Campaign[];
+}
+
+// Helper function to format currency
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+// Helper function to format large numbers
+const formatNumber = (value: number): string => {
+  if (value >= 1000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  }
+  if (value >= 1000) {
+    return (value / 1000).toFixed(1) + 'K';
+  }
+  return value.toString();
+};
+
+export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) {
+  const [data, setData] = useState<Campaign[]>([]);
+  const [showAll, setShowAll] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Campaign | null>(null);
+  const [form, setForm] = useState<{
+    name: string;
+    status: string;
+    spend: string;
+    platforms: string[];
+  }>({ name: "", status: "DRAFT", spend: "", platforms: [] });
+
+  useEffect(() => {
+    setData(campaigns);
+  }, [campaigns]);
 
   const ICONS: Record<string, string> = {
     facebook:
@@ -61,6 +64,12 @@ export default function CampaignsTable() {
     google:
       "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_4_wtcxrl.png",
     tiktok:
+      "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_5_aav4oy.png",
+    META:
+      "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_3_rocwbl.png",
+    GOOGLE:
+      "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_4_wtcxrl.png",
+    TIKTOK:
       "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Container_5_aav4oy.png",
     edit: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765492235/Edit_idtp7y.png",
     trash:
@@ -70,23 +79,12 @@ export default function CampaignsTable() {
       "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765493531/Icon_9_iwacr1.png",
   };
 
-  const [data, setData] = useState<Campaign[]>(initial);
-  const [showAll, setShowAll] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Campaign | null>(null);
-  const [form, setForm] = useState<{
-    name: string;
-    status: "active" | "paused" | "draft";
-    spend: string;
-    platforms: ("facebook" | "google" | "tiktok")[];
-  }>({ name: "", status: "draft", spend: "", platforms: [] });
-
   function openEdit(item: Campaign) {
     setEditing(item);
     setForm({
       name: item.name,
       status: item.status,
-      spend: item.spend,
+      spend: item.spend.toString(),
       platforms: item.platforms,
     });
     setModalOpen(true);
@@ -102,13 +100,17 @@ export default function CampaignsTable() {
       return;
     }
     setData((d) =>
-      d.map((it) => (it.id === editing.id ? { ...it, ...form } : it))
+      d.map((it) => (it.id === editing.id ? { 
+        ...it, 
+        ...form, 
+        spend: parseFloat(form.spend) || 0
+      } : it))
     );
     Swal.fire("Updated", "Campaign updated successfully", "success");
 
     setModalOpen(false);
     setEditing(null);
-    setForm({ name: "", status: "draft", spend: "", platforms: [] });
+    setForm({ name: "", status: "DRAFT", spend: "", platforms: [] });
   }
 
   function handleDelete(item: Campaign) {
@@ -126,7 +128,7 @@ export default function CampaignsTable() {
     });
   }
 
-  function togglePlatform(p: "facebook" | "google" | "tiktok") {
+  function togglePlatform(p: string) {
     setForm((f) => ({
       ...f,
       platforms: f.platforms.includes(p)
@@ -139,6 +141,23 @@ export default function CampaignsTable() {
     if (!t) return "";
     return t.length > 25 ? t.slice(0, 25) + "..." : t;
   }
+
+  function getStatusColor(status: string) {
+    switch (status.toUpperCase()) {
+      case 'ACTIVE':
+        return 'bg-emerald-100 text-emerald-700';
+      case 'PAUSED':
+        return 'bg-yellow-100 text-amber-700';
+      case 'DRAFT':
+        return 'bg-slate-100 text-slate-600';
+      case 'COMPLETED':
+        return 'bg-blue-100 text-blue-700';
+      default:
+        return 'bg-slate-100 text-slate-600';
+    }
+  }
+
+  const displayedData = showAll ? data : data.slice(0, 4);
 
   return (
     <div className="w-full mx-auto mt-5">
@@ -195,110 +214,115 @@ export default function CampaignsTable() {
             </thead>
 
             <tbody className="divide-y divide-slate-100 bg-white">
-              {(showAll ? data : data.slice(0, 4)).map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
-                  <td className="p-4 align-middle">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded border-slate-200"
-                    />
-                  </td>
-
-                  <td
-                    className="p-4 align-middle text-slate-800"
-                    title={row.name}
+              {displayedData.length > 0 ? (
+                displayedData.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-slate-50 transition-colors"
                   >
-                    {truncateTitle(row.name)}
-                  </td>
+                    <td className="p-4 align-middle">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-slate-200"
+                      />
+                    </td>
 
-                  <td className="p-4 align-middle">
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        row.status === "active"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : row.status === "paused"
-                            ? "bg-yellow-100 text-amber-700"
-                            : "bg-slate-100 text-slate-600"
-                      }`}
+                    <td
+                      className="p-4 align-middle text-slate-800"
+                      title={row.name}
                     >
-                      {row.status}
-                    </span>
-                  </td>
+                      {truncateTitle(row.name)}
+                    </td>
 
-                  {/* Platforms */}
-                  <td className="p-4 align-middle">
-                    <div className="flex items-center gap-3">
-                      {row.platforms.map((p) => (
-                        <div
-                          key={p}
-                          className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-slate-100 shadow-sm"
+                    <td className="p-4 align-middle">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(row.status)}`}
+                      >
+                        {row.status}
+                      </span>
+                    </td>
+
+                    {/* Platforms */}
+                    <td className="p-4 align-middle">
+                      <div className="flex items-center gap-3">
+                        {row.platforms && row.platforms.map((p) => (
+                          <div
+                            key={p}
+                            className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-slate-100 shadow-sm"
+                          >
+                            <img
+                              src={ICONS[p] || ICONS.facebook}
+                              alt={p}
+                              className="w-5 h-5 object-contain"
+                            />
+                          </div>
+                        ))}
+                        {(!row.platforms || row.platforms.length === 0) && (
+                          <span className="text-xs text-gray-400">No platforms</span>
+                        )}
+                      </div>
+                    </td>
+
+                    <td className="p-4 align-middle text-slate-800">
+                      {formatCurrency(row.spend)}
+                    </td>
+
+                    {/* Performance icons */}
+                    <td className="p-4 align-middle text-slate-600">
+                      <div className="flex items-center gap-6">
+                        {/* Eye icon - impressions */}
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={ICONS.eye}
+                            alt="views"
+                            className="w-4 h-4 object-contain"
+                          />
+                          <span>{formatNumber(row.performance?.impressions || 0)}</span>
+                        </div>
+
+                        {/* Cursor icon - CTR */}
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={ICONS.cursor}
+                            alt="ctr"
+                            className="w-4 h-4 object-contain"
+                          />
+                          <span>{(row.performance?.ctr || 0).toFixed(2)}%</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="p-4 align-middle text-right">
+                      <div className="inline-flex items-center gap-2">
+                        <button
+                          onClick={() => openEdit(row)}
+                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
+                        >
+                          <img src={ICONS.edit} alt="edit" className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(row)}
+                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
                         >
                           <img
-                            src={ICONS[p]}
-                            alt={p}
-                            className="w-5 h-5 object-contain"
+                            src={ICONS.trash}
+                            alt="delete"
+                            className="w-4 h-4"
                           />
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-
-                  <td className="p-4 align-middle text-slate-800">
-                    {row.spend}
-                  </td>
-
-                  {/* UPDATED PERFORMANCE ICONS */}
-                  <td className="p-4 align-middle text-slate-600">
-                    <div className="flex items-center gap-6">
-                      {/* Eye icon - impressions */}
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={ICONS.eye}
-                          alt="views"
-                          className="w-4 h-4 object-contain"
-                        />
-                        <span>{row.performance.impressions}</span>
+                        </button>
                       </div>
-
-                      {/* Cursor icon - CTR */}
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={ICONS.cursor}
-                          alt="ctr"
-                          className="w-4 h-4 object-contain"
-                        />
-                        <span>{row.performance.ctr}</span>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Actions */}
-                  <td className="p-4 align-middle text-right">
-                    <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() => openEdit(row)}
-                        className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
-                      >
-                        <img src={ICONS.edit} alt="edit" className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(row)}
-                        className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
-                      >
-                        <img
-                          src={ICONS.trash}
-                          alt="delete"
-                          className="w-4 h-4"
-                        />
-                      </button>
-                    </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-gray-500">
+                    No campaigns found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -333,20 +357,22 @@ export default function CampaignsTable() {
                   onChange={(e) =>
                     setForm((f) => ({
                       ...f,
-                      status: e.target.value as "active" | "paused" | "draft",
+                      status: e.target.value,
                     }))
                   }
                   className="mt-1 block w-full border rounded-md p-2"
                 >
-                  <option value="draft">draft</option>
-                  <option value="active">active</option>
-                  <option value="paused">paused</option>
+                  <option value="DRAFT">DRAFT</option>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="PAUSED">PAUSED</option>
+                  <option value="COMPLETED">COMPLETED</option>
                 </select>
               </div>
 
               <div>
                 <label className="text-sm text-slate-600">Spend</label>
                 <input
+                  type="number"
                   value={form.spend}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, spend: e.target.value }))
@@ -360,28 +386,28 @@ export default function CampaignsTable() {
                 <div className="flex gap-3 mt-2">
                   <button
                     type="button"
-                    onClick={() => togglePlatform("facebook")}
-                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("facebook") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
+                    onClick={() => togglePlatform("META")}
+                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("META") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
                   >
                     <img
-                      src={ICONS.facebook}
-                      alt="facebook"
+                      src={ICONS.META}
+                      alt="meta"
                       className="w-4 h-4"
                     />
                   </button>
                   <button
                     type="button"
-                    onClick={() => togglePlatform("google")}
-                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("google") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
+                    onClick={() => togglePlatform("GOOGLE")}
+                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("GOOGLE") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
                   >
-                    <img src={ICONS.google} alt="google" className="w-4 h-4" />
+                    <img src={ICONS.GOOGLE} alt="google" className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
-                    onClick={() => togglePlatform("tiktok")}
-                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("tiktok") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
+                    onClick={() => togglePlatform("TIKTOK")}
+                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("TIKTOK") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
                   >
-                    <img src={ICONS.tiktok} alt="tiktok" className="w-4 h-4" />
+                    <img src={ICONS.TIKTOK} alt="tiktok" className="w-4 h-4" />
                   </button>
                 </div>
               </div>

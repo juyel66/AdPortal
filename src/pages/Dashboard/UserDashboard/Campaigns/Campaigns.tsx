@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -10,88 +10,253 @@ import {
   Copy,
   Trash2,
 } from "lucide-react";
+import { Link } from "react-router";
 
-import type {
+import Swal from "sweetalert2";
+import api from "@/lib/axios";
 
-  MenuItemProps,
-  BadgeProps,
-  KpiProps,
-  StatProps,
-  ChipProps,
-  CampaignData,
-} from "@/types/campaign";
-import {  Link } from "react-router";
+interface Campaign {
+  id: number;
+  name: string;
+  objective: string;
+  status: string;
+  platforms: string[];
+  total_budget: number;
+  total_spent: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  ctr: number;
+  roas: number;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+  draft_data: any;
+  organization: number;
+}
+
+interface MenuItemProps {
+  icon: React.ReactNode;
+  text: string;
+  danger?: boolean;
+  onClick?: () => void;
+}
+
+interface BadgeProps {
+  status: string;
+}
+
+interface KpiProps {
+  label: string;
+  value: string | number;
+  highlight?: boolean;
+}
+
+interface StatProps {
+  label: string;
+  value: string | number;
+}
+
+interface ChipProps {
+  children: React.ReactNode;
+}
 
 const ACTION_BTN =
   "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765671112/Button_2_upzjmx.png";
 
-
 const Campaigns: React.FC = () => {
-  const campaigns: CampaignData[] = [
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
-    {
-      id: 1,
-      title: "Summer Sale 2024",
-      status: "active",
-      type: "sales",
-      platforms: ["Meta", "Google"],
-      budget: "$50/day",
-      spend: "$1,245",
-      impressions: "324K",
-      clicks: "12.4K",
-      ctr: "3.8%",
-      conversions: "342",
-      roas: "3.8x",
-      date: "2024-01-15 → 2024-02-15",
-    },
+  // Get org_id from localStorage
+  const getOrgId = (): string => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        if (orgData && orgData.id) {
+          return orgData.id;
+        }
+      }
 
-    
-    {
-      id: 2,
-      title: "Winter Clearance 2024",
-      status: "active",
-      type: "leads",
-      platforms: ["Tiktok", "Facebook"],
-      budget: "$60/day",
-      spend: "$980",
-      impressions: "250K",
-      clicks: "10.1K",
-      ctr: "4.0%",
-      conversions: "250",
-      roas: "4.0x",
-      date: "2024-01-01 → 2024-01-31",
-    },
-    {
-      id: 3,
-      title: "Summer Sale 2024",
-      status: "paused",
-      type: "conversions",
-      platforms: ["Meta", "Google"],
-      budget: "$50/day",
-      spend: "$1,245",
-      impressions: "324K",
-      clicks: "12.4K",
-      ctr: "3.8%",
-      conversions: "342",
-      roas: "3.8x",
-      date: "2024-01-15 → 2024-02-15",
-    },
-    {
-      id: 4,
-      title: "Spring Launch 2024",
-      status: "draft",
-      type: "conversions",
-      platforms: ["Meta"],
-      budget: "$40/day",
-      spend: "$500",
-      impressions: "150K",
-      clicks: "5.5K",
-      ctr: "3.7%",
-      conversions: "120",
-      roas: "2.5x",
-      date: "2024-03-01 → 2024-03-31",
-    },
-  ];
+      const orgs = localStorage.getItem("organizations");
+      if (orgs) {
+        const orgsData = JSON.parse(orgs);
+        if (Array.isArray(orgsData) && orgsData.length > 0 && orgsData[0][0]) {
+          return orgsData[0][0];
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+    }
+    return "";
+  };
+
+  const orgId = getOrgId();
+
+  useEffect(() => {
+    if (orgId) {
+      fetchCampaigns();
+    } else {
+      setLoading(false);
+      setError("No organization selected");
+    }
+  }, [orgId]);
+
+  useEffect(() => {
+    // Filter campaigns based on search term and status filter
+    let filtered = campaigns;
+
+    // Apply status filter
+    if (activeFilter !== "all") {
+      filtered = filtered.filter(
+        (campaign) => campaign.status.toLowerCase() === activeFilter.toLowerCase()
+      );
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter((campaign) =>
+        campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredCampaigns(filtered);
+  }, [campaigns, searchTerm, activeFilter]);
+
+  const fetchCampaigns = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/main/campaigns/?org_id=${orgId}`);
+      setCampaigns(response.data.results || []);
+      setError(null);
+    } catch (err: any) {
+      console.error("Error fetching campaigns:", err);
+      if (err.response?.status === 401) {
+        setError("Session expired. Please login again.");
+      } else {
+        setError("Failed to load campaigns.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number, name: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `Delete campaign "${name}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/main/campaigns/${id}/?org_id=${orgId}`);
+        setCampaigns(campaigns.filter((c) => c.id !== id));
+        Swal.fire("Deleted!", "Campaign has been deleted.", "success");
+      } catch (err) {
+        console.error("Error deleting campaign:", err);
+        Swal.fire("Error!", "Failed to delete campaign.", "error");
+      }
+    }
+  };
+
+  const handleDuplicate = async (campaign: Campaign) => {
+    try {
+      // You'll need to implement duplicate logic based on your API
+      Swal.fire("Info", "Duplicate functionality coming soon", "info");
+    } catch (err) {
+      console.error("Error duplicating campaign:", err);
+    }
+  };
+
+  const getStatusCount = (status: string) => {
+    if (status === "all") return campaigns.length;
+    return campaigns.filter((c) => c.status.toLowerCase() === status.toLowerCase()).length;
+  };
+
+  // Format currency
+  const formatCurrency = (value: number, currency: string = "USD"): string => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  // Format large numbers
+  const formatNumber = (value: number): string => {
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(1) + "M";
+    }
+    if (value >= 1000) {
+      return (value / 1000).toFixed(1) + "K";
+    }
+    return value.toString();
+  };
+
+  // Format percentage
+  const formatPercentage = (value: number): string => {
+    return value.toFixed(2) + "%";
+  };
+
+  // Get platform display names
+  const getPlatformDisplayNames = (platforms: string[]) => {
+    return platforms.map((p) => {
+      switch (p.toUpperCase()) {
+        case "META":
+        case "FACEBOOK":
+          return "Meta";
+        case "GOOGLE":
+          return "Google";
+        case "TIKTOK":
+          return "TikTok";
+        default:
+          return p;
+      }
+    });
+  };
+
+  // Get budget display
+  const getBudgetDisplay = (campaign: Campaign): string => {
+    if (campaign.draft_data?.budgets && campaign.draft_data.budgets.length > 0) {
+      const totalBudget = campaign.draft_data.budgets.reduce(
+        (sum: number, b: any) => sum + (b.budget || 0),
+        0
+      );
+      if (totalBudget > 0) {
+        return `${formatCurrency(totalBudget, campaign.currency)}/day`;
+      }
+    }
+    return formatCurrency(campaign.total_budget, campaign.currency);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -109,98 +274,159 @@ const Campaigns: React.FC = () => {
             Sync your Ad
           </button>
 
-          <Link to="/user-dashboard/campaigns-create" className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition">
+          <Link
+            to="/user-dashboard/campaigns-create"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+          >
             <Plus size={16} />
             Add Campaign
           </Link>
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search and Filters */}
       <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <div className="flex flex-col gap-4 rounded-xl border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Search */}
+          <div className="relative w-full sm:max-w-md">
+            <Search
+              size={18}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="text"
+              placeholder="Search campaigns..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-700
+                         focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
 
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveFilter("all")}
+              className={`rounded-lg px-4 py-2 text-sm font-medium shadow-sm ${
+                activeFilter === "all"
+                  ? "bg-[#2D6FF8] text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              All ({getStatusCount("all")})
+            </button>
 
+            <button
+              onClick={() => setActiveFilter("active")}
+              className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                activeFilter === "active"
+                  ? "bg-[#2D6FF8] text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              Active ({getStatusCount("active")})
+            </button>
 
+            <button
+              onClick={() => setActiveFilter("paused")}
+              className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                activeFilter === "paused"
+                  ? "bg-[#2D6FF8] text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              Paused ({getStatusCount("paused")})
+            </button>
 
-<div className="flex flex-col gap-4 rounded-xl  border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
-      {/* Search */}
-      <div className="relative w-full sm:max-w-md">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-        />
-        <input
-          type="text"
-          placeholder="Search Resources..."
-          className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-700
-                     focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2">
-        {/* Active */}
-        <button className="rounded-lg bg-[#2D6FF8] px-4 py-2 text-sm font-medium text-white shadow-sm">
-          All (4)
-        </button>
-
-        {/* Inactive */}
-        <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-          Active (2)
-        </button>
-
-        <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-          Paused (1)
-        </button>
-
-        <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-          Draft (1)
-        </button>
-      </div>
-    </div>
-
-
-
+            <button
+              onClick={() => setActiveFilter("draft")}
+              className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                activeFilter === "draft"
+                  ? "bg-[#2D6FF8] text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              Draft ({getStatusCount("draft")})
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Campaign Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {campaigns.map((item) => (
-          <CampaignCard key={item.id} {...item} />
-        ))}
-      </div>
+      {filteredCampaigns.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredCampaigns.map((item) => (
+            <CampaignCard
+              key={item.id}
+              campaign={item}
+              onDelete={handleDelete}
+              onDuplicate={handleDuplicate}
+              formatCurrency={formatCurrency}
+              formatNumber={formatNumber}
+              formatPercentage={formatPercentage}
+              getPlatformDisplayNames={getPlatformDisplayNames}
+              getBudgetDisplay={getBudgetDisplay}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
+          <p className="text-slate-500">No campaigns found</p>
+          <Link
+            to="/user-dashboard/campaigns-create"
+            className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700"
+          >
+            <Plus size={16} />
+            Create your first campaign
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
 
+interface CampaignCardProps {
+  campaign: Campaign;
+  onDelete: (id: number, name: string) => void;
+  onDuplicate: (campaign: Campaign) => void;
+  formatCurrency: (value: number, currency?: string) => string;
+  formatNumber: (value: number) => string;
+  formatPercentage: (value: number) => string;
+  getPlatformDisplayNames: (platforms: string[]) => string[];
+  getBudgetDisplay: (campaign: Campaign) => string;
+}
 
-const CampaignCard: React.FC<CampaignData> = ({
-  title,
-  status,
-  type,
-  platforms,
-  budget,
-  spend,
-  impressions,
-  clicks,
-  ctr,
-  conversions,
-  roas,
-  
+const CampaignCard: React.FC<CampaignCardProps> = ({
+  campaign,
+  onDelete,
+  onDuplicate,
+  formatCurrency,
+  formatNumber,
+  formatPercentage,
+  getPlatformDisplayNames,
+  getBudgetDisplay,
 }) => {
   const [open, setOpen] = useState(false);
 
+  // Extract platforms from draft_data if platforms array is empty
+  const platforms =
+    campaign.platforms && campaign.platforms.length > 0
+      ? campaign.platforms
+      : campaign.draft_data?.platforms || [];
 
+  const displayPlatforms = getPlatformDisplayNames(platforms);
 
   return (
     <div className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+          <h3 className="text-sm font-semibold text-slate-900">
+            {campaign.name}
+          </h3>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <Badge status={status} />
-            <Chip>{type}</Chip>
-            {platforms.map((p, idx) => (
+            <Badge status={campaign.status} />
+            <Chip>{campaign.objective || "N/A"}</Chip>
+            {displayPlatforms.map((p, idx) => (
               <span key={`${p}-${idx}`} className="text-slate-500">
                 {p}
               </span>
@@ -209,62 +435,78 @@ const CampaignCard: React.FC<CampaignData> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <img
-            src={ACTION_BTN}
-            alt="action"
-            className="h-7 w-7 cursor-pointer"
-          />
-          <button onClick={() => setOpen((p: boolean) => !p)}>
+          <img src={ACTION_BTN} alt="action" className="h-7 w-7 cursor-pointer" />
+          <button onClick={() => setOpen(!open)}>
             <MoreVertical className="h-5 w-5 text-slate-400" />
           </button>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-        <Stat label="Total Budget" value={budget} />
-        <Stat label="Total Spend" value={spend} />
-        <Stat label="Impressions" value={impressions} />
-        <Stat label="Clicks" value={clicks} />
+        <Stat label="Total Budget" value={getBudgetDisplay(campaign)} />
+        <Stat label="Total Spend" value={formatCurrency(campaign.total_spent, campaign.currency)} />
+        <Stat label="Impressions" value={formatNumber(campaign.impressions)} />
+        <Stat label="Clicks" value={formatNumber(campaign.clicks)} />
       </div>
 
-
       <div className="mt-4 grid grid-cols-3 gap-3">
-        <Kpi label="CTR" value={ctr} />
-        <Kpi label="Conversions" value={conversions} />
-        <Kpi label="ROAS" value={roas} highlight />
+        <Kpi label="CTR" value={formatPercentage(campaign.ctr)} />
+        <Kpi label="Conversions" value={formatNumber(campaign.conversions)} />
+        <Kpi label="ROAS" value={campaign.roas.toFixed(1) + "x"} highlight={campaign.roas > 2} />
       </div>
 
       <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-        {/* <span>{date}</span> */}
-        <span></span>
-        <Link to ="/user-dashboard/campaigns-view-details" className="text-blue-600 hover:underline">
+        <span>
+          {new Date(campaign.created_at).toLocaleDateString()}
+        </span>
+        <Link
+          to={`/user-dashboard/campaigns-view-details/${campaign.id}`}
+          className="text-blue-600 hover:underline"
+        >
           View Details →
         </Link>
       </div>
 
       {open && (
         <div className="absolute right-4 top-12 z-50 w-52 rounded-xl border border-slate-200 bg-white shadow-lg">
-         <Link to="/user-dashboard/campaigns-view-details"> <MenuItem icon={<Eye size={16} />} text="View Campaign" /></Link>
-          <MenuItem icon={<Pencil size={16} />} text="Edit Campaign" />
-          <MenuItem icon={<Copy size={16} />} text="Duplicate Campaign" />
+          <Link to={`/user-dashboard/campaigns-view-details/${campaign.id}`}>
+            <MenuItem icon={<Eye size={16} />} text="View Campaign" />
+          </Link>
+          <Link to={`/user-dashboard/campaigns-edit/${campaign.id}`}>
+            <MenuItem icon={<Pencil size={16} />} text="Edit Campaign" />
+          </Link>
+          <MenuItem
+            icon={<Copy size={16} />}
+            text="Duplicate Campaign"
+            onClick={() => onDuplicate(campaign)}
+          />
           <div className="border-t" />
-          <MenuItem icon={<Trash2 size={16} />} text="Delete Campaign" danger />
+          <MenuItem
+            icon={<Trash2 size={16} />}
+            text="Delete Campaign"
+            danger
+            onClick={() => onDelete(campaign.id, campaign.name)}
+          />
         </div>
       )}
     </div>
   );
 };
 
-
 const Badge: React.FC<BadgeProps> = ({ status }) => {
-  const map: Record<BadgeProps["status"], string> = {
-    active: "bg-green-100 text-green-600",
-    paused: "bg-yellow-100 text-yellow-600",
-    draft: "bg-slate-100 text-slate-500",
+  const map: Record<string, string> = {
+    ACTIVE: "bg-green-100 text-green-600",
+    PAUSED: "bg-yellow-100 text-yellow-600",
+    DRAFT: "bg-slate-100 text-slate-500",
+    COMPLETED: "bg-blue-100 text-blue-600",
   };
 
+  const statusUpper = status?.toUpperCase() || "DRAFT";
+
   return (
-    <span className={`rounded-full px-2 py-0.5 ${map[status]}`}>{status}</span>
+    <span className={`rounded-full px-2 py-0.5 ${map[statusUpper] || map.DRAFT}`}>
+      {status}
+    </span>
   );
 };
 
@@ -294,8 +536,9 @@ const Kpi: React.FC<KpiProps> = ({ label, value, highlight }) => (
   </div>
 );
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon, text, danger = false }) => (
+const MenuItem: React.FC<MenuItemProps> = ({ icon, text, danger = false, onClick }) => (
   <button
+    onClick={onClick}
     className={`flex w-full items-center gap-3 px-4 py-3 text-sm ${
       danger ? "text-red-600 hover:bg-red-50" : "hover:bg-slate-50"
     }`}

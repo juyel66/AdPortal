@@ -529,21 +529,45 @@ export function AppSidebar() {
           </SidebarGroup>
 
           {/* PLAN CARD */}
-          <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-semibold text-gray-800">
-                Current Plan: Free
-              </div>
-              <img
-                src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765998031/Icon_15_geshwh.png"
-                alt="Plan Icon"
-              />
-            </div>
+   <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
+  
+  {/* Header */}
+  <div className="flex items-center justify-between mb-2">
+    <div className="text-sm font-medium text-gray-500 flex items-center gap-1">
+      Current Plan
+      <svg
+        className="w-4 h-4 text-gray-400"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </div>
 
-            <button className="w-full rounded-lg bg-[#2D6FF8] py-1.5 text-xs font-medium text-white hover:bg-[#1E5FD8] transition-colors">
-              Upgrade Plan
-            </button>
-          </div>
+  <div className="text-lg font-semibold text-gray-800 mb-2">
+    Growth Plan
+  </div>
+
+ 
+  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+    <div className="h-full bg-[#2D6FF8] rounded-full" style={{ width: "65%" }}></div>
+  </div>
+
+  
+  <div className="text-xs text-gray-500 mb-4">
+    65 of 100 campaigns used
+  </div>
+
+ 
+  <button className="w-full rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
+    Upgrade Plan
+  </button>
+
+</div>
+
         </div>
 
         {/* LOGOUT */}

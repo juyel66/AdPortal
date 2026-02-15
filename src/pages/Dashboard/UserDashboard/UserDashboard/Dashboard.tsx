@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -9,8 +9,70 @@ import {
 
 import SpendOverview from "./SpendOverview/SpendOverview";
 import CampaignsTable from "./RecentCampaigns/RecentCampaigns";
+import api from "@/lib/axios";
 
-const nowRelative = "2 minutes ago";
+// Types for dashboard data
+interface DashboardData {
+  total_spend: number;
+  impressions: number;
+  click_rate: number;
+  roas: number;
+  spend_overview: {
+    [key: string]: {
+      META: number;
+      GOOGLE: number;
+      TIKTOK: number;
+    };
+  };
+  ai_insights: Array<{
+    id: number;
+    title: string;
+    description: string;
+    created_at: string;
+    impect: "HIGH" | "MEDIUM" | "LOW";
+  }>;
+  recent_campaigns: Array<{
+    id: number;
+    name: string;
+    status: string;
+    platforms: string[];
+    created_at: string;
+    spend: number;
+    performance: {
+      impressions: number;
+      clicks: number;
+      conversions: number;
+      ctr: number;
+      roas: number;
+    };
+  }>;
+}
+
+// Helper function to format currency
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+// Helper function to format large numbers
+const formatNumber = (value: number): string => {
+  if (value >= 1000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  }
+  if (value >= 1000) {
+    return (value / 1000).toFixed(1) + 'K';
+  }
+  return value.toString();
+};
+
+// Helper function to format percentage
+const formatPercentage = (value: number): string => {
+  return value.toFixed(2) + '%';
+};
 
 function StatCard({
   label,
@@ -105,6 +167,104 @@ const ICONS = {
 
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Get org_id from selectedOrganization in localStorage
+  const getOrgId = (): string => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        if (orgData && orgData.id) {
+          return orgData.id;
+        }
+      }
+
+      const orgs = localStorage.getItem("organizations");
+      if (orgs) {
+        const orgsData = JSON.parse(orgs);
+        if (Array.isArray(orgsData) && orgsData.length > 0 && orgsData[0][0]) {
+          return orgsData[0][0];
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+    }
+    return "";
+  };
+
+  const orgId = getOrgId();
+
+  useEffect(() => {
+    if (orgId) {
+      fetchDashboardData();
+    } else {
+      setLoading(false);
+    }
+  }, [orgId]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/main/dashboard/?org_id=${orgId}`);
+      setDashboardData(response.data);
+      setError(null);
+    } catch (err: any) {
+      console.error("Error fetching dashboard data:", err);
+      if (err.response?.status === 401) {
+        // Just set error, don't redirect automatically
+        setError("Session expired. Please refresh or login again.");
+      } else {
+        setError("Failed to load dashboard data.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format the last updated time
+  const getLastUpdatedText = () => {
+    if (!dashboardData?.ai_insights || dashboardData.ai_insights.length === 0) {
+      return "2 minutes ago"; // Keep the default if no data
+    }
+    // Use the most recent insight's created_at as reference
+    const latestInsight = dashboardData.ai_insights.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )[0];
+    
+    const updatedTime = new Date(latestInsight.created_at);
+    const now = new Date();
+    const diffMs = now.getTime() - updatedTime.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return updatedTime.toLocaleDateString();
+  };
+
+  if (loading) {
+    return (
+      <main className="p-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error || !orgId) {
+    return (
+      <main className="p-8">
+        <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
+          {error || "No organization selected"}
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="p-8">
@@ -128,7 +288,7 @@ const UserDashboard: React.FC = () => {
         <div className="text-right text-sm text-gray-500">
           <div className="text-xs">Last updated</div>
           <div className="mt-1 font-medium text-gray-700">
-            {nowRelative}
+            {getLastUpdatedText()}
           </div>
         </div>
       </div>
@@ -138,28 +298,28 @@ const UserDashboard: React.FC = () => {
         <StatCard
           iconImg={ICONS.dollar}
           label="Total Spend"
-          value="$12,483"
+          value={formatCurrency(dashboardData?.total_spend || 0)}
           delta="+12.3%"
           positive
         />
         <StatCard
           iconImg={ICONS.eye}
           label="Impressions"
-          value="2.4M"
+          value={formatNumber(dashboardData?.impressions || 0)}
           delta="+8.2%"
           positive
         />
         <StatCard
           iconImg={ICONS.cursor}
           label="Click Rate"
-          value="3.42%"
+          value={formatPercentage(dashboardData?.click_rate || 0)}
           delta="-0.5%"
           positive={false}
         />
         <StatCard
           iconImg={ICONS.ROAS}
           label="ROAS"
-          value="4.2x"
+          value={(dashboardData?.roas || 0).toFixed(1) + 'x'}
           delta="+15.8%"
           positive
         />
@@ -187,7 +347,7 @@ const UserDashboard: React.FC = () => {
             subtitle="Create ad copy with AI"
             bgClass="bg-purple-700"
             Icon={Sparkles}
-             onClick={() =>
+            onClick={() =>
               navigate("/user-dashboard/ai-tools")
             }
           />
@@ -203,12 +363,15 @@ const UserDashboard: React.FC = () => {
 
       {/* Spend Overview */}
       <div className="mt-5">
-        <SpendOverview />
+        <SpendOverview 
+          data={dashboardData?.spend_overview}
+          aiInsights={dashboardData?.ai_insights}
+        />
       </div>
 
       {/* Recent Campaigns */}
       <div className="mt-4">
-        <CampaignsTable />
+        <CampaignsTable campaigns={dashboardData?.recent_campaigns || []} />
       </div>
     </main>
   );
