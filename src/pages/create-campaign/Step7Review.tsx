@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckCircle, AlertTriangle } from "lucide-react";
+import { Link } from "react-router";
 
 const Step7Review: React.FC = () => {
   return (
@@ -116,6 +117,24 @@ const Step7Review: React.FC = () => {
 
         {/* Footer Buttons */}
         <div className="flex items-center justify-between pt-4"></div>
+      </div>
+
+      <div>
+              <div className="flex justify-between mt-5">
+  <Link
+    to="/user-dashboard/campaigns-create/step-6"
+    className="btn md:w-40  text-gray-700 border  rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
+  >
+    Previous
+  </Link>
+
+  <button
+   
+    className="btn md:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border"
+  >
+    Continue
+  </button>
+</div>
       </div>
     </div>
   );

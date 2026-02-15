@@ -1,38 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { Calendar } from "lucide-react";
-import { useCampaignStep } from "../../../src/pages/create-campaign/CampaignContext"; 
+import { Link, useNavigate } from "react-router";
+import api from "@/lib/axios";
 
-type BudgetType = "Onetime" | "lifetime";
+type BudgetType = "daily" | "lifetime";
+
+// Platform to API value mapping
+const platformToApiValue: Record<string, string> = {
+  google: "GOOGLE",
+  facebook: "META",
+  tiktok: "TIKTOK"
+};
 
 const Step5Budget: React.FC = () => {
-  // Step 5 data from campaign context
-  const { stepData, updateStepData, isStepValid } = useCampaignStep(5);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   
-  // Type assertion for TypeScript
-  const step5Data = stepData as {
-    budget: number;
-    budget_type: 'daily' | 'lifetime';
-    schedule: {
-      startDate: string;
-      endDate: string;
-      isScheduled: boolean;
-    };
-    biddingStrategy: string;
-    optimizationGoal: string;
-  };
+  // Get campaign_id from localStorage
+  const campaignId = localStorage.getItem("campaignId");
 
   // Local state for form inputs
-  const [localBudget, setLocalBudget] = useState<number>(step5Data.budget);
-  const [localBudgetType, setLocalBudgetType] = useState<'daily' | 'lifetime'>(step5Data.budget_type);
-  const [localStartDate, setLocalStartDate] = useState<string>(step5Data.schedule.startDate);
-  const [localEndDate, setLocalEndDate] = useState<string>(step5Data.schedule.endDate);
-  const [localRunContinuously, setLocalRunContinuously] = useState<boolean>(step5Data.schedule.isScheduled);
-
+  const [localBudget, setLocalBudget] = useState<number>(100);
+  const [localBudgetType, setLocalBudgetType] = useState<'daily' | 'lifetime'>('daily');
+  const [localStartDate, setLocalStartDate] = useState<string>('');
+  const [localEndDate, setLocalEndDate] = useState<string>('');
+  const [localRunContinuously, setLocalRunContinuously] = useState<boolean>(false);
+  
+  // Platform tab state
+  const [selectedPlatform, setSelectedPlatform] = useState<'google' | 'facebook' | 'tiktok'>('google');
 
   const getCurrentDate = () => {
     return new Date().toISOString().split('T')[0];
   };
-
 
   const getDefaultEndDate = () => {
     const date = new Date();
@@ -40,149 +40,98 @@ const Step5Budget: React.FC = () => {
     return date.toISOString().split('T')[0];
   };
 
-
+  // Initialize dates
   useEffect(() => {
     if (!localStartDate) {
-      const currentDate = getCurrentDate();
-      setLocalStartDate(currentDate);
-      updateStepData({
-        schedule: {
-          ...step5Data.schedule,
-          startDate: currentDate
-        }
-      });
+      setLocalStartDate(getCurrentDate());
     }
 
-    
-    
     if (!localEndDate && !localRunContinuously) {
-      const defaultEndDate = getDefaultEndDate();
-      setLocalEndDate(defaultEndDate);
-      updateStepData({
-        schedule: {
-          ...step5Data.schedule,
-          endDate: defaultEndDate
-        }
-      });
+      setLocalEndDate(getDefaultEndDate());
     }
   }, []);
-
-
-  useEffect(() => {
-    console.log("🔄 Step5Budget: Context data updated", step5Data);
-    setLocalBudget(step5Data.budget);
-    setLocalBudgetType(step5Data.budget_type);
-    setLocalStartDate(step5Data.schedule.startDate);
-    setLocalEndDate(step5Data.schedule.endDate);
-    setLocalRunContinuously(step5Data.schedule.isScheduled);
-    
-  
-    logAllData();
-  }, [step5Data]);
-
-
-  const logAllData = () => {
-    console.log("📊 Step5Budget - ALL DATA:", {
-      budget: step5Data.budget,
-      budget_type: step5Data.budget_type,
-      schedule: step5Data.schedule,
-      biddingStrategy: step5Data.biddingStrategy,
-      optimizationGoal: step5Data.optimizationGoal,
-      isValid: isStepValid()
-    });
-  };
-
-
-  const updateCampaignData = (field: string, value: any) => {
-    console.log(`📝 Step5Budget: Updating ${field} to`, value);
-    
-    if (field === 'budget') {
-      updateStepData({ budget: value });
-    } else if (field === 'budget_type') {
-      updateStepData({ budget_type: value });
-    } else if (field === 'startDate') {
-      updateStepData({
-        schedule: {
-          ...step5Data.schedule,
-          startDate: value
-        }
-      });
-    } else if (field === 'endDate') {
-      updateStepData({
-        schedule: {
-          ...step5Data.schedule,
-          endDate: value
-        }
-      });
-    } else if (field === 'isScheduled') {
-      updateStepData({
-        schedule: {
-          ...step5Data.schedule,
-          isScheduled: value,
-          endDate: value ? '' : step5Data.schedule.endDate
-        }
-      });
-    }
-    
-    
-    setTimeout(() => {
-      logAllData();
-    }, 100);
-  };
-
 
   const handleBudgetTypeChange = (type: BudgetType) => {
     setLocalBudgetType(type);
-    updateCampaignData('budget_type', type);
   };
-
 
   const handleBudgetChange = (amount: number) => {
     setLocalBudget(amount);
-    updateCampaignData('budget', amount);
   };
 
-  // Handle start date change
   const handleStartDateChange = (date: string) => {
     setLocalStartDate(date);
-    updateCampaignData('startDate', date);
   };
 
-  // Handle end date change
   const handleEndDateChange = (date: string) => {
     setLocalEndDate(date);
-    updateCampaignData('endDate', date);
   };
 
-
-const handleRunContinuouslyToggle = () => {
-
-  if (!localRunContinuously) return;
-
-
-  setLocalRunContinuously(false);
-
-  updateCampaignData('isScheduled', false);
-
-  const defaultEndDate = getDefaultEndDate();
-  setLocalEndDate(defaultEndDate);
-
-  updateCampaignData('endDate', defaultEndDate);
-};
-
-
-  useEffect(() => {
-    console.log("🚀 Step5Budget Component Mounted");
-    console.log("📦 Step5Budget - Initial Data from Context:", step5Data);
-    console.log("✅ Step5Budget - Initial Validation:", isStepValid());
+  const handleRunContinuouslyToggle = () => {
+    const newValue = !localRunContinuously;
+    setLocalRunContinuously(newValue);
     
+    if (newValue) {
+      // ON - clear end date
+      setLocalEndDate('');
+    } else {
+      // OFF - set default end date if none exists
+      setLocalEndDate(localEndDate || getDefaultEndDate());
+    }
+  };
 
-    logAllData();
-  }, []);
+  // Submit to API
+  const handleSubmit = async () => {
+    if (!campaignId) {
+      setError("Campaign ID not found. Please go back to Step 1.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // Get org_id from localStorage
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      let org_id = "";
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        org_id = orgData.id;
+      }
+
+      // Prepare request data with correct mapping
+      const requestData = {
+        campaign_id: parseInt(campaignId),
+        budgets: [
+          {
+            platform: platformToApiValue[selectedPlatform],
+            budget_type: localBudgetType === 'daily' ? 'DAILY' : 'ONETIME',
+            start_date: localStartDate,
+            end_date: localRunContinuously ? null : localEndDate,
+            budget: localBudget,
+            run_continuously: localRunContinuously
+          }
+        ]
+      };
+
+      console.log("📤 Sending budget data:", requestData);
+
+      const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData);
+      console.log("✅ Budget saved:", response.data);
+
+      navigate("/user-dashboard/campaigns-create/step-6");
+
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to save budget data");
+      console.error("❌ Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
-  
+      {/* Header */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-900">
           Budget & Schedule
@@ -190,9 +139,58 @@ const handleRunContinuouslyToggle = () => {
         <p className="text-sm text-gray-500">
           Set your campaign budget and schedule
         </p>
+        
+        {/* Show campaign ID */}
+        {campaignId && (
+          <p className="text-xs text-gray-400 mt-1">Campaign ID: {campaignId}</p>
+        )}
       </div>
 
-     
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Platform Tabs */}
+      <div className="flex gap-6 mb-6">
+        <button
+          onClick={() => setSelectedPlatform('google')}
+          className={`text-sm font-medium pb-2 transition-all
+            ${selectedPlatform === 'google' 
+              ? 'text-blue-600 border-b-2 border-blue-600' 
+              : 'text-gray-500 hover:text-gray-700'
+            }
+          `}
+        >
+          Google
+        </button>
+        <button
+          onClick={() => setSelectedPlatform('facebook')}
+          className={`text-sm font-medium pb-2 transition-all
+            ${selectedPlatform === 'facebook' 
+              ? 'text-blue-600 border-b-2 border-blue-600' 
+              : 'text-gray-500 hover:text-gray-700'
+            }
+          `}
+        >
+          Facebook
+        </button>
+        <button
+          onClick={() => setSelectedPlatform('tiktok')}
+          className={`text-sm font-medium pb-2 transition-all
+            ${selectedPlatform === 'tiktok' 
+              ? 'text-blue-600 border-b-2 border-blue-600' 
+              : 'text-gray-500 hover:text-gray-700'
+            }
+          `}
+        >
+          TikTok
+        </button>
+      </div>
+
+      {/* Budget Type */}
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 block mb-2">
           Budget Type
@@ -212,6 +210,7 @@ const handleRunContinuouslyToggle = () => {
           >
             <p className="text-sm font-bold text-gray-900">Daily Budget</p>
             <p className="text-xs text-gray-500">Average amount per day</p>
+            
           </button>
 
           <button
@@ -227,14 +226,15 @@ const handleRunContinuouslyToggle = () => {
           >
             <p className="text-sm font-bold text-gray-900">Lifetime Budget</p>
             <p className="text-xs text-gray-500">Total for entire campaign</p>
+            
           </button>
         </div>
       </div>
 
-     
+      {/* Budget Input */}
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 block mb-1">
-          {localBudgetType === "daily" ? "Daily Budget" : "Lifetime Budget"}
+          {localBudgetType === "daily" ? "Daily Budget" : "Lifetime Budget"} for {selectedPlatform}
         </label>
 
         <div className="relative">
@@ -244,49 +244,40 @@ const handleRunContinuouslyToggle = () => {
           <input
             type="number"
             value={localBudget}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              handleBudgetChange(value);
-            }}
-            onBlur={(e) => {
-              if (e.target.value === '' || Number(e.target.value) < 0) {
-                handleBudgetChange(100);
-              }
-            }}
+            onChange={(e) => handleBudgetChange(Number(e.target.value))}
             className="w-full rounded-lg border border-gray-300 pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="100"
-            min="0"
+            placeholder="Enter amount"
             step="1"
           />
         </div>
-
         <p className="text-xs text-gray-400 mt-1">
-          Recommended minimum: $20/day
+          Enter any amount you prefer
         </p>
       </div>
 
-
+      {/* Campaign Schedule */}
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 block mb-2">
           Campaign Schedule
         </label>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-        
+          {/* Start Date */}
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Calendar className="absolute left-3 top-1/2 mt-3 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <label htmlFor=" " className="text-sm text-gray-700">Start Date</label>
             <input
               type="date"
               value={localStartDate}
               onChange={(e) => handleStartDateChange(e.target.value)}
               className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              min={getCurrentDate()}
             />
           </div>
 
-         
+          {/* End Date */}
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Calendar className="absolute left-3 top-1/2 mt-3 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <label className="text-sm text-gray-700" htmlFor="">End Date</label>
             <input
               type="date"
               value={localEndDate}
@@ -304,7 +295,7 @@ const handleRunContinuouslyToggle = () => {
           </div>
         </div>
 
-   
+        {/* Run Continuously Checkbox */}
         <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
           <input
             type="checkbox"
@@ -314,26 +305,56 @@ const handleRunContinuouslyToggle = () => {
           />
           Run continuously (no end date)
         </label>
+        <p className="text-xs text-gray-400 mt-1">
+          {localRunContinuously 
+            ? "✓ Campaign will run continuously" 
+            : "✗ Campaign will end on selected date"}
+        </p>
       </div>
 
-  
-      <div className="rounded-xl border border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 mb-6">
+      {/* Budget Summary */}
+      <div className="rounded-xl border border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-gray-900">
               Budget Summary
             </p>
             <p className="text-xs text-gray-500">
-              {localBudgetType === "daily" ? "Daily Budget" : "Lifetime Budget"}
+              {localBudgetType === "daily" ? "Daily Budget" : "Lifetime Budget"} • {selectedPlatform}
             </p>
           </div>
 
           <p className="text-lg font-semibold text-gray-900">${localBudget}</p>
         </div>
+        
+        {/* Schedule Summary */}
+        <div className="mt-3 pt-3 border-t border-blue-200">
+          <p className="text-xs text-gray-600">
+            {localRunContinuously 
+              ? `Starts: ${localStartDate || 'Not set'} • Runs continuously`
+              : `Starts: ${localStartDate || 'Not set'} • Ends: ${localEndDate || 'Not set'}`
+            }
+          </p>
+        </div>
       </div>
 
-      
-      
+      {/* Navigation Buttons */}
+      <div className="flex justify-between mt-5">
+        <Link
+          to="/user-dashboard/campaigns-create/step-4"
+          className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
+        >
+          Previous
+        </Link>
+
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !campaignId}
+          className="btn md:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Saving..." : "Continue"}
+        </button>
+      </div>
     </div>
   );
 };

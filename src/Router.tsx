@@ -13,7 +13,7 @@ import Step2Platforms from "./pages/create-campaign/Step2Platforms";
 import Step3Objective from "./pages/create-campaign/Step3Objective";
 import Step4Audience from "./pages/create-campaign/Step4Audience";
 import Step5Budget from "./pages/create-campaign/Step5Budget";
-import Step5Creative from "./pages/create-campaign/Step6Creative";
+import Step6Creative from "./pages/create-campaign/Step6Creative";
 import Step7Review from "./pages/create-campaign/Step7Review";
 import CampaignsViewDetails from "./pages/Dashboard/UserDashboard/Campaigns/campaignsViewDetails/CampaignsViewDetails";
 import Root from "./pages/Root";
@@ -219,7 +219,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "step-6",
-            element: <Step5Creative />,
+            element: <Step6Creative />,
           },
           {
             path: "step-7",

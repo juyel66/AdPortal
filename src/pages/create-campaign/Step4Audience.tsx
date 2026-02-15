@@ -1,56 +1,27 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Icon from "../../assets/Icon.svg";
-import { useCampaignStep } from "../../../src/pages/create-campaign/CampaignContext";
+import { Link, useNavigate } from "react-router";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 type GenderType = "all" | "male" | "female";
 
 const Step4Audience: React.FC = () => {
-  const { stepData, updateStepData, isStepValid } = useCampaignStep(4);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   
-  // Type assertion for TypeScript
-  const step4Data = stepData as {
-    min_age: number;
-    max_age: number;
-    audienceAge: [number, number];
-    audienceGender: string[];
-    audienceInterests: string[];
-    audienceLocation: string;
-    audienceLanguages: string[];
-    audienceBehaviors: string[];
-  };
+  // Get campaign_id from localStorage
+  const campaignId = localStorage.getItem("campaignId");
 
-  // Local state
-  const [minAge, setMinAge] = useState<number>(step4Data.min_age || 18);
-  const [maxAge, setMaxAge] = useState<number>(step4Data.max_age || 65);
-  const [gender, setGender] = useState<GenderType>(() => {
-    if (step4Data.audienceGender.includes('all')) return 'all';
-    if (step4Data.audienceGender.includes('male')) return 'male';
-    if (step4Data.audienceGender.includes('female')) return 'female';
-    return 'all';
-  });
-  const [location, setLocation] = useState<string>(step4Data.audienceLocation || "");
-  const [interests, setInterests] = useState<string>(step4Data.audienceInterests.join(", ") || "");
+  // Local state - completely free
+  const [minAge, setMinAge] = useState<string>("18");
+  const [maxAge, setMaxAge] = useState<string>("65");
+  const [gender, setGender] = useState<GenderType>("all");
+  const [location, setLocation] = useState<string>("");
+  const [interests, setInterests] = useState<string>("");
 
-  // Update local state when context data changes
-  useEffect(() => {
-    console.log("🔄 Step4Audience: Context data updated", step4Data);
-    
-    // ✅ min_age এবং max_age আলাদাভাবে সেট করুন
-    setMinAge(step4Data.min_age || 18);
-    setMaxAge(step4Data.max_age || 65);
-    
-    // Gender সেট
-    if (step4Data.audienceGender.includes('all')) setGender('all');
-    else if (step4Data.audienceGender.includes('male')) setGender('male');
-    else if (step4Data.audienceGender.includes('female')) setGender('female');
-    
-    // Location এবং Interests সেট
-    setLocation(step4Data.audienceLocation || "");
-    setInterests(step4Data.audienceInterests.join(", ") || "");
-    
-    logAllData();
-  }, [step4Data]);
-
+  // Estimated reach (static for UI)
   const estimatedReach = useMemo(() => {
     let baseMin = 630;
     let baseMax = 960;
@@ -72,95 +43,50 @@ const Step4Audience: React.FC = () => {
     };
   }, [gender, interests]);
 
-  // Function to log all data
-  const logAllData = () => {
-    console.log("📊 Step4Audience - ALL DATA:", {
-      min_age: minAge,
-      max_age: maxAge,
-      audienceGender: gender === 'all' ? ['all'] : [gender],
-      audienceLocation: location,
-      audienceInterests: interests.split(",").map(i => i.trim()).filter(i => i.length > 0),
-      isValid: isStepValid()
-    });
-    
-    // ✅ API-তে কী যাবে তা দেখান
-    console.log("🎯 API-তে পাঠানো হবে:", {
-      min_age: minAge,
-      max_age: maxAge,
-      gender: gender === 'all' ? 'all' : gender,
-      locations: [location],
-      keywords: interests
-    });
+  // Submit to API
+  const handleSubmit = async () => {
+    if (!campaignId) {
+      setError("Campaign ID not found. Please go back to Step 1.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // Get org_id from localStorage
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      let org_id = "";
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        org_id = orgData.id;
+      }
+
+      // Prepare request data
+      const requestData = {
+        campaign_id: parseInt(campaignId),
+        min_age: parseInt(minAge) || 0,
+        max_age: parseInt(maxAge) || 0,
+        gender: gender === 'all' ? 'all' : gender,
+        locations: location ? [location] : [],
+        keywords: interests
+      };
+
+      console.log("📤 Sending audience data:", requestData);
+
+      const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData);
+      console.log("✅ Audience saved:", response.data);
+
+      navigate("/user-dashboard/campaigns-create/step-5");
+
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to save audience data");
+      toast.error(" min age 13 and max age 65")
+      console.error("❌ Error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  // ✅ Handle changes for min_age
-  const handleMinAgeChange = (age: number) => {
-    setMinAge(age);
-    setTimeout(() => {
-      updateStepData({
-        min_age: age,
-        max_age: maxAge, // maxAge আগের মতো রাখুন
-        audienceAge: [age, maxAge] // compatibility জন্য
-      });
-    }, 300);
-  };
-
-  // ✅ Handle changes for max_age
-  const handleMaxAgeChange = (ageString: string) => {
-    const age = ageString === "60+" ? 65 : parseInt(ageString);
-    setMaxAge(age);
-    setTimeout(() => {
-      updateStepData({
-        min_age: minAge, // minAge আগের মতো রাখুন
-        max_age: age,
-        audienceAge: [minAge, age] // compatibility জন্য
-      });
-    }, 300);
-  };
-
-  // Handle gender change
-  const handleGenderChange = (g: GenderType) => {
-    setGender(g);
-    setTimeout(() => {
-      updateStepData({
-        audienceGender: g === 'all' ? ['all'] : [g]
-      });
-    }, 300);
-  };
-
-  // Handle location change
-  const handleLocationChange = (loc: string) => {
-    setLocation(loc);
-    setTimeout(() => {
-      updateStepData({
-        audienceLocation: loc
-      });
-    }, 500);
-  };
-
-  // Handle interests change
-  const handleInterestsChange = (interestStr: string) => {
-    setInterests(interestStr);
-    setTimeout(() => {
-      updateStepData({
-        audienceInterests: interestStr.split(",").map(i => i.trim()).filter(i => i.length > 0)
-      });
-    }, 500);
-  };
-
-  // Age options
-  const minAgeOptions = [18, 19, 20, 21, 22, 23, 24, 25];
-  const maxAgeOptions = ["30", "40", "50", "60+"];
-
-  // Initial console log when component mounts
-  useEffect(() => {
-    console.log("🚀 Step4Audience Component Mounted");
-    console.log("📦 Step4Audience - Initial Data from Context:", step4Data);
-    console.log("✅ Step4Audience - Initial Validation:", isStepValid());
-    
-    // Log all data
-    logAllData();
-  }, []);
 
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
@@ -170,8 +96,14 @@ const Step4Audience: React.FC = () => {
         <p className="text-sm text-gray-500">
           Define who you want to reach with your campaign
         </p>
-        
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
 
       {/* Age Range */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
@@ -179,36 +111,26 @@ const Step4Audience: React.FC = () => {
           <label className="text-sm font-medium text-gray-700 mb-1 block">
             Minimum Age
           </label>
-          <select
+          <input
+            type="text"
             value={minAge}
-            onChange={(e) => handleMinAgeChange(Number(e.target.value))}
+            onChange={(e) => setMinAge(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {minAgeOptions.map((age) => (
-              <option key={age} value={age}>
-                {age}
-              </option>
-            ))}
-          </select>
-         
+            placeholder="18"
+          />
         </div>
 
         <div>
           <label className="text-sm font-medium text-gray-700 mb-1 block">
             Maximum Age 
           </label>
-          <select
-            value={maxAge === 65 ? "60+" : maxAge.toString()}
-            onChange={(e) => handleMaxAgeChange(e.target.value)}
+          <input
+            type="text"
+            value={maxAge}
+            onChange={(e) => setMaxAge(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {maxAgeOptions.map((age) => (
-              <option key={age} value={age}>
-                {age}
-              </option>
-            ))}
-          </select>
-         
+            placeholder="65"
+          />
         </div>
       </div>
 
@@ -224,7 +146,7 @@ const Step4Audience: React.FC = () => {
               <button
                 key={g}
                 type="button"
-                onClick={() => handleGenderChange(g)}
+                onClick={() => setGender(g)}
                 className={`flex-1 rounded-lg py-2 text-sm font-medium border transition
                   ${
                     gender === g
@@ -238,7 +160,6 @@ const Step4Audience: React.FC = () => {
               </button>
             ))}
           </div>
-       
         </div>
 
         {/* Location */}
@@ -248,19 +169,18 @@ const Step4Audience: React.FC = () => {
           </label>
           <select
             value={location}
-            onChange={(e) => handleLocationChange(e.target.value)}
+            onChange={(e) => setLocation(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select Location</option>
+            <option value="Bangladesh">Bangladesh</option>
             <option value="United States">United States</option>
             <option value="Canada">Canada</option>
             <option value="United Kingdom">United Kingdom</option>
-            <option value="Bangladesh">Bangladesh</option>
             <option value="India">India</option>
             <option value="Australia">Australia</option>
             <option value="Germany">Germany</option>
           </select>
-         
         </div>
       </div>
 
@@ -272,11 +192,13 @@ const Step4Audience: React.FC = () => {
         <input
           type="text"
           value={interests}
-          onChange={(e) => handleInterestsChange(e.target.value)}
+          onChange={(e) => setInterests(e.target.value)}
           placeholder="e.g., Happy, Sad, Crazy, Technology, Sports"
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-     
+        <p className="text-xs text-gray-400 mt-1">
+          Use commas to separate multiple interests
+        </p>
       </div>
 
       {/* Estimated Reach */}
@@ -289,12 +211,7 @@ const Step4Audience: React.FC = () => {
             </p>
           </div>
 
-          <div
-            className="
-              w-16 h-16 rounded-2xl flex items-center justify-center
-              bg-gradient-to-b from-blue-500 to-blue-300 shadow-md
-            "
-          >
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-b from-blue-500 to-blue-300 shadow-md">
             <img src={Icon} alt="icon" className="w-8 h-8" />
           </div>
         </div>
@@ -312,9 +229,23 @@ const Step4Audience: React.FC = () => {
         </p>
       </div>
 
-   
+      {/* Navigation Buttons */}
+      <div className="flex justify-between mt-5">
+        <Link
+          to="/user-dashboard/campaigns-create/step-3"
+          className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
+        >
+          Previous
+        </Link>
 
-    
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !campaignId}
+          className="btn md:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Saving..." : "Continue"}
+        </button>
+      </div>
     </div>
   );
 };

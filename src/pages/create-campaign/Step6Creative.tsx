@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Image as ImageIcon, Video, UploadCloud, Sparkles } from "lucide-react";
 import CopyGeneratePreview from "./CopyGeneratePreview";
+import { Link } from "react-router";
 
 type AdFormat = "image" | "video";
 
-const Step5Creative: React.FC = () => {
+const Step6Creative: React.FC = () => {
   const [adName, setAdName] = useState("");
   const [adFormat, setAdFormat] = useState<AdFormat>("image");
   const [product, setProduct] = useState("");
@@ -184,7 +185,9 @@ const Step5Creative: React.FC = () => {
         </div>
       </div>
 
-      {/* Show preview only after generating copy */}
+      
+
+    
       {showPreview && (
         <CopyGeneratePreview
           data={{
@@ -197,8 +200,28 @@ const Step5Creative: React.FC = () => {
           }}
         />
       )}
+
+      <div>
+        <div>
+              <div className="flex justify-between mt-5">
+  <Link
+    to="/user-dashboard/campaigns-create/step-5"
+    className="btn md:w-40  text-gray-700 border  rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
+  >
+    Previous
+  </Link>
+
+  <Link
+    to="/user-dashboard/campaigns-create/step-7"
+    className="btn md:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border"
+  >
+    Continue
+  </Link>
+</div>
+      </div>
+      </div>
     </div>
   );
 };
 
-export default Step5Creative;
+export default Step6Creative;
