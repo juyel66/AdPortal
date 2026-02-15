@@ -155,24 +155,57 @@ const Campaigns: React.FC = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
     });
 
     if (result.isConfirmed) {
       try {
-        await api.delete(`/main/campaigns/${id}/?org_id=${orgId}`);
+        // Show loading state
+        Swal.fire({
+          title: "Deleting...",
+          text: "Please wait",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        // Call delete API
+        await api.delete(`/main/campaign/${id}/?org_id=${orgId}`);
+        
+        // Remove from local state
         setCampaigns(campaigns.filter((c) => c.id !== id));
-        Swal.fire("Deleted!", "Campaign has been deleted.", "success");
-      } catch (err) {
+        
+        // Show success message
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: `Campaign "${name}" has been deleted successfully.`,
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } catch (err: any) {
         console.error("Error deleting campaign:", err);
-        Swal.fire("Error!", "Failed to delete campaign.", "error");
+        
+        // Show error message
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: err.response?.data?.message || "Failed to delete campaign. Please try again.",
+          confirmButtonColor: "#3085d6",
+        });
       }
     }
   };
 
   const handleDuplicate = async (campaign: Campaign) => {
     try {
-      // You'll need to implement duplicate logic based on your API
-      Swal.fire("Info", "Duplicate functionality coming soon", "info");
+      Swal.fire({
+        icon: "info",
+        title: "Coming Soon",
+        text: "Duplicate functionality will be available soon!",
+        confirmButtonColor: "#3085d6",
+      });
     } catch (err) {
       console.error("Error duplicating campaign:", err);
     }
@@ -253,6 +286,12 @@ const Campaigns: React.FC = () => {
       <div className="p-6">
         <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
           {error}
+          <button
+            onClick={fetchCampaigns}
+            className="block mx-auto mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -472,7 +511,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
           <Link to={`/user-dashboard/campaigns-view-details/${campaign.id}`}>
             <MenuItem icon={<Eye size={16} />} text="View Campaign" />
           </Link>
-          <Link to={`/user-dashboard/campaigns-edit/${campaign.id}`}>
+          <Link to={`/user-dashboard/campaigns-update/${campaign.id}`}>
             <MenuItem icon={<Pencil size={16} />} text="Edit Campaign" />
           </Link>
           <MenuItem

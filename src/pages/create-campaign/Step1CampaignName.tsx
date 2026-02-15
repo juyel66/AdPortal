@@ -47,7 +47,7 @@ const Step1CampaignName: React.FC = () => {
 
       console.log("Success:", response.data);
 
-      // ★★★ IMPORTANT: Save campaign_id in localStorage ★★★
+     
       localStorage.setItem("campaignId", response.data.campaign_id.toString());
       localStorage.setItem("campaignStatus", response.data.status);
       localStorage.setItem("campaignName", response.data.campaign_name);

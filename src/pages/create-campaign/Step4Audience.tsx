@@ -81,8 +81,8 @@ const Step4Audience: React.FC = () => {
 
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to save audience data");
-      toast.error(" min age 13 and max age 65")
-      console.error("❌ Error:", err);
+      toast.error("Failed to save audience data")
+      console.error(" Error:", err);
     } finally {
       setLoading(false);
     }
