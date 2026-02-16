@@ -157,7 +157,7 @@ export const router = createBrowserRouter([
         element: <Campaigns />,
       },
       {
-        path: "campaigns-view-details",
+        path: "campaigns-view-details/:id",
         element: <CampaignsViewDetails />,
       },
       {
