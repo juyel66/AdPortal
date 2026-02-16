@@ -452,11 +452,14 @@ export function AppSidebar() {
     try {
       await dispatch(logout()).unwrap();
       navigate("/auth/signin");
+      toast.success("Logged out successfully!");
     } catch (error) {
       console.error("Logout failed:", error);
       navigate("/auth/signin");
     }
   };
+
+  
 
   const renderMenu = (items: typeof userItems) =>
     items.map((item) => {
