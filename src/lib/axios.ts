@@ -57,7 +57,7 @@ api.interceptors.response.use(
         
   
         const response = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/refresh`,
+          `${import.meta.env.VITE_API_BASE_URL}/api/v1/accounts/token/refresh`,
           { refreshToken }
         );
 
@@ -71,7 +71,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         
         localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        // localStorage.removeItem("refreshToken");
+        
         localStorage.removeItem("user")
         window.location.href = "/auth/signIn";
         return Promise.reject(refreshError);
