@@ -112,7 +112,7 @@ const Security: React.FC = () => {
             background: "#ffffff",
             color: "#1e293b",
           }).then(() => {
-            window.location.href = "/login";
+            window.location.href = "/auth/signin";
           });
           
         } catch (error: any) {
