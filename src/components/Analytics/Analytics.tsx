@@ -46,48 +46,48 @@ type PlatformSpend = {
 const stats: StatCard[] = [
   {
     label: "Total Spend",
-    value: "$8,700",
-    change: "+12.3%",
+    value: "$0",
+    change: "0%",
     positive: true,
     icon: <DollarSign size={16} className="text-blue-600" />,
   },
   {
     label: "Impressions",
-    value: "2.4M",
-    change: "+18.2%",
+    value: "0",
+    change: "0%",
     positive: true,
     icon: <Eye size={16} className="text-green-600" />,
   },
   {
     label: "Click Rate",
-    value: "3.42%",
+    value: "0%",
     change: "-0.5%",
     positive: false,
     icon: <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765841382/Icon_14_snirvz.png" alt="" />
   },
   {
     label: "Conversions",
-    value: "752",
-    change: "+24.8%",
+    value: "0",
+    change: "0%",
     positive: true,
     icon: <Target size={16} className="text-indigo-600" />,
   },
 ];
 
 const lineData = [
-  { date: "Jan 1", impressions: 48000, clicks: 1200, conversions: 120 },
-  { date: "Jan 8", impressions: 54000, clicks: 1400, conversions: 150 },
-  { date: "Jan 15", impressions: 50000, clicks: 1300, conversions: 140 },
-  { date: "Jan 22", impressions: 62000, clicks: 1700, conversions: 180 },
-  { date: "Jan 29", impressions: 59000, clicks: 1600, conversions: 165 },
-  { date: "Feb 5", impressions: 68000, clicks: 1900, conversions: 210 },
-  { date: "Feb 12", impressions: 73000, clicks: 2100, conversions: 240 },
+  { date: "Jan 1", impressions: 3000, clicks: 1200, conversions: 120 },
+  { date: "Jan 8", impressions: 0, clicks: 1400, conversions: 150 },
+  { date: "Jan 15", impressions: 0, clicks: 1300, conversions: 140 },
+  { date: "Jan 22", impressions: 0, clicks: 1700, conversions: 180 },
+  { date: "Jan 29", impressions: 0, clicks: 1600, conversions: 165 },
+  { date: "Feb 5", impressions: 6800, clicks: 1900, conversions: 210 },
+  { date: "Feb 12", impressions: 7300, clicks: 2100, conversions: 240 },
 ];
 
 const spendPlatform: PlatformSpend[] = [
-  { name: "Meta", value: 4300, color: "#3B82F6" },
-  { name: "Google", value: 2100, color: "#10B981" },
-  { name: "TikTok", value: 2300, color: "#A855F7" },
+  { name: "Meta", value: 10, color: "#3B82F6" },
+  { name: "Google", value: 10, color: "#10B981" },
+  { name: "TikTok", value: 10, color: "#A855F7" },
 ];
 
 const deviceData = [
