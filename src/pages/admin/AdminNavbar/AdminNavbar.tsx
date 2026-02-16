@@ -1,7 +1,17 @@
+import { useAppSelector } from "@/hooks/reduxHooks";
 import { Link } from "react-router";
 
 
 const AdminNavbar = () => {
+
+    const {user } = useAppSelector((state) => state.auth);
+
+
+
+    
+
+
+
     return (
         <div>
 
@@ -22,8 +32,8 @@ const AdminNavbar = () => {
         <img className='w-10 h-10 rounded-full' src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1766353699/Button_3_jqwyyc.png" alt="" />
     </Link>
      <div>
-    <p className='text-xl'>Md Juyel Rana</p>
-    <p className='text-gray-500'>mdjuyelrana.com.bd1@gmail.com</p>
+    <p className='text-xl'>{user?.full_name}</p>
+    <p className='text-gray-500'>{user?.email}</p>
    </div>
   </div>
   </div>
