@@ -305,10 +305,12 @@ const Step6Creative: React.FC = () => {
       
       Swal.fire({
         icon: "error",
-        title: "Creation Failed",
+        title: "Create Failed",
         text: errorMessage,
         width: '600px',
+      
       });
+      
     } finally {
       setLoading(false);
     }
