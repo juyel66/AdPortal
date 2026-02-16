@@ -102,6 +102,8 @@ const Step5Budget: React.FC = () => {
       // Prepare request data with correct mapping
       const requestData = {
         campaign_id: parseInt(campaignId),
+        // include campaign name so backend receives the same campaign identifier
+        campaign_name: localStorage.getItem("campaignName") || undefined,
         budgets: [
           {
             platform: platformToApiValue[selectedPlatform],
@@ -114,16 +116,16 @@ const Step5Budget: React.FC = () => {
         ]
       };
 
-      console.log("📤 Sending budget data:", requestData);
+      console.log(" Sending budget data:", requestData);
 
       const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData);
-      console.log("✅ Budget saved:", response.data);
+      console.log(" Budget saved:", response.data);
 
       navigate("/user-dashboard/campaigns-create/step-6");
 
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to save budget data");
-      console.error("❌ Error:", err);
+      console.error(" Error:", err);
     } finally {
       setLoading(false);
     }
