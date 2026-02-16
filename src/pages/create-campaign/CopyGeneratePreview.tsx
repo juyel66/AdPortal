@@ -4,7 +4,6 @@ import {
   MessageCircle,
   Share2,
   MoreHorizontal,
-
   Music,
 } from "lucide-react";
 import type { CopyGeneratePreviewData } from "../../types/copyGeneratePreview";
@@ -16,7 +15,7 @@ interface Props {
 const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6 space-y-10">
-    
+      {/* Generated Copy Fields */}
       <div className="space-y-4">
         <Field label="Headline" value={data.headline} limit={40} />
         <Field
@@ -33,7 +32,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
         <Field label="Call to Action" value={data.cta} limit={30} />
       </div>
 
-    
+      {/* Facebook Ad Preview */}
       <Section title="Facebook Ad Preview">
         <div className="border rounded-lg overflow-hidden">
           {/* Header */}
@@ -42,10 +41,13 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
               <img
                 src="https://i.pravatar.cc/40"
                 className="w-9 h-9 rounded-full"
+                alt="profile"
               />
               <div>
                 <p className="text-sm font-semibold">Club Doggo</p>
-                <p className="text-xs text-gray-500">Sponsored · <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917543/Vertical_container_kwvzmk.png" alt="" /></p>
+                <p className="text-xs text-gray-500">
+                  Sponsored · <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917543/Vertical_container_kwvzmk.png" alt="" className="inline" />
+                </p>
               </div>
             </div>
             <MoreHorizontal size={18} />
@@ -66,6 +68,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           ) : (
             <img
               src={data.mediaUrl}
+              alt="ad creative"
               className="w-full h-[360px] object-cover"
             />
           )}
@@ -81,8 +84,8 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           {/* Reactions */}
           <div className="flex items-center justify-between px-3 py-2 text-xs text-gray-500">
             <div className="flex items-center gap-1">
-            <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917683/Container_14_masz7i.png" alt="" />
-               <span>507</span>
+              <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917683/Container_14_masz7i.png" alt="" />
+              <span>507</span>
             </div>
             <div>12 Comments · 8 Shares</div>
           </div>
@@ -102,7 +105,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
         </div>
       </Section>
 
-      
+      {/* Google Ad Preview */}
       <Section title="Google Ad Preview">
         <div className="border rounded-lg p-4 flex gap-4">
           <div className="flex-1">
@@ -110,45 +113,42 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
               <img
                 src="https://i.pravatar.cc/32"
                 className="w-6 h-6 rounded-full"
+                alt="profile"
               />
               <p className="text-xs text-gray-500">Club Doggo · Sponsored</p>
-                   <img  src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917950/Horizontal_container_dq8wfb.png" alt="" />
+              <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767917950/Horizontal_container_dq8wfb.png" alt="" />
             </div>
 
-      <div className="flex items-center gap-2 mb-2">
-            <div>
-              <p className="text-sm font-semibold mb-1">{data.headline}</p>
-            <p className="text-xs text-gray-600 mb-2">{data.primaryText}</p>
-          </div>
-            <div>
-              <button className="px-3 py-2 font-bold bg-gray-300 text-xs rounded">
-                Shop Now
-              </button>
+            <div className="flex items-center gap-2 mb-2">
+              <div>
+                <p className="text-sm font-semibold mb-1">{data.headline}</p>
+                <p className="text-xs text-gray-600 mb-2">{data.primaryText}</p>
+              </div>
+              <div>
+                <button className="px-3 py-2 font-bold bg-gray-300 text-xs rounded">
+                  Shop Now
+                </button>
+              </div>
             </div>
-      </div>
 
-
-         {data.isVideo ? (
-            <video
-              
-              src={data.mediaUrl}
-              className="lg:w-4/12 h-72 rounded object-cover"
-            />
-          ) : (
-            <img
-              src={data.mediaUrl}
-              className="lg:w-4/12 h-72 rounded object-cover"
-            />
-          )}
-
-          
+            {data.isVideo ? (
+              <video
+                src={data.mediaUrl}
+                className="lg:w-4/12 h-72 rounded object-cover"
+                controls
+              />
+            ) : (
+              <img
+                src={data.mediaUrl}
+                alt="ad creative"
+                className="lg:w-4/12 h-72 rounded object-cover"
+              />
+            )}
           </div>
-
-       
         </div>
       </Section>
 
-  
+      {/* TikTok Ad Preview */}
       <Section title="Tiktok Ad Preview">
         <div className="relative w-[240px] h-[440px] bg-black rounded-xl overflow-hidden">
           {/* Media */}
@@ -163,6 +163,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           ) : (
             <img
               src={data.mediaUrl}
+              alt="ad creative"
               className="absolute inset-0 w-full h-full object-cover"
             />
           )}
@@ -174,16 +175,15 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
 
           {/* Right actions */}
           <div className="absolute right-2 bottom-24 flex flex-col gap-4 items-center text-white text-xs">
-           <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916526/Avatar_nhfhwe.png" alt="" />
+            <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916526/Avatar_nhfhwe.png" alt="" />
             <div className="flex flex-col items-center">
               <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916689/Vector_6_n1tznf.png" alt="" />
-               1.3M
+              1.3M
             </div>
-           
+
             <div className="flex flex-col items-center">
               <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916689/Group_2_3_yst4yy.png" alt="" />
-              
-               30.9K
+              30.9K
             </div>
             <Music size={20} />
           </div>
@@ -197,8 +197,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
               Learn More
             </button>
 
-            <span className="absolute  right-4 bottom-5 bg-white/30 text-white font-semibold text-[10px] px-3 py-[4px] rounded">
-
+            <span className="absolute right-4 bottom-5 bg-white/30 text-white font-semibold text-[10px] px-3 py-[4px] rounded">
               Ad
             </span>
           </div>
@@ -209,8 +208,6 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
 };
 
 export default CopyGeneratePreview;
-
-
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
@@ -234,16 +231,17 @@ const Field: React.FC<{
       <textarea
         value={value}
         readOnly
-        className="w-full rounded-lg border px-3 py-2 text-sm bg-gray-50"
+        rows={3}
+        className="w-full rounded-lg border px-3 py-2 text-sm bg-gray-50 mt-1"
       />
     ) : (
       <input
         value={value}
         readOnly
-        className="w-full rounded-lg border px-3 py-2 text-sm bg-gray-50"
+        className="w-full rounded-lg border px-3 py-2 text-sm bg-gray-50 mt-1"
       />
     )}
-    <p className="text-xs text-gray-400">
+    <p className="text-xs text-gray-400 mt-1">
       {value.length}/{limit} characters
     </p>
   </div>
