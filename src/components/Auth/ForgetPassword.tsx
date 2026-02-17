@@ -275,7 +275,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
               noValidate
               aria-label="Forgot password form"
             >
-              <div className="mb-2">
+              <div className="mb-2 ">
                 <h1 className="text-2xl font-bold text-gray-900" id="forgot-password-title">
                   Forgot Password?
                 </h1>
@@ -364,7 +364,7 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || !formData.termsAccepted}
-                className="mt-8 w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                className="mt-8 w-full cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
                 aria-label={isSubmitting ? "Sending OTP..." : "Send OTP"}
               >
                 {isSubmitting ? (

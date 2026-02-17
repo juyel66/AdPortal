@@ -308,7 +308,7 @@ const CheckEmail: React.FC = () => {
             <button
               type="submit"
               disabled={loading || otp.length !== 6}
-              className="mb-6 w-full flex justify-center items-center rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="mb-6 w-full cursor-pointer flex justify-center items-center rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? (
                 <>
@@ -337,7 +337,7 @@ const CheckEmail: React.FC = () => {
                     type="button"
                     onClick={handleResendOtp}
                     disabled={isResending}
-                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="inline-flex cursor-pointer items-center gap-2 text-blue-600 hover:text-blue-700 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isResending ? (
                       <>
