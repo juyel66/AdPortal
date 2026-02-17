@@ -51,10 +51,10 @@ export const login = createAsyncThunk<
     const res = await api.post<LoginResponse>("/accounts/login/", payload);
     console.log('✅ Login successful');
     
-    toast.success('Login successful!', {
-      duration: 3000,
-      position: 'top-center',
-    });
+    // toast.success('Login successful!', {
+    //   duration: 3000,
+    //   position: 'top-center',
+    // });
     
     return res.data;
   } catch (err: any) {
