@@ -418,6 +418,26 @@ const getOrgId = (): string | null => {
 const SubscriptionBilling: React.FC = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [activePlan, setActivePlan] = useState<PlanKey>("growth");
+  useEffect(() => {
+    fetchCurrentPlan();
+  }, []);
+
+  const fetchCurrentPlan = async () => {
+    const org_id = getOrgId();
+    if (!org_id) return;
+    try {
+      const response = await api.get(`/finance/get-current-plan/?org_id=${org_id}`);
+      if (response.data && response.data.plan_name) {
+        setActivePlan(response.data.plan_name);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404 && error.response.data?.error === "No active subscription found.") {
+        setActivePlan("");
+      } else {
+        console.error("Error fetching current plan:", error);
+      }
+    }
+  };
   const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -640,29 +660,43 @@ const SubscriptionBilling: React.FC = () => {
               const activeIndex = planOrder.indexOf(activePlan);
               const planIndex = planOrder.indexOf(plan.key);
 
-              const isCurrent = plan.key === activePlan;
-              const isIncluded = planIndex < activeIndex;
-              const isUpgrade = planIndex > activeIndex;
+
+              // If no plan is active (new account), show all as 'Buy Plan' and none as active
+              const noActivePlan = !activePlan || !planOrder.includes(activePlan);
+              const isCurrent = !noActivePlan && plan.key === activePlan;
+              const isLowerTier = !noActivePlan && planIndex < activeIndex;
+              const isHigherTier = !noActivePlan && planIndex > activeIndex;
               const isLoading = processingPayment?.planId === plan.id;
 
-              let buttonLabel = "Buy Now";
+              let buttonLabel = "";
               let buttonStyle = "border border-slate-300 text-slate-600 hover:bg-slate-50";
+              let buttonDisabled = false;
 
-              if (isCurrent) {
+              if (noActivePlan) {
+                buttonLabel = "Buy Plan";
+                buttonDisabled = false;
+                buttonStyle = "border border-slate-300 text-slate-600 hover:bg-slate-50";
+              } else if (isCurrent) {
                 buttonLabel = "Current Plan";
                 buttonStyle = "bg-blue-600 text-white cursor-not-allowed";
-              } else if (isIncluded) {
-                buttonLabel = "Included";
+                buttonDisabled = true;
+              } else if (isHigherTier) {
+                buttonLabel = `Upgrade to ${plan.title}`;
+              } else if (isLowerTier) {
+                buttonLabel = `Downgrade to ${plan.title}`;
+              } else {
+                buttonLabel = "Contact Sales";
                 buttonStyle = "bg-slate-100 text-slate-500 cursor-not-allowed";
+                buttonDisabled = true;
               }
 
               return (
                 <div
                   key={plan.key}
                   className={`relative rounded-2xl border p-6 ${
-                    isCurrent
+                    !noActivePlan && isCurrent
                       ? "border-blue-600 shadow-lg scale-[1.02]"
-                      : "hover:border-slate-300"
+                      : (!noActivePlan ? "hover:border-slate-300" : "")
                   }`}
                 >
                   {plan.popular && (
@@ -701,8 +735,8 @@ const SubscriptionBilling: React.FC = () => {
                   </ul>
 
                   <button
-                    onClick={() => isUpgrade && handleBuyPlan(plan.id, plan.key)}
-                    disabled={!isUpgrade || isLoading}
+                    onClick={() => !isCurrent && !buttonDisabled && handleBuyPlan(plan.id, plan.key)}
+                    disabled={buttonDisabled || isLoading}
                     className={`mt-6 w-full rounded-lg px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 ${buttonStyle}`}
                   >
                     {isLoading ? (
@@ -713,7 +747,6 @@ const SubscriptionBilling: React.FC = () => {
                     ) : (
                       <>
                         {buttonLabel}
-                        
                       </>
                     )}
                   </button>
