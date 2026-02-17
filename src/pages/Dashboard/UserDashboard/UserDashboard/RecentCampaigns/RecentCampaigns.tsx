@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import Swal from "sweetalert2";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Trash2, Edit, MoreHorizontal, Eye } from "lucide-react";
+import api from "@/lib/axios";
 
 interface Campaign {
   id: number;
@@ -19,6 +22,7 @@ interface Campaign {
 
 interface CampaignsTableProps {
   campaigns?: Campaign[];
+  onDelete?: (campaignId: number, campaignName: string) => void;
 }
 
 // Helper function to format currency
@@ -42,21 +46,12 @@ const formatNumber = (value: number): string => {
   return value.toString();
 };
 
-export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) {
+export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTableProps) {
+  const navigate = useNavigate();
   const [data, setData] = useState<Campaign[]>([]);
   const [showAll, setShowAll] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Campaign | null>(null);
-  const [form, setForm] = useState<{
-    name: string;
-    status: string;
-    spend: string;
-    platforms: string[];
-  }>({ name: "", status: "DRAFT", spend: "", platforms: [] });
-
-  useEffect(() => {
-    setData(campaigns);
-  }, [campaigns]);
+  const [selectedCampaigns, setSelectedCampaigns] = useState<number[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
 
   const ICONS: Record<string, string> = {
     facebook:
@@ -79,63 +74,94 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
       "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765493531/Icon_9_iwacr1.png",
   };
 
-  function openEdit(item: Campaign) {
-    setEditing(item);
-    setForm({
-      name: item.name,
-      status: item.status,
-      spend: item.spend.toString(),
-      platforms: item.platforms,
-    });
-    setModalOpen(true);
-  }
+  useEffect(() => {
+    setData(campaigns);
+  }, [campaigns]);
 
-  function handleSave() {
-    if (!editing) {
-      Swal.fire("Disabled", "Creating campaigns is disabled", "info");
-      return;
-    }
-    if (!form.name.trim()) {
-      Swal.fire("Validation", "Campaign name is required", "warning");
-      return;
-    }
-    setData((d) =>
-      d.map((it) => (it.id === editing.id ? { 
-        ...it, 
-        ...form, 
-        spend: parseFloat(form.spend) || 0
-      } : it))
-    );
-    Swal.fire("Updated", "Campaign updated successfully", "success");
-
-    setModalOpen(false);
-    setEditing(null);
-    setForm({ name: "", status: "DRAFT", spend: "", platforms: [] });
-  }
-
-  function handleDelete(item: Campaign) {
-    Swal.fire({
-      title: "Are you sure?",
-      text: `Delete ${item.name}`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete it",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setData((d) => d.filter((i) => i.id !== item.id));
-        Swal.fire("Deleted", "Campaign deleted successfully", "success");
+  // Get org_id from localStorage
+  const getOrgId = (): string => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        if (orgData && orgData.id) {
+          return orgData.id;
+        }
       }
-    });
-  }
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+    }
+    return "";
+  };
 
-  function togglePlatform(p: string) {
-    setForm((f) => ({
-      ...f,
-      platforms: f.platforms.includes(p)
-        ? f.platforms.filter((x) => x !== p)
-        : [...f.platforms, p],
-    }));
-  }
+  const handleEdit = (campaignId: number) => {
+    navigate(`/user-dashboard/campaigns-update/${campaignId}`);
+  };
+
+  const handleDelete = async (campaign: Campaign) => {
+    if (onDelete) {
+      onDelete(campaign.id, campaign.name);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCampaigns.length === data.length) {
+      setSelectedCampaigns([]);
+    } else {
+      setSelectedCampaigns(data.map(c => c.id));
+    }
+  };
+
+  const handleSelectCampaign = (campaignId: number) => {
+    setSelectedCampaigns(prev =>
+      prev.includes(campaignId)
+        ? prev.filter(id => id !== campaignId)
+        : [...prev, campaignId]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedCampaigns.length === 0) return;
+    
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedCampaigns.length} selected campaigns?`);
+    if (!confirmed) return;
+
+    const orgId = getOrgId();
+    if (!orgId) {
+      toast.error('No organization selected');
+      return;
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const campaignId of selectedCampaigns) {
+      try {
+        await api.delete(`/main/campaign/${campaignId}/?org_id=${orgId}`);
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to delete campaign ${campaignId}:`, error);
+        failCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      setData(prev => prev.filter(c => !selectedCampaigns.includes(c.id)));
+      setSelectedCampaigns([]);
+      
+      toast.success(`${successCount} campaign${successCount > 1 ? 's' : ''} deleted successfully`, {
+        duration: 3000,
+        position: 'top-center',
+      });
+    }
+
+    if (failCount > 0) {
+      toast.error(`Failed to delete ${failCount} campaign${failCount > 1 ? 's' : ''}`, {
+        duration: 4000,
+        position: 'top-center',
+      });
+    }
+  };
 
   function truncateTitle(t: string) {
     if (!t) return "";
@@ -174,6 +200,15 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
           </div>
 
           <div className="flex items-center gap-3">
+            {selectedCampaigns.length > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Selected ({selectedCampaigns.length})
+              </button>
+            )}
             <button
               onClick={() => setShowAll((s) => !s)}
               className="text-sm text-sky-600 hover:underline"
@@ -188,20 +223,22 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
           <table className="w-full text-sm table-fixed">
             <colgroup>
               <col style={{ width: "48px" }} />
-              <col style={{ width: "38%" }} />
-              <col style={{ width: "120px" }} />
-              <col style={{ width: "160px" }} />
-              <col style={{ width: "120px" }} />
-              <col style={{ width: "160px" }} />
-              <col style={{ width: "120px" }} />
+              <col style={{ width: "35%" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "140px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "140px" }} />
+              <col style={{ width: "100px" }} />
             </colgroup>
 
             <thead className="bg-slate-50">
-              <tr className="text-left text-xs font-extrabold text-slate-700 ">
+              <tr className="text-left text-xs font-extrabold text-slate-700">
                 <th className="p-4">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 rounded border-slate-200"
+                    checked={selectedCampaigns.length === data.length && data.length > 0}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 rounded border-slate-200 text-blue-600 focus:ring-blue-500"
                   />
                 </th>
                 <th className="p-4">Campaign</th>
@@ -218,17 +255,21 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
                 displayedData.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-slate-50 transition-colors"
+                    className={`hover:bg-slate-50 transition-colors ${
+                      selectedCampaigns.includes(row.id) ? 'bg-blue-50/50' : ''
+                    }`}
                   >
                     <td className="p-4 align-middle">
                       <input
                         type="checkbox"
-                        className="w-4 h-4 rounded border-slate-200"
+                        checked={selectedCampaigns.includes(row.id)}
+                        onChange={() => handleSelectCampaign(row.id)}
+                        className="w-4 h-4 rounded border-slate-200 text-blue-600 focus:ring-blue-500"
                       />
                     </td>
 
                     <td
-                      className="p-4 align-middle text-slate-800"
+                      className="p-4 align-middle text-slate-800 font-medium"
                       title={row.name}
                     >
                       {truncateTitle(row.name)}
@@ -249,6 +290,7 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
                           <div
                             key={p}
                             className="w-8 h-8 bg-white rounded-full flex items-center justify-center border border-slate-100 shadow-sm"
+                            title={p}
                           >
                             <img
                               src={ICONS[p] || ICONS.facebook}
@@ -263,7 +305,7 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
                       </div>
                     </td>
 
-                    <td className="p-4 align-middle text-slate-800">
+                    <td className="p-4 align-middle text-slate-800 font-medium">
                       {formatCurrency(row.spend)}
                     </td>
 
@@ -271,23 +313,29 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
                     <td className="p-4 align-middle text-slate-600">
                       <div className="flex items-center gap-6">
                         {/* Eye icon - impressions */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 group relative">
                           <img
                             src={ICONS.eye}
-                            alt="views"
+                            alt="impressions"
                             className="w-4 h-4 object-contain"
                           />
                           <span>{formatNumber(row.performance?.impressions || 0)}</span>
+                          <span className="absolute -top-8 left-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                            Impressions
+                          </span>
                         </div>
 
                         {/* Cursor icon - CTR */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 group relative">
                           <img
                             src={ICONS.cursor}
                             alt="ctr"
                             className="w-4 h-4 object-contain"
                           />
                           <span>{(row.performance?.ctr || 0).toFixed(2)}%</span>
+                          <span className="absolute -top-8 left-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                            Click-through rate
+                          </span>
                         </div>
                       </div>
                     </td>
@@ -295,31 +343,45 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
                     {/* Actions */}
                     <td className="p-4 align-middle text-right">
                       <div className="inline-flex items-center gap-2">
-                        <button
-                          onClick={() => openEdit(row)}
-                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
+                        <Link
+                          to={`/user-dashboard/campaigns-update/${row.id}`}
+                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100 hover:bg-slate-50 transition-colors group relative"
+                          title="Edit campaign"
                         >
                           <img src={ICONS.edit} alt="edit" className="w-4 h-4" />
-                        </button>
+                        </Link>
 
                         <button
                           onClick={() => handleDelete(row)}
-                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100"
+                          disabled={deleteLoading === row.id}
+                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100 hover:bg-slate-50 hover:border-red-200 transition-colors group relative disabled:opacity-50"
+                          title="Delete campaign"
                         >
-                          <img
-                            src={ICONS.trash}
-                            alt="delete"
-                            className="w-4 h-4"
-                          />
+                          {deleteLoading === row.id ? (
+                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <img src={ICONS.trash} alt="delete" className="w-4 h-4" />
+                          )}
                         </button>
+
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-gray-500">
-                    No campaigns found
+                  <td colSpan={7} className="text-center py-12 text-gray-500">
+                    <div className="flex flex-col items-center gap-3">
+                      
+                      <p className="text-lg font-medium">No campaigns found</p>
+                      <p className="text-sm text-gray-400">Create your first campaign to get started</p>
+                      <Link
+                        to="/user-dashboard/campaigns-create/step-1"
+                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                      >
+                        Create Campaign
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -327,113 +389,6 @@ export default function CampaignsTable({ campaigns = [] }: CampaignsTableProps) 
           </table>
         </div>
       </div>
-
-      {/* Edit Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setModalOpen(false)}
-          />
-          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-xl p-6 z-10">
-            <h3 className="text-lg font-semibold mb-3">Edit Campaign</h3>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm text-slate-600">Name</label>
-                <input
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
-                  className="mt-1 block w-full border rounded-md p-2"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-slate-600">Status</label>
-                <select
-                  value={form.status}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      status: e.target.value,
-                    }))
-                  }
-                  className="mt-1 block w-full border rounded-md p-2"
-                >
-                  <option value="DRAFT">DRAFT</option>
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="PAUSED">PAUSED</option>
-                  <option value="COMPLETED">COMPLETED</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm text-slate-600">Spend</label>
-                <input
-                  type="number"
-                  value={form.spend}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, spend: e.target.value }))
-                  }
-                  className="mt-1 block w-full border rounded-md p-2"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-slate-600">Platforms</label>
-                <div className="flex gap-3 mt-2">
-                  <button
-                    type="button"
-                    onClick={() => togglePlatform("META")}
-                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("META") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
-                  >
-                    <img
-                      src={ICONS.META}
-                      alt="meta"
-                      className="w-4 h-4"
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => togglePlatform("GOOGLE")}
-                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("GOOGLE") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
-                  >
-                    <img src={ICONS.GOOGLE} alt="google" className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => togglePlatform("TIKTOK")}
-                    className={`px-3 py-1 rounded-md border ${form.platforms.includes("TIKTOK") ? "bg-blue-50 border-blue-300" : "bg-white"}`}
-                  >
-                    <img src={ICONS.TIKTOK} alt="tiktok" className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => {
-                    setModalOpen(false);
-                    setEditing(null);
-                  }}
-                  className="px-4 py-2 rounded-md border"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 rounded-md bg-blue-600 text-white"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

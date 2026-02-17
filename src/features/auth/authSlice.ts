@@ -12,7 +12,8 @@ import {
   checkOTP,
   resendOtp,
   forgotPassword,
-} from "../../features/auth/AuthThunks";
+  refreshToken, // Import refresh token
+} from "./AuthThunks";
 
 import type { UserProfile, LoginResponse } from "../../types/auth";
 
@@ -28,8 +29,10 @@ export interface AuthState {
   organizations: string[];
   currentPlan: any | null;
   selectedOrganization: string | null;
-  otpVerified: boolean; // New field to track OTP verification status
-  resetPasswordEmail: string | null; // New field to store email for password reset
+  otpVerified: boolean;
+  resetPasswordEmail: string | null;
+  lastAction: string | null;
+  tokenRefreshAttempts: number; // Track refresh attempts
 }
 
 // Function to save auth data to localStorage
@@ -83,11 +86,6 @@ const getAuthDataFromLocalStorage = () => {
   }
 };
 
-
-
-
-
-
 const authData = getAuthDataFromLocalStorage();
 
 const initialState: AuthState = {
@@ -104,28 +102,32 @@ const initialState: AuthState = {
   selectedOrganization: authData.selectedOrganization,
   otpVerified: false,
   resetPasswordEmail: authData.resetPasswordEmail,
+  lastAction: null,
+  tokenRefreshAttempts: 0,
 };
-
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    clearAuthError(state) {
+    clearAuthError: (state) => {
       state.error = null;
       state.message = null;
+      state.lastAction = 'clear_error';
     },
-    clearAuthMessage(state) {
+    clearAuthMessage: (state) => {
       state.message = null;
+      state.lastAction = 'clear_message';
     },
-    setForgotPasswordEmail(state, action: PayloadAction<string>) {
+    setForgotPasswordEmail: (state, action: PayloadAction<string>) => {
       state.forgotPasswordEmail = action.payload;
+      state.lastAction = 'set_forgot_email';
     },
-    clearForgotPasswordEmail(state) {
+    clearForgotPasswordEmail: (state) => {
       state.forgotPasswordEmail = null;
+      state.lastAction = 'clear_forgot_email';
     },
-    // New action to update user profile
-    updateUserProfile(state, action: PayloadAction<Partial<UserProfile>>) {
+    updateUserProfile: (state, action: PayloadAction<Partial<UserProfile>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
         saveAuthDataToLocalStorage({
@@ -134,51 +136,57 @@ const authSlice = createSlice({
           currentPlan: state.currentPlan,
           selectedOrganization: state.selectedOrganization,
         });
+        state.lastAction = 'update_profile';
       }
     },
-    // New action to set selected organization
-    setSelectedOrganization(state, action: PayloadAction<string>) {
+    setSelectedOrganization: (state, action: PayloadAction<string>) => {
       state.selectedOrganization = action.payload;
       localStorage.setItem("selectedOrganization", action.payload);
+      state.lastAction = 'set_org';
     },
-    // New action to clear selected organization
-    clearSelectedOrganization(state) {
+    clearSelectedOrganization: (state) => {
       state.selectedOrganization = null;
       localStorage.removeItem("selectedOrganization");
+      state.lastAction = 'clear_org';
     },
-    // New action to update organizations
-    updateOrganizations(state, action: PayloadAction<string[]>) {
+    updateOrganizations: (state, action: PayloadAction<string[]>) => {
       state.organizations = action.payload;
       localStorage.setItem("organizations", JSON.stringify(action.payload));
+      state.lastAction = 'update_orgs';
     },
-    // New action to update current plan
-    updateCurrentPlan(state, action: PayloadAction<any>) {
+    updateCurrentPlan: (state, action: PayloadAction<any>) => {
       state.currentPlan = action.payload;
       localStorage.setItem("currentPlan", JSON.stringify(action.payload));
+      state.lastAction = 'update_plan';
     },
-    // New action to set OTP verification status
-    setOTPVerified(state, action: PayloadAction<boolean>) {
+    setOTPVerified: (state, action: PayloadAction<boolean>) => {
       state.otpVerified = action.payload;
+      state.lastAction = 'set_otp';
     },
-    // New action to set reset password email
-    setResetPasswordEmail(state, action: PayloadAction<string>) {
+    setResetPasswordEmail: (state, action: PayloadAction<string>) => {
       state.resetPasswordEmail = action.payload;
       localStorage.setItem("resetPasswordEmail", action.payload);
+      state.lastAction = 'set_reset_email';
     },
-    // New action to clear reset password data
-    clearResetPasswordData(state) {
+    clearResetPasswordData: (state) => {
       state.otpVerified = false;
       state.resetPasswordEmail = null;
       localStorage.removeItem("resetPasswordEmail");
+      state.lastAction = 'clear_reset';
+    },
+    resetAuthState: () => initialState,
+    resetTokenRefreshAttempts: (state) => {
+      state.tokenRefreshAttempts = 0;
     },
   },
   extraReducers: (builder) => {
-    // Login
+    // Login cases
     builder
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
+        state.lastAction = 'login_pending';
       })
       .addCase(login.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
         state.loading = false;
@@ -189,12 +197,12 @@ const authSlice = createSlice({
         state.currentPlan = action.payload.current_plan || null;
         state.isAuthenticated = true;
         state.message = "Login successful!";
+        state.error = null;
+        state.tokenRefreshAttempts = 0;
+        state.lastAction = 'login_success';
 
-        // Save tokens to localStorage
         localStorage.setItem("accessToken", action.payload.access);
         localStorage.setItem("refreshToken", action.payload.refresh);
-        
-        // Save all auth data to localStorage
         saveAuthDataToLocalStorage({
           user: action.payload.user,
           organizations: action.payload.organizations || [],
@@ -204,42 +212,43 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action: any) => {
         state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "Login failed";
-      });
+        state.error = action.payload?.error || "Login failed";
+        state.message = null;
+        state.lastAction = 'login_error';
+      })
 
-    // Register
-    builder
+    // Register cases
       .addCase(register.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
+        state.lastAction = 'register_pending';
       })
       .addCase(register.fulfilled, (state) => {
         state.loading = false;
         state.message = "Registration successful! Please verify your email.";
+        state.error = null;
+        state.lastAction = 'register_success';
       })
       .addCase(register.rejected, (state, action: any) => {
         state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "Registration failed";
-      });
+        state.error = action.payload?.error || "Registration failed";
+        state.message = null;
+        state.lastAction = 'register_error';
+      })
 
-    // Logout
-    builder
+    // Logout cases
       .addCase(logout.pending, (state) => {
         state.loading = true;
+        state.lastAction = 'logout_pending';
       })
       .addCase(logout.fulfilled, (state) => {
-        state.loading = false;
+        // Reset all state
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
+        state.loading = false;
         state.error = null;
         state.message = "Logged out successfully!";
         state.forgotPasswordEmail = null;
@@ -248,8 +257,9 @@ const authSlice = createSlice({
         state.selectedOrganization = null;
         state.otpVerified = false;
         state.resetPasswordEmail = null;
+        state.tokenRefreshAttempts = 0;
+        state.lastAction = 'logout_success';
         
-        // Clear all auth data from localStorage
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
@@ -259,11 +269,12 @@ const authSlice = createSlice({
         localStorage.removeItem("resetPasswordEmail");
       })
       .addCase(logout.rejected, (state) => {
-        state.loading = false;
+        // Still clear state even if API fails
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
+        state.loading = false;
         state.error = null;
         state.message = "Logged out successfully!";
         state.forgotPasswordEmail = null;
@@ -272,8 +283,9 @@ const authSlice = createSlice({
         state.selectedOrganization = null;
         state.otpVerified = false;
         state.resetPasswordEmail = null;
+        state.tokenRefreshAttempts = 0;
+        state.lastAction = 'logout_error';
         
-        // Clear all auth data from localStorage even on error
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
@@ -281,160 +293,205 @@ const authSlice = createSlice({
         localStorage.removeItem("currentPlan");
         localStorage.removeItem("selectedOrganization");
         localStorage.removeItem("resetPasswordEmail");
-      });
+      })
 
-    // Fetch Profile
-    builder
+    // Fetch Profile cases
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.message = null;
+        state.lastAction = 'profile_pending';
       })
-      .addCase(
-        fetchProfile.fulfilled,
-        (state, action: PayloadAction<UserProfile>) => {
-          state.loading = false;
-          state.user = action.payload;
-          // Update localStorage with fresh user data
-          saveAuthDataToLocalStorage({
-            user: action.payload,
-            organizations: state.organizations,
-            currentPlan: state.currentPlan,
-            selectedOrganization: state.selectedOrganization,
-          });
-        }
-      )
+      .addCase(fetchProfile.fulfilled, (state, action: PayloadAction<UserProfile>) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+        state.lastAction = 'profile_success';
+        
+        saveAuthDataToLocalStorage({
+          user: action.payload,
+          organizations: state.organizations,
+          currentPlan: state.currentPlan,
+          selectedOrganization: state.selectedOrganization,
+        });
+      })
       .addCase(fetchProfile.rejected, (state, action: any) => {
         state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "Profile fetch failed";
-      });
+        state.error = action.payload?.error || "Profile fetch failed";
+        state.lastAction = 'profile_error';
+      })
 
-    // Change Password
-    builder
+    // Change Password cases
       .addCase(changePassword.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
+        state.lastAction = 'change_password_pending';
       })
       .addCase(changePassword.fulfilled, (state) => {
         state.loading = false;
         state.message = "Password changed successfully!";
+        state.error = null;
+        state.lastAction = 'change_password_success';
       })
       .addCase(changePassword.rejected, (state, action: any) => {
         state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "Password change failed";
-      });
-
-    // Reset Password Confirm - UPDATED
-    builder
-      .addCase(resetPasswordConfirm.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.error = action.payload?.error || "Password change failed";
         state.message = null;
+        state.lastAction = 'change_password_error';
       })
-      .addCase(resetPasswordConfirm.fulfilled, (state, action: any) => {
-        state.loading = false;
-        state.message = action.payload?.message || "Password reset successful! You can now login.";
-        state.otpVerified = false;
-        state.resetPasswordEmail = null;
-        localStorage.removeItem("resetPasswordEmail");
-      })
-      .addCase(resetPasswordConfirm.rejected, (state, action: any) => {
-        state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "Password reset failed";
-      });
 
-    // Forgot Password
-    builder
+    // Forgot Password cases
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
+        state.lastAction = 'forgot_pending';
       })
       .addCase(forgotPassword.fulfilled, (state, action: any) => {
         state.loading = false;
-        state.message = 
-          action.payload?.message || 
-          action.payload?.detail || 
-          "Password reset email sent successfully!";
+        state.message = action.payload?.message || "Password reset email sent!";
+        state.forgotPasswordEmail = action.payload?.email || null;
+        state.error = null;
+        state.lastAction = 'forgot_success';
       })
       .addCase(forgotPassword.rejected, (state, action: any) => {
         state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "Failed to send password reset email";
-      });
+        state.error = action.payload?.error || "Failed to send reset email";
+        state.message = null;
+        state.lastAction = 'forgot_error';
+      })
 
-    // Verify Email (for signup verification)
-    builder
+    // Reset Password Confirm cases
+      .addCase(resetPasswordConfirm.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+        state.lastAction = 'reset_confirm_pending';
+      })
+      .addCase(resetPasswordConfirm.fulfilled, (state, action: any) => {
+        state.loading = false;
+        state.message = action.payload?.message || "Password reset successful!";
+        state.otpVerified = false;
+        state.resetPasswordEmail = null;
+        state.error = null;
+        state.lastAction = 'reset_confirm_success';
+        
+        localStorage.removeItem("resetPasswordEmail");
+      })
+      .addCase(resetPasswordConfirm.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload?.error || "Password reset failed";
+        state.message = null;
+        state.lastAction = 'reset_confirm_error';
+      })
+
+    // Verify Email cases
       .addCase(verifyEmail.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
+        state.lastAction = 'verify_email_pending';
       })
       .addCase(verifyEmail.fulfilled, (state) => {
         state.loading = false;
         state.message = "Email verified successfully!";
+        state.error = null;
+        state.lastAction = 'verify_email_success';
       })
       .addCase(verifyEmail.rejected, (state, action: any) => {
         state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "OTP verification failed";
-      });
+        state.error = action.payload?.error || "Email verification failed";
+        state.message = null;
+        state.lastAction = 'verify_email_error';
+      })
 
-    // Check OTP (for password reset)
-    builder
+    // Check OTP cases
       .addCase(checkOTP.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
+        state.lastAction = 'check_otp_pending';
       })
       .addCase(checkOTP.fulfilled, (state, action: any) => {
         state.loading = false;
         state.otpVerified = true;
-        state.message = action.payload?.message || "OTP verified successfully!";
+        state.message = action.payload?.message || "OTP verified!";
+        state.error = null;
+        state.lastAction = 'check_otp_success';
       })
       .addCase(checkOTP.rejected, (state, action: any) => {
         state.loading = false;
         state.otpVerified = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "OTP verification failed";
-      });
+        state.error = action.payload?.error || "OTP verification failed";
+        state.message = null;
+        state.lastAction = 'check_otp_error';
+      })
 
-    // Resend OTP
-    builder
+    // Resend OTP cases
       .addCase(resendOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.message = null;
+        state.lastAction = 'resend_otp_pending';
       })
       .addCase(resendOtp.fulfilled, (state, action: any) => {
         state.loading = false;
-        state.message = 
-          action.payload?.message || 
-          action.payload?.detail || 
-          "New verification code sent successfully!";
+        state.message = action.payload?.message || "OTP resent successfully!";
+        state.error = null;
+        state.lastAction = 'resend_otp_success';
       })
       .addCase(resendOtp.rejected, (state, action: any) => {
         state.loading = false;
-        state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          "Failed to resend verification code";
+        state.error = action.payload?.error || "Failed to resend OTP";
+        state.message = null;
+        state.lastAction = 'resend_otp_error';
+      })
+
+    // ========== REFRESH TOKEN CASES ==========
+      .addCase(refreshToken.pending, (state) => {
+        // Don't set loading to true to avoid UI flicker
+        state.tokenRefreshAttempts += 1;
+        state.lastAction = 'refresh_token_pending';
+      })
+      .addCase(refreshToken.fulfilled, (state, action: PayloadAction<{ access: string }>) => {
+        state.accessToken = action.payload.access;
+        state.isAuthenticated = true;
+        state.error = null;
+        state.lastAction = 'refresh_token_success';
+        
+        // Update localStorage
+        localStorage.setItem("accessToken", action.payload.access);
+        
+        console.log('🔄 Token refreshed in state');
+      })
+      .addCase(refreshToken.rejected, (state, action: any) => {
+        // Only clear if multiple failures
+        if (state.tokenRefreshAttempts > 2) {
+          console.log('❌ Multiple refresh failures, logging out');
+          
+          // Clear everything
+          state.user = null;
+          state.accessToken = null;
+          state.refreshToken = null;
+          state.isAuthenticated = false;
+          state.organizations = [];
+          state.currentPlan = null;
+          state.selectedOrganization = null;
+          state.otpVerified = false;
+          state.resetPasswordEmail = null;
+          
+          // Clear localStorage
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+          localStorage.removeItem("organizations");
+          localStorage.removeItem("currentPlan");
+          localStorage.removeItem("selectedOrganization");
+          localStorage.removeItem("resetPasswordEmail");
+        }
+        
+        state.error = action.payload?.error || "Token refresh failed";
+        state.lastAction = 'refresh_token_error';
       });
   },
 });
@@ -451,6 +508,9 @@ export const {
   updateCurrentPlan,
   setOTPVerified,
   setResetPasswordEmail,
-  clearResetPasswordData
+  clearResetPasswordData,
+  resetAuthState,
+  resetTokenRefreshAttempts
 } = authSlice.actions;
+
 export default authSlice.reducer;

@@ -283,7 +283,7 @@ const Step6Creative: React.FC = () => {
       });
 
     } catch (err: any) {
-      console.error("❌ Error creating ad:", err);
+      console.error(" Error creating ad:", err);
       
       let errorMessage = "Failed to create ad. Please try again.";
       

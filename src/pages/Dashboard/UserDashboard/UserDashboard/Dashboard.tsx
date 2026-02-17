@@ -4,8 +4,10 @@ import {
   Plus,
   Sparkles,
   BarChart2,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import SpendOverview from "./SpendOverview/SpendOverview";
 import CampaignsTable from "./RecentCampaigns/RecentCampaigns";
@@ -154,6 +156,66 @@ function ActionCard({
   );
 }
 
+// Delete Confirmation Modal Component
+const DeleteConfirmationModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  campaignName,
+  loading 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onConfirm: () => void; 
+  campaignName: string;
+  loading: boolean;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center gap-3 text-red-600">
+          <Trash2 className="h-6 w-6" />
+          <h3 className="text-lg font-semibold">Delete Campaign</h3>
+        </div>
+        
+        <p className="text-gray-600">
+          Are you sure you want to delete <span className="font-semibold">"{campaignName}"</span>? 
+          This action cannot be undone.
+        </p>
+        
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4" />
+                Delete Campaign
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ICONS = {
   dollar:
     "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494156/Container_6_h2gdjc.png",
@@ -170,6 +232,18 @@ const UserDashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  
+  // Delete modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    campaignId: number | null;
+    campaignName: string;
+  }>({
+    isOpen: false,
+    campaignId: null,
+    campaignName: '',
+  });
 
   // Get org_id from selectedOrganization in localStorage
   const getOrgId = (): string => {
@@ -214,7 +288,6 @@ const UserDashboard: React.FC = () => {
     } catch (err: any) {
       console.error("Error fetching dashboard data:", err);
       if (err.response?.status === 401) {
-        // Just set error, don't redirect automatically
         setError("Session expired. Please refresh or login again.");
       } else {
         setError("Failed to load dashboard data.");
@@ -224,12 +297,93 @@ const UserDashboard: React.FC = () => {
     }
   };
 
+  // Handle delete campaign
+  const handleDeleteClick = (campaignId: number, campaignName: string) => {
+    setDeleteModal({
+      isOpen: true,
+      campaignId,
+      campaignName,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.campaignId || !orgId) return;
+
+    setDeleteLoading(true);
+    
+    try {
+      // Make API call to delete campaign
+      const response = await api.delete(`/main/campaign/${deleteModal.campaignId}/?org_id=${orgId}`);
+      
+      console.log('✅ Campaign deleted successfully:', response.data);
+      
+      // Remove campaign from local state
+      setDashboardData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          recent_campaigns: prev.recent_campaigns.filter(
+            c => c.id !== deleteModal.campaignId
+          ),
+        };
+      });
+      
+      // Close modal
+      setDeleteModal({ isOpen: false, campaignId: null, campaignName: '' });
+      
+      // Show success toast
+      toast.success('Campaign deleted successfully!', {
+        duration: 3000,
+        position: 'top-center',
+      });
+      
+    } catch (err: any) {
+      console.error('❌ Campaign delete failed:', err);
+      
+      // Handle specific error cases
+      if (err.response?.status === 403) {
+        toast.error('You do not have permission to delete this campaign.', {
+          duration: 5000,
+          position: 'top-center',
+        });
+      } else if (err.response?.status === 404) {
+        toast.error('Campaign not found. It may have been already deleted.', {
+          duration: 5000,
+          position: 'top-center',
+        });
+        
+        // Remove from UI anyway
+        setDashboardData(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            recent_campaigns: prev.recent_campaigns.filter(
+              c => c.id !== deleteModal.campaignId
+            ),
+          };
+        });
+        
+        setDeleteModal({ isOpen: false, campaignId: null, campaignName: '' });
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to delete campaign', {
+          duration: 5000,
+          position: 'top-center',
+        });
+      }
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, campaignId: null, campaignName: '' });
+  };
+
   // Format the last updated time
   const getLastUpdatedText = () => {
     if (!dashboardData?.ai_insights || dashboardData.ai_insights.length === 0) {
-      return "2 minutes ago"; // Keep the default if no data
+      return "2 minutes ago";
     }
-    // Use the most recent insight's created_at as reference
     const latestInsight = dashboardData.ai_insights.sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )[0];
@@ -268,6 +422,15 @@ const UserDashboard: React.FC = () => {
 
   return (
     <main className="p-8">
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        campaignName={deleteModal.campaignName}
+        loading={deleteLoading}
+      />
+
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -371,7 +534,10 @@ const UserDashboard: React.FC = () => {
 
       {/* Recent Campaigns */}
       <div className="mt-4">
-        <CampaignsTable campaigns={dashboardData?.recent_campaigns || []} />
+        <CampaignsTable 
+          campaigns={dashboardData?.recent_campaigns || []}
+          onDelete={handleDeleteClick}
+        />
       </div>
     </main>
   );

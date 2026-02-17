@@ -11,6 +11,7 @@ type SignUpForm = {
   confirmPassword: string;
   remember: boolean;
   acceptTerms: boolean;
+  full_name: string
 };
 
 type FormErrors = {
@@ -201,13 +202,13 @@ const SignUp: React.FC = () => {
       return;
     }
 
-    const [first_name, ...rest] = form.name.trim().split(" ");
+    const [full_name, ...rest] = form.name.trim().split(" ");
     const last_name = rest.join(" ") || " ";
 
     try {
       await dispatch(
         register({
-          first_name,
+          full_name,
           last_name,
           email: form.email,
           password: form.password,
@@ -502,7 +503,7 @@ const SignUp: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="mb-4 w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="mb-4 w-full cursor-pointer rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
