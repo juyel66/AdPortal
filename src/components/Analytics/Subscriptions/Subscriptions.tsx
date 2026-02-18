@@ -417,7 +417,7 @@ const getOrgId = (): string | null => {
 
 const SubscriptionBilling: React.FC = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [activePlan, setActivePlan] = useState<PlanKey>("growth");
+  const [activePlan, setActivePlan] = useState<PlanKey | "">("");
   useEffect(() => {
     fetchCurrentPlan();
   }, []);
@@ -431,12 +431,15 @@ const SubscriptionBilling: React.FC = () => {
         setActivePlan(response.data.plan_name);
       }
     } catch (error) {
-      if (error.response && error.response.status === 404 && error.response.data?.error === "No active subscription found.") {
+      if (error && error.response && error.response.status === 404 && error.response.data?.error === "No active subscription found.") {
         setActivePlan("");
       } else {
+        // Optionally show a toast or handle other errors
         console.error("Error fetching current plan:", error);
       }
     }
+    // Catch-all to prevent unhandled promise rejection
+    return Promise.resolve();
   };
   const [billingHistory, setBillingHistory] = useState<BillingHistoryItem[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
