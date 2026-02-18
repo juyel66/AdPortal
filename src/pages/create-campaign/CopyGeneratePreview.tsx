@@ -54,8 +54,8 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           </div>
 
           {/* Text */}
-          <div className="px-3 pb-2 text-sm text-gray-700">
-            {data.primaryText}
+          <div className="px-3 pb-2 text-sm text-gray-700 ">
+            {data.primaryText} 
           </div>
 
           {/* Media */}
@@ -77,7 +77,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           <div className="flex items-center justify-between px-3 py-2 bg-gray-100">
             <p className="text-sm font-semibold">{data.headline}</p>
             <button className="px-3 py-2 font-bold bg-gray-300 text-xs rounded">
-              {data.cta}
+              Shop Now
             </button>
           </div>
 
@@ -174,7 +174,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           </div>
 
           {/* Right actions */}
-          <div className="absolute right-2 bottom-24 flex flex-col gap-4 items-center text-white text-xs">
+          <div className="absolute right-2 bottom-24 flex flex-col gap-4 items-center text-white text-[10px]">
             <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916526/Avatar_nhfhwe.png" alt="" />
             <div className="flex flex-col items-center">
               <img src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1767916689/Vector_6_n1tznf.png" alt="" />
@@ -193,11 +193,11 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
             <p className="text-xs mb-1">@JaneFisher</p>
             <p className="text-xs mb-2">{data.description}</p>
 
-            <button className="w-full bg-red-500 text-white text-xs py-3 rounded">
-              Learn More
+            <button className="w-full bg-[#FE2C55] text-white text-xs py-3 rounded-sm">
+              Shop now
             </button>
 
-            <span className="absolute right-4 bottom-5 bg-white/30 text-white font-semibold text-[10px] px-3 py-[4px] rounded">
+            <span className="absolute right-4 bottom-5 bg-white/30 text-white font-semibold text-[10px] px-2 py-[4px] rounded">
               Ad
             </span>
           </div>
