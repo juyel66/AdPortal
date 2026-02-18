@@ -216,16 +216,16 @@ const initialCampaignData: CampaignData = {
     creativeAssets: [],
     headline: '',
     description: '',
-    callToAction: 'Learn More',
+    callToAction: 'Shop now',
     destinationUrl: '',
     brandName: '',
     primaryText: '',
-    adName: '',            // ✅ নতুন ডিফল্ট
-    product: '',           // ✅ নতুন ডিফল্ট
-    audience: '',          // ✅ নতুন ডিফল্ট
-    benefits: '',          // ✅ নতুন ডিফল্ট
-    tone: 'Professional',  // ✅ নতুন ডিফল্ট
-    uploadedFile: ''       // ✅ নতুন ডিফল্ট
+    adName: '',            
+    product: '',           
+    audience: '',          
+    benefits: '',          
+    tone: 'Professional',  
+    uploadedFile: ''       
   },
   step7: { 
     reviewNotes: '',
