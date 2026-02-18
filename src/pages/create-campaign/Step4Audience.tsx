@@ -80,8 +80,8 @@ const Step4Audience: React.FC = () => {
       navigate("/user-dashboard/campaigns-create/step-5");
 
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to save audience data");
-      toast.error("Failed to save audience data")
+      setError(err.response?.data?.message || "All fields are required. Please check your input and try again.");
+      toast.error("All fields are required. Please check your input and try again.")
       console.error(" Error:", err);
     } finally {
       setLoading(false);

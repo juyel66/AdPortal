@@ -22,7 +22,6 @@ const Step6Creative: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // Get campaign_id from localStorage (same as Step5Budget)
   const campaignId = localStorage.getItem("campaignId");
 
   // Form states
@@ -35,7 +34,7 @@ const Step6Creative: React.FC = () => {
   const [headline, setHeadline] = useState("");
   const [primaryText, setPrimaryText] = useState("");
   const [description, setDescription] = useState("");
-  const [cta, setCta] = useState("Learn More");
+  const [cta, setCta] = useState("Shop now");
   const [destinationUrl, setDestinationUrl] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -196,6 +195,7 @@ const Step6Creative: React.FC = () => {
     setLoading(true);
     setError("");
 
+
     try {
       // Get org_id
       const selectedOrg = localStorage.getItem("selectedOrganization");
@@ -205,46 +205,60 @@ const Step6Creative: React.FC = () => {
         org_id = orgData.id;
       }
 
-      // Prepare request data - only include campaign_id (required)
-      const requestData: any = {
-        campaign_id: parseInt(campaignId),
-      };
-
-      // Add fields only if they have values (all optional)
-      if (adName) requestData.ad_name = adName;
-      if (headline) requestData.headline = headline;
-      if (primaryText) requestData.primary_text = primaryText;
-      if (description) requestData.description = description;
-      if (cta && cta !== "Learn More") requestData.call_to_action = cta;
-      
-      // Handle URL if provided
-      if (destinationUrl) {
-        let url = destinationUrl.trim();
-        if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
+      let response;
+      // If a file is uploaded, use FormData
+      if (uploadedFile) {
+        const formData = new FormData();
+        formData.append("campaign_id", campaignId ? String(campaignId) : "");
+        if (adName) formData.append("ad_name", adName);
+        if (headline) formData.append("headline", headline);
+        if (primaryText) formData.append("primary_text", primaryText);
+        if (description) formData.append("description", description);
+        if (cta && cta !== "Learn More") formData.append("call_to_action", cta);
+        if (destinationUrl) {
+          let url = destinationUrl.trim();
+          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+          }
+          formData.append("destination_url", url);
         }
-        requestData.destination_url = url;
+        if (keywords) formData.append("keywords", keywords);
+        formData.append("ad_file", uploadedFile);
+        formData.append("file_name", uploadedFile.name);
+        formData.append("file_type", uploadedFile.type);
+
+        console.log("📤 Sending ad data (FormData):", formData);
+
+        response = await api.post(`/main/create-ad/?org_id=${org_id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        // No file, send as JSON
+        const requestData: any = {
+          campaign_id: parseInt(campaignId),
+        };
+        if (adName) requestData.ad_name = adName;
+        if (headline) requestData.headline = headline;
+        if (primaryText) requestData.primary_text = primaryText;
+        if (description) requestData.description = description;
+        if (cta && cta !== "Learn More") requestData.call_to_action = cta;
+        if (destinationUrl) {
+          let url = destinationUrl.trim();
+          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+          }
+          requestData.destination_url = url;
+        }
+        if (keywords) requestData.keywords = keywords;
+        console.log("📤 Sending ad data (JSON):", requestData);
+        response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
       }
-
-      // Add keywords if provided
-      if (keywords) {
-        requestData.keywords = keywords;
-      }
-
-      // Add file if uploaded (as base64)
-      if (fileBase64) {
-        requestData.ad_file = fileBase64;
-        requestData.file_name = uploadedFile?.name;
-        requestData.file_type = uploadedFile?.type;
-      }
-
-      console.log("📤 Sending ad data:", requestData);
-
-      const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
 
       console.log("✅ Ad created:", response.data);
 
