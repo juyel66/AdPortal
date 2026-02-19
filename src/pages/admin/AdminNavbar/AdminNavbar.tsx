@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/hooks/reduxHooks";
+
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { Link } from "react-router";
 
