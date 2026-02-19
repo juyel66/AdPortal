@@ -40,16 +40,16 @@ const extractErrorMessage = (error: any): string => {
   return 'An unexpected error occurred. Please try again.';
 };
 
-// ==================== LOGIN ====================
+
 export const login = createAsyncThunk<
   LoginResponse,
   LoginPayload,
   { rejectValue: any }
 >("auth/login", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Login attempt:', payload.email);
+    console.log(' Login attempt:', payload.email);
     const res = await api.post<LoginResponse>("/accounts/login/", payload);
-    console.log('✅ Login successful');
+    console.log(' Login successful');
     
     // toast.success('Login successful!', {
     //   duration: 3000,
@@ -59,7 +59,7 @@ export const login = createAsyncThunk<
     return res.data;
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Login failed:', errorMessage);
+    console.log(' Login failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -73,16 +73,16 @@ export const login = createAsyncThunk<
   }
 });
 
-// ==================== REGISTER ====================
+
 export const register = createAsyncThunk<
   any,
   RegisterPayload,
   { rejectValue: any }
 >("auth/register", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Registration attempt:', payload.email);
+    console.log('Registration attempt:', payload.email);
     const res = await api.post("/accounts/register/", payload);
-    console.log('✅ Registration successful');
+    console.log(' Registration successful');
     
     toast.success('Registration successful! Please verify your email.', {
       duration: 5000,
@@ -92,7 +92,7 @@ export const register = createAsyncThunk<
     return res.data;
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Registration failed:', errorMessage);
+    console.log(' Registration failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -129,7 +129,7 @@ export const logout = createAsyncThunk<
       { headers: { "Content-Type": "application/json" } }
     );
 
-    console.log('✅ Logout successful');
+    console.log(' Logout successful');
     
     toast.success('Logged out successfully!', {
       duration: 3000,
@@ -138,7 +138,7 @@ export const logout = createAsyncThunk<
     
     return true;
   } catch (err: any) {
-    console.log('❌ Logout error:', extractErrorMessage(err));
+    console.log(' Logout error:', extractErrorMessage(err));
     
     toast.info('You have been logged out locally.', {
       duration: 3000,
@@ -149,20 +149,20 @@ export const logout = createAsyncThunk<
   }
 });
 
-// ==================== FETCH PROFILE ====================
+
 export const fetchProfile = createAsyncThunk<
   UserProfile,
   void,
   { rejectValue: any }
 >("auth/profile", async (_, { rejectWithValue }) => {
   try {
-    console.log('📝 Fetching profile...');
+    console.log(' Fetching profile...');
     const res = await api.get<UserProfile>("/accounts/profile/");
-    console.log('✅ Profile fetched:', res.data.email);
+    console.log('Profile fetched:', res.data.email);
     return res.data;
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Profile fetch failed:', errorMessage);
+    console.log(' Profile fetch failed:', errorMessage);
     
     if (err.response?.status !== 401) {
       toast.error(errorMessage, {
@@ -178,16 +178,16 @@ export const fetchProfile = createAsyncThunk<
   }
 });
 
-// ==================== CHANGE PASSWORD ====================
+
 export const changePassword = createAsyncThunk<
   { message: string },
   ChangePasswordPayload,
   { rejectValue: any }
 >("auth/change-password", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Changing password...');
+    console.log(' Changing password...');
     const res = await api.post("/accounts/change-password/", payload);
-    console.log('✅ Password changed');
+    console.log(' Password changed');
     
     toast.success('Password changed successfully!', {
       duration: 4000,
@@ -197,7 +197,7 @@ export const changePassword = createAsyncThunk<
     return { message: 'Password changed successfully' };
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Password change failed:', errorMessage);
+    console.log(' Password change failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -211,18 +211,18 @@ export const changePassword = createAsyncThunk<
   }
 });
 
-// ==================== FORGOT PASSWORD ====================
+
 export const forgotPassword = createAsyncThunk<
   { message: string, email: string },
   { email: string },
   { rejectValue: any }
 >("auth/forgot-password", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Forgot password request for:', payload.email);
+    console.log(' Forgot password request for:', payload.email);
     const res = await api.post("/accounts/password-reset/", {
       email: payload.email,
     });
-    console.log('✅ Reset email sent');
+    console.log(' Reset email sent');
     
     toast.success('Password reset email sent! Check your inbox.', {
       duration: 5000,
@@ -235,7 +235,7 @@ export const forgotPassword = createAsyncThunk<
     };
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Forgot password failed:', errorMessage);
+    console.log(' Forgot password failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -249,14 +249,14 @@ export const forgotPassword = createAsyncThunk<
   }
 });
 
-// ==================== RESET PASSWORD CONFIRM ====================
+
 export const resetPasswordConfirm = createAsyncThunk<
   { message: string },
   { email: string; otp: string; password: string },
   { rejectValue: any }
 >("auth/reset-password-confirm", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Resetting password...');
+    console.log(' Resetting password...');
     
     const response = await api.post("/accounts/password-reset-confirm/", {
       email: payload.email,
@@ -264,7 +264,7 @@ export const resetPasswordConfirm = createAsyncThunk<
       new_password: payload.password
     });
     
-    console.log('✅ Password reset successful');
+    console.log(' Password reset successful');
     
     toast.success('Password reset successful! You can now login.', {
       duration: 5000,
@@ -274,7 +274,7 @@ export const resetPasswordConfirm = createAsyncThunk<
     return { message: 'Password reset successful' };
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Password reset failed:', errorMessage);
+    console.log(' Password reset failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -288,20 +288,20 @@ export const resetPasswordConfirm = createAsyncThunk<
   }
 });
 
-// ==================== VERIFY EMAIL ====================
+
 export const verifyEmail = createAsyncThunk<
   { message: string },
   VerifyEmailPayload,
   { rejectValue: any }
 >("auth/verify-email", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Verifying email:', payload.email);
+    console.log(' Verifying email:', payload.email);
     const res = await api.post("/accounts/verify-email/", {
       email: payload.email,
       otp: payload.otp,
     });
 
-    console.log('✅ Email verified');
+    console.log(' Email verified');
     
     toast.success('Email verified successfully!', {
       duration: 4000,
@@ -311,7 +311,7 @@ export const verifyEmail = createAsyncThunk<
     return { message: 'Email verified' };
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Email verification failed:', errorMessage);
+    console.log(' Email verification failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -325,20 +325,20 @@ export const verifyEmail = createAsyncThunk<
   }
 });
 
-// ==================== CHECK OTP ====================
+
 export const checkOTP = createAsyncThunk<
   { message: string, verified: boolean },
   VerifyEmailPayload,
   { rejectValue: any }
 >("auth/check-otp", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Checking OTP for:', payload.email);
+    console.log(' Checking OTP for:', payload.email);
     const res = await api.post("/accounts/check-otp/", {
       email: payload.email,
       otp: payload.otp,
     });
 
-    console.log('✅ OTP verified');
+    console.log(' OTP verified');
     
     toast.success('OTP verified successfully!', {
       duration: 3000,
@@ -351,7 +351,7 @@ export const checkOTP = createAsyncThunk<
     };
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ OTP check failed:', errorMessage);
+    console.log(' OTP check failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -366,19 +366,19 @@ export const checkOTP = createAsyncThunk<
   }
 });
 
-// ==================== RESEND OTP ====================
+
 export const resendOtp = createAsyncThunk<
   { message: string },
   { email: string },
   { rejectValue: any }
 >("auth/resend-otp", async (payload, { rejectWithValue }) => {
   try {
-    console.log('📝 Resending OTP to:', payload.email);
+    console.log(' Resending OTP to:', payload.email);
     const res = await api.post("/accounts/resend-otp/", {
       email: payload.email,
     });
     
-    console.log('✅ OTP resent');
+    console.log(' OTP resent');
     
     toast.success('New verification code sent!', {
       duration: 4000,
@@ -388,7 +388,7 @@ export const resendOtp = createAsyncThunk<
     return { message: 'OTP resent' };
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Resend OTP failed:', errorMessage);
+    console.log(' Resend OTP failed:', errorMessage);
     
     toast.error(errorMessage, {
       duration: 5000,
@@ -402,7 +402,7 @@ export const resendOtp = createAsyncThunk<
   }
 });
 
-// ==================== REFRESH TOKEN ====================
+
 export const refreshToken = createAsyncThunk<
   { access: string },
   void,
@@ -412,19 +412,19 @@ export const refreshToken = createAsyncThunk<
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (!refreshToken) {
-      console.log('❌ No refresh token available');
+      console.log(' No refresh token available');
       return rejectWithValue({ 
         error: "No refresh token available" 
       });
     }
 
-    console.log('🔄 Attempting to refresh token...');
+    console.log(' Attempting to refresh token...');
     
     const response = await api.post<{ access: string }>("/accounts/token/refresh/", {
       refresh: refreshToken
     });
 
-    console.log('✅ Token refreshed successfully');
+    console.log(' Token refreshed successfully');
     
     // Optional: Show toast only in development
     if (import.meta.env.DEV) {
@@ -437,7 +437,7 @@ export const refreshToken = createAsyncThunk<
     return response.data;
   } catch (err: any) {
     const errorMessage = extractErrorMessage(err);
-    console.log('❌ Token refresh failed:', errorMessage);
+    console.log(' Token refresh failed:', errorMessage);
     
     // Clear invalid tokens
     localStorage.removeItem("accessToken");
