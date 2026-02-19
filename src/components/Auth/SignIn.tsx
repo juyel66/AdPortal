@@ -28,38 +28,40 @@ const SignIn: React.FC = () => {
   const [loginAttempted, setLoginAttempted] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  // Clear error when component unmounts
+
   useEffect(() => {
     return () => {
       dispatch(clearAuthError());
     };
   }, [dispatch]);
 
-  // Handle authentication state changes
+ 
   useEffect(() => {
     if (isAuthenticated && user && loginAttempted) {
       const orgCount = organizations.length;
-      
-      // Show success message
+ 
       if (orgCount === 0) {
-        toast.success("✨ Welcome to AdPortal!", {
+        toast.success(" Welcome to AdPortal!", {
           duration: 3000,
           position: "top-center",
         });
       } else {
-        toast.success("✅Login successful", {
+        toast.success("Login successful", {
           duration: 3000,
           position: "top-center",
         });
       }
-      
-      // Reset form and flags
+
       setForm({ email: "", password: "", remember: false });
       setLoginAttempted(false);
       setShowPassword(false);
-      
-      // Navigate to dashboard
-      navigate("/");
+
+  
+      if (user.is_admin === true || user.is_admin === "true") {
+        navigate("/admin-dashboard/dashboard");
+      } else {
+        navigate("/user-dashboard/dashboard");
+      }
     }
   }, [isAuthenticated, user, navigate, organizations, loginAttempted]);
 
@@ -69,7 +71,7 @@ const SignIn: React.FC = () => {
       setShowError(true);
       setLoginAttempted(false);
       
-      // Auto-hide error after 5 seconds
+      
       const timer = setTimeout(() => {
         setShowError(false);
         dispatch(clearAuthError());
@@ -86,7 +88,7 @@ const SignIn: React.FC = () => {
     };
     let isValid = true;
 
-    // Email validation
+   
     if (!form.email) {
       errors.email = "Email is required";
       isValid = false;
@@ -95,7 +97,7 @@ const SignIn: React.FC = () => {
       isValid = false;
     }
 
-    // Password validation
+
     if (!form.password) {
       errors.password = "Password is required";
       isValid = false;
@@ -115,15 +117,25 @@ const SignIn: React.FC = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
     
-    // Clear field-specific error when user types
+
     if (formErrors[name as keyof typeof formErrors]) {
       setFormErrors((prev) => ({
         ...prev,
         [name]: "",
       }));
     }
+
+
+
+
     
-    // Clear general error when user types
+
+
+
+
+
+    
+    
     if (showError) {
       setShowError(false);
       dispatch(clearAuthError());
@@ -133,7 +145,7 @@ const SignIn: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
+
     if (!validateForm()) {
       return;
     }
@@ -141,7 +153,7 @@ const SignIn: React.FC = () => {
     setLoginAttempted(true);
     setShowError(false);
     
-    // Dispatch login action
+
     dispatch(
       login({
         email: form.email,
@@ -152,7 +164,7 @@ const SignIn: React.FC = () => {
 
   const handleForgotPassword = () => {
     if (form.email) {
-      // Pre-fill email in forgot password page
+
       navigate("/auth/forgot-password", { state: { email: form.email } });
     } else {
       navigate("/auth/forgot-password");
@@ -162,7 +174,7 @@ const SignIn: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 sm:px-6">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
-        {/* Left Side - Branding */}
+
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
             <img
@@ -184,7 +196,7 @@ const SignIn: React.FC = () => {
           </p>
         </div>
 
-        {/* Right Side - Login Form */}
+      
         <div className="flex justify-center">
           <form
             onSubmit={handleSubmit}
@@ -197,7 +209,7 @@ const SignIn: React.FC = () => {
               Sign in to access your dashboard
             </p>
 
-            {/* Error Alert */}
+        
             {showError && error && (
               <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 animate-shake">
                 <div className="flex items-start gap-3">
@@ -224,7 +236,7 @@ const SignIn: React.FC = () => {
               </div>
             )}
 
-            {/* Email Field */}
+         
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Email Address
@@ -251,7 +263,7 @@ const SignIn: React.FC = () => {
               )}
             </div>
 
-            {/* Password Field */}
+           
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Password
@@ -296,7 +308,7 @@ const SignIn: React.FC = () => {
               )}
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            
             <div className="mb-6 flex items-center justify-between">
               <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
                 <input
@@ -320,7 +332,7 @@ const SignIn: React.FC = () => {
               </button>
             </div>
 
-            {/* Submit Button */}
+          
             <button
               type="submit"
               disabled={loading}
