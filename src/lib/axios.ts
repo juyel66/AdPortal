@@ -145,10 +145,17 @@ api.interceptors.response.use(
         processQueue(null, newToken);
         
        
-        toast.success('Session refreshed!', {
-          duration: 2000,
-          position: 'top-center',
-        });
+        // toast.success('Session refreshed!', {
+        //   duration: 2000,
+        //   position: 'top-center',
+        // });
+
+        
+
+        
+        
+
+        
         
         
         return api(originalRequest);
