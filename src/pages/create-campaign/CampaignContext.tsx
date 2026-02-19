@@ -253,7 +253,7 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
       const savedData = localStorage.getItem(CAMPAIGN_STORAGE_KEY);
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        console.log('📂 Campaign Context: Data loaded from localStorage');
+        console.log(' Campaign Context: Data loaded from localStorage');
         
         // Merge with initial data, ensuring all fields exist
         const mergedData = {
@@ -308,16 +308,24 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
     return initialCampaignData;
   });
 
-  // Save to localStorage whenever campaignData changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(CAMPAIGN_STORAGE_KEY, JSON.stringify(campaignData));
-      console.log('💾 Campaign Context: Data saved to localStorage');
-      console.log('📋 Campaign Context: Current data structure:', campaignData);
-    } catch (error) {
-      console.error('❌ Campaign Context: Error saving to localStorage:', error);
-    }
-  }, [campaignData]);
+
+
+
+  // useEffect(() => {
+  //   try {
+  //     localStorage.setItem(CAMPAIGN_STORAGE_KEY, JSON.stringify(campaignData));
+  //     console.log(' Campaign Context: Data saved to localStorage');
+  //     console.log(' Campaign Context: Current data structure:', campaignData);
+  //   } catch (error) {
+  //     console.error(' Campaign Context: Error saving to localStorage:', error);
+  //   }
+  // }, [campaignData]);
+
+
+
+
+
+
 
   const updateCampaignData = <K extends keyof CampaignData>(step: K, data: Partial<CampaignData[K]>) => {
     setCampaignData(prev => {
@@ -330,12 +338,12 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
       };
 
-      console.log(`🔄 Campaign Context: Updated ${step}`, data);
-      console.log('📦 Campaign Context: Full data after update:', updatedData);
+      console.log(` Campaign Context: Updated ${step}`, data);
+      console.log(' Campaign Context: Full data after update:', updatedData);
       
       // Specifically log Step5 data if it's step5
       if (step === 'step5') {
-        console.log('💰 Step5 Data Details:', updatedData.step5);
+        console.log(' Step5 Data Details:', updatedData.step5);
       }
       
       return updatedData;
@@ -351,28 +359,28 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
         updatedAt: new Date().toISOString()
       }
     }));
-    console.log('🔄 Campaign Context: Updated metadata', metadata);
+    console.log(' Campaign Context: Updated metadata', metadata);
   };
 
   const getAllCampaignData = () => {
-    console.log('📋 Campaign Context: Getting all campaign data');
-    console.log('📋 Campaign Context: Full data dump:', campaignData);
+    console.log(' Campaign Context: Getting all campaign data');
+    console.log(' Campaign Context: Full data dump:', campaignData);
     return campaignData;
   };
 
   const getStepData = <K extends keyof CampaignData>(step: K) => {
-    console.log(`📋 Campaign Context: Getting step ${step} data:`, campaignData[step]);
+    console.log(` Campaign Context: Getting step ${step} data:`, campaignData[step]);
     return campaignData[step];
   };
 
   const clearCampaignData = () => {
-    console.log('🗑️ Campaign Context: Clearing all campaign data');
+    console.log(' Campaign Context: Clearing all campaign data');
     setCampaignData(initialCampaignData);
     localStorage.removeItem(CAMPAIGN_STORAGE_KEY);
   };
 
   const loadCampaignData = (data: Partial<CampaignData>) => {
-    console.log('📥 Campaign Context: Loading external campaign data:', data);
+    console.log(' Campaign Context: Loading external campaign data:', data);
     setCampaignData(prev => ({
       ...prev,
       ...data,
@@ -386,33 +394,33 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const isStepValid = (step: keyof CampaignData): boolean => {
     const stepData = campaignData[step];
-    console.log(`✅ Campaign Context: Validating step ${step}`, stepData);
+    console.log(` Campaign Context: Validating step ${step}`, stepData);
     
     switch (step) {
       case 'step1':
         const isValid1 = (stepData as Step1Data).campaignName.trim().length > 0;
-        console.log(`✅ Step1 validation: ${isValid1 ? 'VALID' : 'INVALID'}`);
+        console.log(` Step1 validation: ${isValid1 ? 'VALID' : 'INVALID'}`);
         return isValid1;
       
       case 'step2':
         const isValid2 = (stepData as Step2Data).selectedPlatforms.length > 0;
-        console.log(`✅ Step2 validation: ${isValid2 ? 'VALID' : 'INVALID'}`);
+        console.log(` Step2 validation: ${isValid2 ? 'VALID' : 'INVALID'}`);
         return isValid2;
       
       case 'step3':
         const isValid3 = (stepData as Step3Data).objective.trim().length > 0;
-        console.log(`✅ Step3 validation: ${isValid3 ? 'VALID' : 'INVALID'}`);
+        console.log(` Step3 validation: ${isValid3 ? 'VALID' : 'INVALID'}`);
         return isValid3;
       
       case 'step4':
         const step4Data = stepData as Step4Data;
-        // ✅ min_age এবং max_age validation
+        //  min_age এবং max_age validation
         const isMinAgeValid = step4Data.min_age >= 18 && step4Data.min_age <= 65;
         const isMaxAgeValid = step4Data.max_age >= step4Data.min_age && step4Data.max_age <= 100;
         const isLocationValid = step4Data.audienceLocation.trim().length > 0;
         
         const isValid4 = isMinAgeValid && isMaxAgeValid && isLocationValid;
-        console.log(`✅ Step4 validation: ${isValid4 ? 'VALID' : 'INVALID'}`);
+        console.log(` Step4 validation: ${isValid4 ? 'VALID' : 'INVALID'}`);
         console.log(`   Min Age: ${step4Data.min_age} (valid: ${isMinAgeValid})`);
         console.log(`   Max Age: ${step4Data.max_age} (valid: ${isMaxAgeValid})`);
         console.log(`   Location: "${step4Data.audienceLocation}" (valid: ${isLocationValid})`);
@@ -420,24 +428,24 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
       
       case 'step5':
         const isValid5 = (stepData as Step5Data).budget > 0;
-        console.log(`✅ Step5 validation: ${isValid5 ? 'VALID' : 'INVALID'}`);
-        console.log(`✅ Step5 budget value: ${(stepData as Step5Data).budget}`);
+        console.log(`Step5 validation: ${isValid5 ? 'VALID' : 'INVALID'}`);
+        console.log(` Step5 budget value: ${(stepData as Step5Data).budget}`);
         return isValid5;
       
       case 'step6':
         const step6Data = stepData as Step6Data;
         const isValid6 = step6Data.headline.trim().length > 0 && 
                step6Data.description.trim().length > 0;
-        console.log(`✅ Step6 validation: ${isValid6 ? 'VALID' : 'INVALID'}`);
+        console.log(` Step6 validation: ${isValid6 ? 'VALID' : 'INVALID'}`);
         return isValid6;
       
       case 'step7':
         const isValid7 = (stepData as Step7Data).termsAccepted === true;
-        console.log(`✅ Step7 validation: ${isValid7 ? 'VALID' : 'INVALID'}`);
+        console.log(` Step7 validation: ${isValid7 ? 'VALID' : 'INVALID'}`);
         return isValid7;
       
       default:
-        console.log(`❌ Step ${step} validation: UNKNOWN STEP`);
+        console.log(` Step ${step} validation: UNKNOWN STEP`);
         return false;
     }
   };
@@ -446,13 +454,13 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
     const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'] as const;
     const validationResults: Record<keyof CampaignData, boolean> = {} as Record<keyof CampaignData, boolean>;
     
-    console.log('✅ Campaign Context: Starting validation of all steps');
+    console.log(' Campaign Context: Starting validation of all steps');
     
     steps.forEach(step => {
       validationResults[step] = isStepValid(step);
     });
     
-    console.log('✅ Campaign Context: Step validation results', validationResults);
+    console.log(' Campaign Context: Step validation results', validationResults);
     return validationResults;
   };
 
@@ -464,26 +472,26 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
         exportedAt: new Date().toISOString()
       }
     };
-    console.log('📤 Campaign Context: Exporting data', exportData);
+    console.log(' Campaign Context: Exporting data', exportData);
     return JSON.stringify(exportData, null, 2);
   };
 
   const importCampaignData = (jsonString: string): boolean => {
     try {
       const importedData = JSON.parse(jsonString);
-      console.log('📤 Campaign Context: Importing data', importedData);
+      console.log(' Campaign Context: Importing data', importedData);
       loadCampaignData(importedData);
-      console.log('📤 Campaign Context: Data imported successfully');
+      console.log(' Campaign Context: Data imported successfully');
       return true;
     } catch (error) {
-      console.error('❌ Campaign Context: Error importing data:', error);
+      console.error(' Campaign Context: Error importing data:', error);
       return false;
     }
   };
 
-  // ✅ নতুন: API ফরম্যাটে ডেটা কনভার্ট করার ফাংশন
+
   const getApiFormattedData = (): ApiCampaignData => {
-    console.log("🎯 Campaign Context: Converting to API format");
+    console.log(" Campaign Context: Converting to API format");
     
     // Platform mapping
     const platformMapping: Record<string, string> = {
@@ -512,17 +520,21 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
       "lifetime": "ONETIME"
     };
 
-    // Gender mapping
+
     const genderMapping: Record<string, string> = {
       "all": "all",
       "male": "male",
       "female": "female"
     };
 
-    // Step4-এর audienceGender array থেকে প্রথম gender নিন
+    
+
+
     const selectedGender = campaignData.step4.audienceGender.length > 0 
       ? campaignData.step4.audienceGender[0] 
       : "all";
+
+      
 
     const apiData: ApiCampaignData = {
       platforms: campaignData.step2.selectedPlatforms.map(

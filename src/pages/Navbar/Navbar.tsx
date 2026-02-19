@@ -6,6 +6,7 @@ import logo from "../../assets/whiteLogo.svg";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { logout } from "../../features/auth/AuthThunks"; 
 import { toast } from "sonner";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-2 text-[15px] font-medium transition-all ${
@@ -39,6 +40,8 @@ const handleLogout = async () => {
   }
 };
 
+ const {is_admin} = useUserProfile();
+
 
 
 
@@ -70,12 +73,19 @@ const handleLogout = async () => {
             </NavLink>
 
             {isAuthenticated && (
-              <NavLink
-                to="/user-dashboard/dashboard"
-                className={navLinkClass}
+              <button
+                className={`${navLinkClass({ isActive: false })} cursor-pointer`}
+                onClick={() => {
+                  if (is_admin === "true" || is_admin === true) {
+                    navigate("/admin-dashboard/dashboard");
+                  } else {
+                    navigate("/user-dashboard/dashboard");
+                  }
+                  handleLinkClick();
+                }}
               >
                 Dashboard
-              </NavLink>
+              </button>
             )}
           </nav>
 
