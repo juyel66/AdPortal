@@ -429,6 +429,8 @@ const adminItems = [
   { title: "Settings", url: "/admin-dashboard/settings", icon: Settings },
 ];
 
+
+
 const ACTIVE_BG = "#2D6FF8";
 const ACTIVE_TEXT = "#FFFFFF";
 const INACTIVE_TEXT = "#4B5563";
@@ -506,80 +508,89 @@ export function AppSidebar() {
             />
           </div>
 
-          {/* Account Dropdown */}
-          <div className="px-1 py-1">
-            <AccountDropdown 
-              userName={userName}
-              userInitial={userInitial}
-              email={user?.email || ""}
-              organizations={organizations}
-              selectedOrganization={selectedOrganization}
-            />
-          </div>
+          {/* Account Dropdown only for user, not admin */}
+          {!isAdmin && (
+            <div className="px-1 py-1">
+              <AccountDropdown 
+                userName={userName}
+                userInitial={userInitial}
+                email={user?.email || ""}
+                organizations={organizations}
+                selectedOrganization={selectedOrganization}
+              />
+            </div>
+          )}
 
-          {/* Dynamic Menu based on user role */}
-          <SidebarGroup>
-            <SidebarGroupLabel className="">
-              <span className="px-4 text-xs font-semibold uppercase text-gray-400">
-                {isAdmin ? "Admin" : "User"} 
-              </span> 
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {isAdmin ? renderMenu(adminItems) : renderMenu(userItems)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {/* Show admin menu if user is admin, otherwise show user menu */}
+          {isAdmin ? (
+            <SidebarGroup>
+              <SidebarGroupLabel className="">
+                <span className="px-4 text-xs font-semibold uppercase text-gray-400">
+                  Admin
+                </span> 
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {renderMenu(adminItems)}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : (
+            <SidebarGroup>
+              <SidebarGroupLabel className="">
+                <span className="px-4 text-xs font-semibold uppercase text-gray-400">
+                  User
+                </span> 
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {renderMenu(userItems)}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
 
-          {/* PLAN CARD */}
-   <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
-  
-  {/* Header */}
-  <div className="flex items-center justify-between mb-2">
-    <div className="text-sm font-medium text-gray-500 flex items-center gap-1">
-      Current Plan
-      <svg
-        className="w-4 h-4 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  </div>
-
-  <div className="text-lg font-semibold text-gray-800 mb-2">
-    Growth Plan
-  </div>
-
- 
-  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
-    <div className="h-full bg-[#2D6FF8] rounded-full" style={{ width: "65%" }}></div>
-  </div>
-
-  
-  <div className="text-xs text-gray-500 mb-4">
-    65 of 100 campaigns used
-  </div>
-
- 
-  <button className="w-full rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
-    Upgrade Plan
-  </button>
-
-</div>
-
+          {/* PLAN CARD only for user, not admin */}
+          {!isAdmin && (
+            <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                  Current Plan
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="text-lg font-semibold text-gray-800 mb-2">
+                Growth Plan
+              </div>
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                <div className="h-full bg-[#2D6FF8] rounded-full" style={{ width: "65%" }}></div>
+              </div>
+              <div className="text-xs text-gray-500 mb-4">
+                65 of 100 campaigns used
+              </div>
+              <button className="w-full rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
+                Upgrade Plan
+              </button>
+            </div>
+          )}
         </div>
 
         {/* LOGOUT */}
         <div className="mt-4 border-t border-gray-100 pt-4">
           <button 
             onClick={handleLogout}
-            className="mx-4 flex w-[calc(100%-2rem)] items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-[#EF4444] hover:bg-red-50 transition-colors"
+            className="mx-4 flex cursor-pointer w-[calc(100%-2rem)] items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-[#EF4444] hover:bg-red-50 transition-colors"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4 " />
             <span>Log out</span>
           </button>
         </div>
