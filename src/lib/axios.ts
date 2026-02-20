@@ -127,10 +127,10 @@ api.interceptors.response.use(
         console.log('🔄 Attempting token refresh...');
         
       
-        toast.info('Refreshing session...', {
-          duration: 2000,
-          position: 'top-center',
-        });
+        // toast.info('Refreshing session...', {
+        //   duration: 2000,
+        //   position: 'top-center',
+        // });
 
 
         const result = await store.dispatch(refreshToken()).unwrap();
