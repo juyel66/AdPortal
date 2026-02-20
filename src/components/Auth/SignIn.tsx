@@ -101,8 +101,8 @@ const SignIn: React.FC = () => {
     if (!form.password) {
       errors.password = "Password is required";
       isValid = false;
-    } else if (form.password.length < 5) {
-      errors.password = "Password must be at least 5 characters";
+    } else if (form.password.length < 4) {
+      errors.password = "Password must be at least 4 characters";
       isValid = false;
     }
 
