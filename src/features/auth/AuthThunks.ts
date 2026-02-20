@@ -427,12 +427,12 @@ export const refreshToken = createAsyncThunk<
     console.log(' Token refreshed successfully');
     
     // Optional: Show toast only in development
-    if (import.meta.env.DEV) {
-      toast.success('Token refreshed!', {
-        duration: 2000,
-        position: 'top-center',
-      });
-    }
+    // if (import.meta.env.DEV) {
+    //   toast.success('Token refreshed!', {
+    //     duration: 2000,
+    //     position: 'top-center',
+    //   });
+    // }
     
     return response.data;
   } catch (err: any) {
