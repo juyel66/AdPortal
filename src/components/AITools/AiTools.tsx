@@ -73,6 +73,26 @@ const AiTools: React.FC = () => {
   );
   const [tone, setTone] = useState("Professional");
 
+  // AI Insights state
+  const [insights, setInsights] = useState<any[]>([]);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (activeTab !== "optimization") return;
+    const org_id = getOrgId();
+    if (!org_id) return;
+    setInsightsLoading(true);
+    api
+      .get(`/main/ai-insights/?org_id=${org_id}`)
+      .then((res) => {
+        setInsights(res.data.results || []);
+      })
+      .catch((err) => {
+        setInsights([]);
+      })
+      .finally(() => setInsightsLoading(false));
+  }, [activeTab]);
+
   // Copy to clipboard logic
   const handleCopy = async (text: string) => {
     try {
@@ -355,28 +375,36 @@ const AiTools: React.FC = () => {
             AI Campaign Optimization
           </h2>
 
-          {OPTIMIZATION_DATA.map((item, idx) => (
-            <div
-              key={idx}
-              className="rounded-xl border border-slate-200 p-4 flex items-start justify-between hover:border-slate-300 transition-colors"
-            >
-              <div className="flex-1">
-                <h3 className="font-medium text-slate-900">{item.title}</h3>
-                <p className="text-sm text-slate-600 mt-1">
-                  {item.description}
-                </p>
-              </div>
-              <span
-                className={`text-xs px-2 py-1 rounded-full h-fit ml-4 ${
-                  item.impact === "High Impact"
-                    ? "bg-green-100 border border-green-500 text-green-700"
-                    : "bg-yellow-100 border border-yellow-500 text-yellow-700"
-                }`}
+          {insightsLoading ? (
+            <div className="text-center text-slate-500 py-8">Loading insights...</div>
+          ) : insights.length > 0 ? (
+            insights.map((item, idx) => (
+              <div
+                key={item.id || idx}
+                className="rounded-xl border border-slate-200 p-4 flex items-start justify-between hover:border-slate-300 transition-colors"
               >
-                {item.impact}
-              </span>
-            </div>
-          ))}
+                <div className="flex-1">
+                  <h3 className="font-medium text-slate-900">{item.title}</h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    {item.description}
+                  </p>
+                </div>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full h-fit ml-4 ${
+                    item.impect === "HIGH"
+                      ? "bg-green-100 border border-green-500 text-green-700"
+                      : item.impect === "MEDIUM"
+                      ? "bg-yellow-100 border border-yellow-500 text-yellow-700"
+                      : "bg-slate-100 border border-slate-300 text-slate-700"
+                  }`}
+                >
+                  {item.impect}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-slate-500 py-8">No insights found.</div>
+          )}
         </div>
       )}
     </div>
