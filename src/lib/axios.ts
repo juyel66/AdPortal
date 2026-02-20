@@ -197,10 +197,12 @@ api.interceptors.response.use(
     } 
     
     else if (error.response?.status === 404) {
-      toast.error('Resource not found.', {
-        duration: 4000,
-        position: 'top-center',
-      });
+      // toast.error('Resource not found.', {
+      //   duration: 4000,
+      //   position: 'top-center',
+      // });
+
+       console.log("resource not found");
 
 
 

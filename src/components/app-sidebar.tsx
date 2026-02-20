@@ -568,7 +568,7 @@ export function AppSidebar() {
                   </svg>
                 </div>
               </div>
-              <div className="text-lg font-semibold text-gray-800 mb-2">
+              <div  className="text-lg cursor-pointer font-semibold text-gray-800 mb-2">
                 Growth Plan
               </div>
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
@@ -577,9 +577,11 @@ export function AppSidebar() {
               <div className="text-xs text-gray-500 mb-4">
                 65 of 100 campaigns used
               </div>
-              <button className="w-full rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
+              <Link to="/user-dashboard/subscriptions">
+                <button className="w-full cursor-pointer rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
                 Upgrade Plan
               </button>
+              </Link>
             </div>
           )}
         </div>
