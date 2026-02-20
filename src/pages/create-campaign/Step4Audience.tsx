@@ -72,10 +72,10 @@ const Step4Audience: React.FC = () => {
         keywords: interests
       };
 
-      console.log("📤 Sending audience data:", requestData);
+      console.log(" Sending audience data:", requestData);
 
       const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData);
-      console.log("✅ Audience saved:", response.data);
+      console.log(" Audience saved:", response.data);
 
       navigate("/user-dashboard/campaigns-create/step-5");
 
