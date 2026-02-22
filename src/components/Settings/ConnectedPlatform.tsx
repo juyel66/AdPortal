@@ -63,11 +63,33 @@ const ConnectedPlatforms: React.FC = () => {
       return null;
     };
 
-    getOrgIdFromLocalStorage();
-    
-    // You can add a function here to check which platforms are already connected
-    // For example: fetchConnectedPlatforms();
+    const orgId = getOrgIdFromLocalStorage();
+    if (orgId) {
+      fetchIntegrationStatus(orgId);
+    }
   }, []);
+
+  const fetchIntegrationStatus = async (orgId: string) => {
+    try {
+      // Use POST method as requested
+      const response = await api.get(`/main/integrations-status/?org_id=${orgId}`);
+      if (response.data && response.data.integrations) {
+        const statusMap: Record<PlatformKey, boolean> = {
+          meta: false,
+          google: false,
+          tiktok: false,
+        };
+        response.data.integrations.forEach((integration: any) => {
+          if (integration.platform === "META") statusMap.meta = integration.status;
+          if (integration.platform === "GOOGLE") statusMap.google = integration.status;
+          if (integration.platform === "TIKTOK") statusMap.tiktok = integration.status;
+        });
+        setConnected(statusMap);
+      }
+    } catch (error) {
+      console.error("Error fetching integration status:", error);
+    }
+  };
 
   const handleConnect = async (platform: Platform) => {
     if (!organizationId) {
@@ -112,8 +134,7 @@ const ConnectedPlatforms: React.FC = () => {
   };
 
   const getPlatformConnectionStatus = (key: PlatformKey) => {
-    // This function should check actual connection status from your backend
-    // For now, returning the local state
+    // Always use the latest status from backend
     return connected[key];
   };
 
