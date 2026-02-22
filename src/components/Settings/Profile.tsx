@@ -76,6 +76,14 @@ const Profile: React.FC = () => {
     } finally {
       setLoading(false);
     }
+
+
+    // const pageReload = setTimeout(() => {
+    //   window.location.reload();
+    // }, );
+    // return () => clearTimeout(pageReload);
+
+    
   };
 
   const handleCancel = () => {
@@ -180,14 +188,14 @@ const Profile: React.FC = () => {
               type="button"
               onClick={handleSave}
               disabled={loading || !hasChanges()}
-              className={`rounded-lg px-5 py-2 text-sm font-medium transition flex items-center gap-2 ${
+              className={`rounded-lg px-5 cursor-pointer py-2 text-sm font-medium transition flex items-center gap-2 ${
                 hasChanges() 
                   ? 'bg-blue-600 text-white hover:bg-blue-700' 
                   : 'bg-slate-200 text-slate-500 cursor-not-allowed'
               }`}
             >
               {loading && (
-                <div className="h-3 w-3 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
+                <div className="h-3 w-3  animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
               )}
               {loading ? "Saving..." : "Save Changes"}
             </button>
