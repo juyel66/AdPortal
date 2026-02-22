@@ -62,7 +62,7 @@ const General: React.FC = () => {
           Cancel
         </button>
 
-        <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+        <button className="rounded-lg  bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
           Save Changes
         </button>
       </div>
