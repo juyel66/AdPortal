@@ -367,8 +367,10 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "../../src/hooks/reduxHooks";
+import { useAppDispatch } from "../../src/hooks/reduxHooks";
 import { logout } from "../../src/features/auth/AuthThunks";
+import { useEffect } from "react";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 import {
   Sidebar,
@@ -440,15 +442,35 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  
-  const { user, organizations, selectedOrganization } = useAppSelector((state) => state.auth);
-  
-  const isAdmin = user?.is_admin || false;
-  const userName = user?.first_name && user?.last_name 
-    ? `${user.first_name} ${user.last_name}`
-    : user?.email || "User";
-  
-  const userInitial = userName.charAt(0).toUpperCase();
+  const { user, loading, is_admin } = useUserProfile();
+
+  // Block access to dashboard routes if not authenticated or no profile
+  useEffect(() => {
+    if (loading) return;
+    // If profile is missing or is_admin is undefined/null, block all except login
+    if (!user || typeof user.is_admin !== "boolean") {
+      if (!pathname.startsWith("/auth/signin")) {
+        navigate("/auth/signin", { replace: true });
+      }
+      return;
+    }
+    // If on dashboard root, redirect based on is_admin
+    if (pathname === "/admin-dashboard" || pathname === "/user-dashboard") {
+      if (user.is_admin) {
+        navigate("/admin-dashboard/dashboard", { replace: true });
+      } else {
+        navigate("/user-dashboard/dashboard", { replace: true });
+      }
+    }
+    // If admin tries to access user dashboard, redirect
+    if (user.is_admin && pathname.startsWith("/user-dashboard")) {
+      navigate("/admin-dashboard/dashboard", { replace: true });
+    }
+    // If user tries to access admin dashboard, redirect
+    if (!user.is_admin && pathname.startsWith("/admin-dashboard")) {
+      navigate("/user-dashboard/dashboard", { replace: true });
+    }
+  }, [user, loading, pathname, navigate]);
 
   const handleLogout = async () => {
     try {
@@ -461,15 +483,14 @@ export function AppSidebar() {
     }
   };
 
-  
+  const userName = user?.full_name || user?.email || "User";
+  const userInitial = userName.charAt(0).toUpperCase();
 
   const renderMenu = (items: typeof userItems) =>
     items.map((item) => {
       const isActive =
         pathname === item.url || pathname.startsWith(item.url + "/");
-
       const Icon = item.icon;
-
       return (
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton
@@ -509,20 +530,20 @@ export function AppSidebar() {
           </div>
 
           {/* Account Dropdown only for user, not admin */}
-          {!isAdmin && (
+          {user && !user.is_admin && (
             <div className="px-1 py-1">
               <AccountDropdown 
                 userName={userName}
                 userInitial={userInitial}
                 email={user?.email || ""}
-                organizations={organizations}
-                selectedOrganization={selectedOrganization}
+                organizations={[]}
+                selectedOrganization={undefined}
               />
             </div>
           )}
 
           {/* Show admin menu if user is admin, otherwise show user menu */}
-          {isAdmin ? (
+          {user && user.is_admin ? (
             <SidebarGroup>
               <SidebarGroupLabel className="">
                 <span className="px-4 text-xs font-semibold uppercase text-gray-400">
@@ -551,7 +572,7 @@ export function AppSidebar() {
           )}
 
           {/* PLAN CARD only for user, not admin */}
-          {!isAdmin && (
+          {user && !user.is_admin && (
             <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
               {/* Header */}
               <div className="flex items-center justify-between mb-2">
