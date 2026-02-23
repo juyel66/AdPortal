@@ -80,23 +80,50 @@ const BusinessInfo: React.FC = () => {
 
   const handleSave = async () => {
     if (!organizationId) return;
-    
     try {
       setLoading(true);
-      
       const updateData = {
         name: form.companyName,
         website: form.website,
         industry: form.industry,
         company_size: form.companySize,
       };
-
       await api.patch(`/main/organization/?org_id=${organizationId}`, updateData);
-      
+      // Update localStorage.selectedOrganization with new company name
+      const selectedOrgRaw = localStorage.getItem('selectedOrganization');
+      if (selectedOrgRaw) {
+        try {
+          const selectedOrg = JSON.parse(selectedOrgRaw);
+          selectedOrg.name = form.companyName;
+          localStorage.setItem('selectedOrganization', JSON.stringify(selectedOrg));
+        } catch (e) {
+          // ignore parse error
+        }
+      }
+      // Update organizations array in localStorage if present
+      const orgsRaw = localStorage.getItem('organizations');
+      if (orgsRaw) {
+        try {
+          let orgs = JSON.parse(orgsRaw);
+          if (Array.isArray(orgs)) {
+            orgs = orgs.map((org: any) => {
+              if (Array.isArray(org) && org[0] === organizationId) {
+                // [id, name, ...]
+                return [org[0], form.companyName, ...org.slice(2)];
+              } else if (typeof org === 'object' && org !== null && org.id === organizationId) {
+                return { ...org, name: form.companyName };
+              }
+              return org;
+            });
+            localStorage.setItem('organizations', JSON.stringify(orgs));
+          }
+        } catch (e) {
+          // ignore parse error
+        }
+      }
       setEditing(false);
       setInitialForm(form);
       toast.success("Business information updated successfully!");
-      
     } catch (error) {
       console.error("Error updating organization data:", error);
       toast.error("Update failed!");
