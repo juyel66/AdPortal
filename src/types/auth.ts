@@ -16,6 +16,7 @@ export interface UserProfile {
   is_staff?: boolean;
   is_superuser?: boolean;
   is_active?: boolean;
+  is_admin?: boolean;
 }
 
 /* =========================
