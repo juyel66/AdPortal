@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 
 interface Organization {
@@ -22,6 +22,27 @@ export default function AccountDropdown({
   const [open, setOpen] = useState(false);
   const [localSelectedOrganization, setLocalSelectedOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
 
   // Process raw organizations array to Organization objects
   const processedOrganizations: Organization[] = rawOrganizations.map((org) => {
@@ -173,7 +194,7 @@ export default function AccountDropdown({
   }
 
   return (
-    <div className="relative px-4 mt-2">
+    <div className="relative px-4 mt-2" ref={dropdownRef}>
       {/* Trigger Button */}
       <button
         onClick={() => setOpen(!open)}
@@ -203,11 +224,7 @@ export default function AccountDropdown({
       {open && (
         <div className="absolute left-4 right-4 z-50 mt-1 rounded-xl bg-white shadow-lg border border-gray-200 px-2 py-2">
           {/* User Info Section - Moved to top */}
-          
-
- 
-
-          {/* Switch Organization Section */}
+          {/* ...existing code... */}
           <div className="p-2 max-h-56 overflow-y-auto">
             <p className="mb-1 px-1 text-[10px] font-bold text-gray-800  uppercase">
               Switch Organization
