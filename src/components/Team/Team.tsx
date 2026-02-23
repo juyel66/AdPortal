@@ -104,7 +104,7 @@ const Team: React.FC = () => {
         dispatch(fetchTeam({ org_id })),
         dispatch(fetchTeamMembers({ org_id }))
       ]).then(([teamResult]) => {
-        if (fetchTeam.fulfilled.match(teamResult)) {
+        if (fetchTeam.fulfilled.match(teamResult)) { 
           console.log(teamResult);
         }
        
@@ -121,7 +121,7 @@ const Team: React.FC = () => {
       dispatch(clearTeamMessage());
     }
     if (error) {
-      toast.error(error);
+      
       dispatch(clearTeamError());
     }
   }, [message, error, dispatch]);
