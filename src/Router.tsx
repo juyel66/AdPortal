@@ -52,6 +52,7 @@ import ContactUs from "./pages/Contact/ContactUs";
 import NotificationsPage from "./pages/NotificationsPage/Notificationspage";
 import AcceptInvite from "./components/Team/AcceptInvite";
 import UpdateCampaignLayout from "./pages/update-campaign/UpdateCampaignLayout";
+import MetaAuthCallback from "./components/Settings/MetaAuthCallback";
 
 export const router = createBrowserRouter([
   {
@@ -69,6 +70,10 @@ export const router = createBrowserRouter([
             {
         path: "accept-invite/:token",
         element: <AcceptInvite />,
+      },
+            {
+        path: "meta-auth-callback",
+        element: <MetaAuthCallback />,
       },
       {
         path: "features",
