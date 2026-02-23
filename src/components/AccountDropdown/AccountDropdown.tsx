@@ -115,18 +115,36 @@ export default function AccountDropdown({
   }, []);
 
 
-  const handleOrganizationSelect = (org: Organization) => {
-    
-    setLocalSelectedOrganization(org);
-    
+  // Add effect to sync localSelectedOrganization with localStorage on organizationChanged event
+  useEffect(() => {
+    const syncWithLocalStorage = () => {
+      const savedOrg = localStorage.getItem("selectedOrganization");
+      if (savedOrg) {
+        try {
+          const parsedOrg = JSON.parse(savedOrg);
+          setLocalSelectedOrganization(parsedOrg);
+        } catch {}
+      }
+    };
+    window.addEventListener('organizationChanged', syncWithLocalStorage);
+    // Also sync when dropdown is opened
+    if (open) syncWithLocalStorage();
+    return () => {
+      window.removeEventListener('organizationChanged', syncWithLocalStorage);
+    };
+  }, [open]);
 
+  const handleOrganizationSelect = (org: Organization) => {
+    // Only update if a different org is selected
+    if (localSelectedOrganization?.id === org.id) {
+      setLocalSelectedOrganization(org); // still update state for UI
+      return;
+    }
+    setLocalSelectedOrganization(org);
     localStorage.setItem("selectedOrganization", JSON.stringify(org));
-    
-  
     window.dispatchEvent(new CustomEvent('organizationChanged', { 
       detail: org 
     }));
-    
     console.log("Organization selected and saved:", org);
   };
 
@@ -149,28 +167,41 @@ export default function AccountDropdown({
   };
 
 
-  const getOrganizationInitial = (org: Organization): string => {
-    if (!org) return "O";
-    
-    if (org.name && org.name !== null && org.name.trim() !== "") {
-      return org.name.charAt(0).toUpperCase();
-    }
-    
-    return "O";
-  };
-
-
   const getOrganizationDisplayName = (org: Organization): string => {
+    try {
+      const savedOrg = localStorage.getItem("selectedOrganization");
+      if (savedOrg) {
+        const parsedOrg = JSON.parse(savedOrg);
+        if (parsedOrg.id === org.id && parsedOrg.name && parsedOrg.name.trim() !== "") {
+          return parsedOrg.name;
+        }
+      }
+    } catch {}
     if (!org) return "N/A";
-    
     if (org.name && org.name !== null && org.name.trim() !== "") {
       return org.name;
     }
-    
     const orgNumber = getOrganizationNumber(org.id);
     return `Organization ${orgNumber}`;
   };
 
+
+  const getOrganizationInitial = (org: Organization): string => {
+    try {
+      const savedOrg = localStorage.getItem("selectedOrganization");
+      if (savedOrg) {
+        const parsedOrg = JSON.parse(savedOrg);
+        if (parsedOrg.id === org.id && parsedOrg.name && parsedOrg.name.trim() !== "") {
+          return parsedOrg.name.charAt(0).toUpperCase();
+        }
+      }
+    } catch {}
+    if (!org) return "O";
+    if (org.name && org.name !== null && org.name.trim() !== "") {
+      return org.name.charAt(0).toUpperCase();
+    }
+    return "O";
+  };
 
   const isOrganizationSelected = (orgId: string): boolean => {
     return localSelectedOrganization?.id === orgId;
