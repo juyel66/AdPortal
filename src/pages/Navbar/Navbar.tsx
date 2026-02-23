@@ -5,7 +5,7 @@ import logo from "../../assets/whiteLogo.svg";
 
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { logout } from "../../features/auth/AuthThunks"; 
-import { toast } from "sonner";
+
 import { useUserProfile } from "@/hooks/useUserProfile";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -16,31 +16,33 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 const Navbar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
-  const { isAuthenticated, user } = useAppSelector(
-    (state) => state.auth
-  );
-
-  
+  const { user, loading, is_admin, email } = useUserProfile();
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
   };
 
-const handleLogout = async () => {
-  try {
-    await dispatch(logout()).unwrap();
-  } finally {
-    navigate("/auth/signin", { replace: true });
-    toast.success("Logged out successfully!");
-  }
-};
+  const handleDashboardClick = () => {
+    if (is_admin) {
+      navigate("/admin-dashboard/dashboard");
+    } else {
+      navigate("/user-dashboard/dashboard");
+    }
+    handleLinkClick();
+  };
 
- const {is_admin} = useUserProfile();
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+    } finally {
+      navigate("/auth/signin", { replace: true });
+      
+    }
+  };
 
 
 
@@ -72,17 +74,10 @@ const handleLogout = async () => {
               Pricing
             </NavLink>
 
-            {isAuthenticated && (
+            {email && (
               <button
                 className={`${navLinkClass({ isActive: false })} cursor-pointer`}
-                onClick={() => {
-                  if (is_admin === "true" || is_admin === true) {
-                    navigate("/admin-dashboard/dashboard");
-                  } else {
-                    navigate("/user-dashboard/dashboard");
-                  }
-                  handleLinkClick();
-                }}
+                onClick={handleDashboardClick}
               >
                 Dashboard
               </button>
@@ -91,7 +86,7 @@ const handleLogout = async () => {
 
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center gap-4">
-            {!isAuthenticated ? (
+            {!email ? (
               <>
                 <Link
                   to="/auth/signin"
@@ -110,7 +105,7 @@ const handleLogout = async () => {
             ) : (
               <>
                 <span className="text-sm text-gray-600">
-                  {user?.first_name}
+                  {user?.full_name}
                 </span>
 
                 <button
@@ -167,18 +162,17 @@ const handleLogout = async () => {
             Pricing
           </NavLink>
 
-          {isAuthenticated && (
-            <NavLink
-              to="/user-dashboard/dashboard"
-              className={navLinkClass}
-              onClick={handleLinkClick}
+          {email && (
+            <button
+              className={`${navLinkClass({ isActive: false })} cursor-pointer`}
+              onClick={handleDashboardClick}
             >
               Dashboard
-            </NavLink>
+            </button>
           )}
 
           <div className="pt-4 border-t space-y-3">
-            {!isAuthenticated ? (
+            {!email ? (
               <>
                 <Link
                   to="/auth/signin"
