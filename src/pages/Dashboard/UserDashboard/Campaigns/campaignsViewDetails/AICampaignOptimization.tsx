@@ -5,46 +5,25 @@ import type {
 } from "@/types/aiCampaignOptimization";
 
 /* ===============================
-   DATA
+   TYPES
 ================================ */
 
-const optimizations: OptimizationItem[] = [
-  {
-    id: 1,
-    title: "Budget Reallocation Suggestion",
-    description:
-      "Google Ads is performing 23% better than Meta in terms of ROAS. Consider reallocating $15/day from Meta to Google Ads.",
-    impact: "high",
-  },
-  {
-    id: 2,
-    title: "New Target Audience Proposal",
-    description:
-      "Targeting a younger demographic on Instagram has shown a 35% increase in engagement. Recommend allocating an additional $10/day towards this audience.",
-    impact: "medium",
-  },
-  {
-    id: 3,
-    title: "Creative Content Enhancement",
-    description:
-      "Video content on social media results in 50% higher shares. Consider investing an extra $20/day for video production.",
-    impact: "high",
-  },
-  {
-    id: 4,
-    title: "Budget Reallocation Suggestion",
-    description:
-      "Google Ads is performing 23% better than Meta in terms of ROAS. Consider reallocating $15/day from Meta to Google Ads.",
-    impact: "high",
-  },
-  {
-    id: 5,
-    title: "Cross-Promotion Strategy",
-    description:
-      "Collaborating with influencers has led to a 40% boost in brand awareness. Allocate $5/day for influencer partnerships.",
-    impact: "medium",
-  },
-];
+interface AIInsight {
+  id: number;
+  title: string;
+  description: string;
+  created_at: string;
+  impect: string; // Note: API returns "impect" (misspelled) instead of "impact"
+}
+
+interface CampaignData {
+  ai_insights?: AIInsight[];
+  [key: string]: any;
+}
+
+interface AICampaignOptimizationProps {
+  campaign?: CampaignData;
+}
 
 /* ===============================
    HELPERS
@@ -62,34 +41,81 @@ const impactStyles: Record<
     badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
     text: "Medium impact",
   },
+  low: {
+    badge: "bg-blue-100 text-blue-700 border-blue-200",
+    text: "Low impact",
+  },
 };
 
-/* ===============================
-   COMPONENT
-================================ */
+// Helper to map API impact to our component's impact level
+const mapImpactLevel = (impect: string): ImpactLevel => {
+  const upper = impect?.toUpperCase() || "";
+  if (upper.includes("HIGH")) return "high";
+  if (upper.includes("MEDIUM")) return "medium";
+  return "low";
+};
 
-const AICampaignOptimization: React.FC = () => {
+const AICampaignOptimization: React.FC<AICampaignOptimizationProps> = ({ campaign }) => {
+  // Get insights from campaign data or use empty array
+  const insights = campaign?.ai_insights || [];
+
+  // If no insights, show empty state
+  if (insights.length === 0) {
+    return (
+      <div className="rounded-xl border bg-white p-6">
+        <h2 className="mb-4 text-sm font-semibold text-slate-900">
+          AI Campaign Optimization
+        </h2>
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="mb-3 rounded-full bg-slate-100 p-3">
+            <svg className="h-6 w-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 className="text-sm font-medium text-slate-900">No AI insights available</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            AI-powered optimization suggestions will appear here
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border bg-white p-6">
-      <h2 className="mb-4 text-sm font-semibold text-slate-900">
-        AI Campaign Optimization
-      </h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-slate-900">
+          AI Campaign Optimization
+        </h2>
+        <span className="text-xs text-slate-500">
+          {insights.length} insight{insights.length !== 1 ? 's' : ''}
+        </span>
+      </div>
 
       <div className="space-y-4">
-        {optimizations.map((item) => {
-          const impact = impactStyles[item.impact];
+        {insights.map((insight) => {
+          const impact = impactStyles[mapImpactLevel(insight.impect)];
 
           return (
             <div
-              key={item.id}
+              key={insight.id}
               className="flex items-start justify-between gap-4 rounded-xl border border-blue-200 bg-white p-4"
             >
-              <div>
+              <div className="flex-1">
                 <h3 className="text-sm font-semibold text-slate-900">
-                  {item.title}
+                  {insight.title}
                 </h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  {item.description}
+                  {insight.description}
+                </p>
+                <p className="mt-2 text-xs text-slate-400">
+                  {new Date(insight.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </p>
               </div>
 
