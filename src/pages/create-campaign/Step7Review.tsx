@@ -132,7 +132,7 @@ const Step7Review: React.FC = () => {
    
     className="btn md:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border"
   >
-    Continue
+    Publish
   </button>
 </div>
       </div>
