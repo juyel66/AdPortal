@@ -141,7 +141,7 @@ const Step3Objective: React.FC = () => {
       });
 
       // Navigate to next step
-      navigate("/user-dashboard/campaigns-create/step-4");
+      navigate(`/user-dashboard/campaigns-create/${campaignId}/update-step-4`);
 
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || "Failed to save objective";
@@ -276,7 +276,7 @@ const Step3Objective: React.FC = () => {
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
         <Link
-          to="/user-dashboard/campaigns-create/step-2"
+          to={`/user-dashboard/campaigns-create/${campaignId}/update-step-2`}
           className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
         >
           Previous
