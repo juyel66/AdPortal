@@ -1,7 +1,8 @@
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import CampaignProgressBar from "@/components/campaign/CampaignProgressBar";
+
 import { Button } from "@/components/ui/button";
+import UpdateCampaignProgressBar from "./UpdateCampaignProgressBar";
 
 const TOTAL_STEPS = 7;
 
@@ -47,7 +48,7 @@ const UpdateCampaignLayout: React.FC = () => {
 
       {/* Progress Bar */}
       <div className="px-6 pt-6">
-        <CampaignProgressBar currentStep={currentStep} />
+        <UpdateCampaignProgressBar currentStep={currentStep} />
       </div>
 
       
