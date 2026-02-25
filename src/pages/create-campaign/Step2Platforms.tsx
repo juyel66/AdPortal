@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
-import { useCampaign } from "../../pages/create-campaign/CampaignContext";
+import { useCampaign } from "./CampaignContext";
 import { useNavigate, Link } from "react-router";
 import type { PlatformItem, PlatformKey } from "@/types/createCampaignStep1";
 import api from "@/lib/axios";
