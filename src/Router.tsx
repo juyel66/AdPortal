@@ -53,6 +53,14 @@ import NotificationsPage from "./pages/NotificationsPage/Notificationspage";
 import AcceptInvite from "./components/Team/AcceptInvite";
 import UpdateCampaignLayout from "./pages/update-campaign/UpdateCampaignLayout";
 import MetaAuthCallback from "./components/Settings/MetaAuthCallback";
+import UpdateStep1CampaignName from "./pages/update-campaign/UpdateStep1CampaignName";
+import UpdateStep2Platforms from "./pages/update-campaign/UpdateStep2Platforms";
+import UpdateStep3Objective from "./pages/update-campaign/UpdateStep3Objective";
+import UpdateStep5Budget from "./pages/update-campaign/UpdateStep5Budget";
+import UpdateStep6Creative from "./pages/update-campaign/UpdateStep6Creative";
+import UpdateStep4Audience from "./pages/update-campaign/UpdateStep4Audience";
+import UpdateStep7Review from "./pages/update-campaign/UpdateStep7Review";
+import Success from "./components/Analytics/Subscriptions/Success";
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +78,10 @@ export const router = createBrowserRouter([
             {
         path: "accept-invite/:token",
         element: <AcceptInvite />,
+      },
+            {
+        path: "success",
+        element: <Success />,
       },
             {
         path: "meta-auth-callback",
@@ -241,35 +253,35 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Navigate to="step-1" replace />,
+            element: <Navigate to="update-step-1" replace />,
           },
           {
-            path: "step-1",
-            element: <Step1CampaignName />,
+            path: "update-step-1",
+            element: <UpdateStep1CampaignName />,
           },
           {
-            path: "step-2",
-            element: <Step2Platforms />,
+            path: "update-step-2",
+            element: <UpdateStep2Platforms />,
           },
           {
-            path: "step-3",
-            element: <Step3Objective />,
+            path: "update-step-3",
+            element: <UpdateStep3Objective />,
           },
           {
-            path: "step-4",
-            element: <Step4Audience />,
+            path: "update-step-4",
+            element: <UpdateStep4Audience />,
           },
           {
-            path: "step-5",
-            element: <Step5Budget />,
+            path: "update-step-5",
+            element: <UpdateStep5Budget />,
           },
           {
-            path: "step-6",
-            element: <Step6Creative />,
+            path: "update-step-6",
+            element: <UpdateStep6Creative />,
           },
           {
-            path: "step-7",
-            element: <Step7Review />,
+            path: "update-step-7",
+            element: <UpdateStep7Review />,
           },
         ],
       },
