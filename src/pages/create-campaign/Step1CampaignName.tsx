@@ -8,7 +8,7 @@ const Step1CampaignName: React.FC = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Get org_id from localStorage
+
   const getOrgId = () => {
     try {
       const selectedOrg = localStorage.getItem("selectedOrganization");
@@ -52,7 +52,7 @@ const Step1CampaignName: React.FC = () => {
       localStorage.setItem("campaignStatus", response.data.status);
       localStorage.setItem("campaignName", response.data.campaign_name);
 
-      // Navigate to next page
+
       navigate("/user-dashboard/campaigns-create/step-2");
 
     } catch (err: any) {
