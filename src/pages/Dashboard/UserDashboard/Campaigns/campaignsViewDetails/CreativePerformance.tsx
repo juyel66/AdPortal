@@ -272,7 +272,16 @@ const CreativePerformance: React.FC<CreativePerformanceProps> = ({ campaign }) =
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center text-slate-500">No creatives found.</div>
+            <div className="col-span-full flex justify-center">
+  <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-sm p-6 text-center">
+    <h3 className="text-lg font-semibold text-slate-800">No Creatives Found</h3>
+    <p className="mt-2 text-sm text-slate-500">
+      You haven’t uploaded any creatives. Create one to get started.
+    </p>
+
+    
+  </div>
+</div>
         )}
       </div>
     </div>
