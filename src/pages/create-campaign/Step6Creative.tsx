@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Image as ImageIcon, Video, UploadCloud, Sparkles } from "lucide-react";
+import { Image as ImageIcon, Video, UploadCloud, Sparkles, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import CopyGeneratePreview from "./CopyGeneratePreview";
 import { Link, useNavigate } from "react-router";
 import api from "@/lib/axios";
@@ -24,7 +24,7 @@ const Step6Creative: React.FC = () => {
   
   const campaignId = localStorage.getItem("campaignId");
 
-  // Form states
+  // Form states - all visible from the start
   const [adName, setAdName] = useState("");
   const [adFormat, setAdFormat] = useState<AdFormat>("image");
   const [product, setProduct] = useState("");
@@ -42,6 +42,9 @@ const Step6Creative: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [keywords, setKeywords] = useState("");
   const [fileBase64, setFileBase64] = useState<string>("");
+  
+  // State for collapsible AI generator
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
   // Get builder data from localStorage
   const getCampaignBuilderData = () => {
@@ -52,6 +55,15 @@ const Step6Creative: React.FC = () => {
       console.error("Error parsing campaign builder data:", error);
       return {};
     }
+  };
+
+  // Clear all campaign-related data from localStorage
+  const clearCampaignData = () => {
+    localStorage.removeItem("campaign_builder_data");
+    localStorage.removeItem("campaignId");
+    localStorage.removeItem("campaignName");
+    localStorage.removeItem("campaignStatus");
+    console.log("🧹 Campaign data cleared from localStorage");
   };
 
   // Convert file to base64
@@ -77,6 +89,11 @@ const Step6Creative: React.FC = () => {
       setCta(saved.cta || "Learn More");
       setDestinationUrl(saved.destinationUrl || "");
       setKeywords(saved.keywords || "");
+      
+      // Also load the preview state if there was previously generated content
+      if (saved.headline || saved.primaryText || saved.description) {
+        setShowPreview(true);
+      }
     }
   }, []);
 
@@ -152,13 +169,18 @@ const Step6Creative: React.FC = () => {
 
       if (response.data?.["Ad copy"]) {
         const adCopy = response.data["Ad copy"];
+        
+        // Update all the form fields with generated content
         setHeadline(adCopy.headline || "");
         setPrimaryText(adCopy.primary_text || "");
         setDescription(adCopy.description || "");
         setCta(adCopy.call_to_action || "Learn More");
         setKeywords(benefits);
+        
+        // Show the preview section
         setShowPreview(true);
         
+        // Scroll to preview after generation
         setTimeout(() => {
           const previewElement = document.getElementById('ad-preview-section');
           if (previewElement) {
@@ -194,7 +216,6 @@ const Step6Creative: React.FC = () => {
 
     setLoading(true);
     setError("");
-
 
     try {
       // Get org_id
@@ -252,6 +273,7 @@ const Step6Creative: React.FC = () => {
           requestData.destination_url = url;
         }
         if (keywords) requestData.keywords = keywords;
+        
         console.log("📤 Sending ad data (JSON):", requestData);
         response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData, {
           headers: {
@@ -261,6 +283,10 @@ const Step6Creative: React.FC = () => {
       }
 
       console.log("✅ Ad created:", response.data);
+
+      // Store the complete API response in localStorage with key "api_response"
+      localStorage.setItem("api_response", JSON.stringify(response.data));
+      console.log("💾 Complete API response stored in localStorage with key: api_response");
 
       // Save to localStorage for next steps
       const builderData = getCampaignBuilderData();
@@ -293,6 +319,10 @@ const Step6Creative: React.FC = () => {
         timer: 1500,
         showConfirmButton: false,
       }).then(() => {
+        // Clear all campaign data from localStorage
+        clearCampaignData();
+        
+        // Navigate to review page
         navigate("/user-dashboard/campaigns-create/step-7");
       });
 
@@ -322,7 +352,6 @@ const Step6Creative: React.FC = () => {
         title: "Create Failed",
         text: errorMessage,
         width: '600px',
-      
       });
       
     } finally {
@@ -483,81 +512,189 @@ const Step6Creative: React.FC = () => {
         />
       </div>
 
-      {/* Generate Ad Copy - All fields optional */}
+
+
+          {/* AI Copy Generator - Collapsible Section */}
+      <div className="mb-6 border border-gray-200 rounded-xl overflow-hidden">
+        {/* Header/Button */}
+        <button
+          onClick={() => setShowAIGenerator(!showAIGenerator)}
+          className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-blue-600" />
+            <span className="text-sm font-semibold text-gray-900">
+              AI Copy Generator
+            </span>
+            <span className="text-xs text-gray-500">  (AI will generate and fill the fields below) Click to expand</span>
+          </div>
+          {showAIGenerator ? (
+            <ChevronUp className="w-5 h-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-500" />
+          )}
+        </button>
+
+        {/* Collapsible Content */}
+        {showAIGenerator && (
+          <div className="p-4 bg-blue-50/30 border-t border-gray-200">
+            <p className="text-xs text-gray-600 mb-3">
+              Fill in the details below and AI will generate ad copy for you. The generated content will automatically fill the fields above.
+            </p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-gray-600 block mb-1">Product/Service</label>
+                <input
+                  value={product}
+                  onChange={(e) => setProduct(e.target.value)}
+                  placeholder="e.g. Salon, Software, Clothing"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 block mb-1">Target Audience</label>
+                <input
+                  value={audience}
+                  onChange={(e) => setAudience(e.target.value)}
+                  placeholder="e.g. Women, Professionals, Students"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 block mb-1">Key Benefits</label>
+                <input
+                  value={benefits}
+                  onChange={(e) => setBenefits(e.target.value)}
+                  placeholder="e.g. Better service, Fast delivery"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 block mb-1">Tone</label>
+                <select
+                  value={tone}
+                  onChange={(e) => setTone(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option>Professional</option>
+                  <option>Friendly</option>
+                  <option>Bold</option>
+                  <option>Casual</option>
+                  <option>Exciting</option>
+                  <option>Humorous</option>
+                </select>
+              </div>
+
+              <button
+                onClick={handleGenerateCopy}
+                disabled={isGenerating}
+                className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Generate Copy with AI
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+
+
+
+      
+
+      {/* Ad Copy Fields - Always visible and editable */}
       <div className="mb-6 border border-gray-200 rounded-xl p-4">
-        <p className="text-sm font-semibold text-gray-900 mb-3">
-          Generate Ad Copy <span className="text-gray-400 text-xs">(Optional)</span>
-        </p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-gray-900">
+            Ad Copy Generator <span className="text-gray-400 text-xs"></span>
+          </p>
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <Pencil className="w-3 h-3" />
+            <span>You can edit these fields anytime</span>
+          </div>
+        </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
+          {/* Headline */}
           <div>
-            <label className="text-sm text-gray-600 block mb-1">Product/Service</label>
+            <label className="text-sm text-gray-600 block mb-1">
+              Headline
+            </label>
             <input
-              value={product}
-              onChange={(e) => setProduct(e.target.value)}
-              placeholder="e.g. Salon, Software, Clothing"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              placeholder="Enter your ad headline"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
+          {/* Primary Text */}
           <div>
-            <label className="text-sm text-gray-600 block mb-1">Target Audience</label>
-            <input
-              value={audience}
-              onChange={(e) => setAudience(e.target.value)}
-              placeholder="e.g. Women, Professionals, Students"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+            <label className="text-sm text-gray-600 block mb-1">
+              Primary Text
+            </label>
+            <textarea
+              value={primaryText}
+              onChange={(e) => setPrimaryText(e.target.value)}
+              placeholder="Enter your primary ad text"
+              rows={3}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 resize-none"
             />
           </div>
 
+          {/* Description */}
           <div>
-            <label className="text-sm text-gray-600 block mb-1">Key Benefits</label>
+            <label className="text-sm text-gray-600 block mb-1">
+              Description
+            </label>
             <input
-              value={benefits}
-              onChange={(e) => setBenefits(e.target.value)}
-              placeholder="e.g. Better service, Fast delivery"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter ad description"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
+          {/* Call to Action */}
           <div>
-            <label className="text-sm text-gray-600 block mb-1">Tone</label>
+            <label className="text-sm text-gray-600 block mb-1">
+              Call to Action
+            </label>
             <select
-              value={tone}
-              onChange={(e) => setTone(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              value={cta}
+              onChange={(e) => setCta(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
             >
-              <option>Professional</option>
-              <option>Friendly</option>
-              <option>Bold</option>
-              <option>Casual</option>
-              <option>Exciting</option>
-              <option>Humorous</option>
+              <option>Shop now</option>
+              <option>Learn More</option>
+              <option>Sign Up</option>
+              <option>Contact Us</option>
+              <option>Book Now</option>
+              <option>Download</option>
+              <option>Get Quote</option>
             </select>
           </div>
-
-          <button
-            onClick={handleGenerateCopy}
-            disabled={isGenerating}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                Generate Copy
-              </>
-            )}
-          </button>
         </div>
       </div>
 
-      {/* Preview Section - Shows only if generated */}
-      {showPreview && (
+  
+
+      {/* Preview Section - Shows only if there's content */}
+      {(showPreview || headline || primaryText || description) && (
         <div id="ad-preview-section" className="mb-6 border-t pt-6">
           <h3 className="text-md font-semibold text-gray-900 mb-4">Ad Preview</h3>
           <CopyGeneratePreview
@@ -570,10 +707,13 @@ const Step6Creative: React.FC = () => {
               isVideo: adFormat === "video",
             }}
           />
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            Preview updates automatically as you edit the fields above
+          </p>
         </div>
       )}
 
-      {/* Navigation Buttons - Same as Step5Budget */}
+      {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
         <Link
           to="/user-dashboard/campaigns-create/step-5"
@@ -581,6 +721,8 @@ const Step6Creative: React.FC = () => {
         >
           Previous
         </Link>
+
+   
 
         <button
           onClick={handleSubmit}
