@@ -195,7 +195,7 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
               Recent Campaigns
             </h3>
             <p className="text-sm text-slate-500 mt-1">
-              Track your active campaign performance
+              Track your active campaign performance 
             </p>
           </div>
 
@@ -209,12 +209,12 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                 Delete Selected ({selectedCampaigns.length})
               </button>
             )}
-            <button
-              onClick={() => setShowAll((s) => !s)}
+            <Link to="/user-dashboard/campaigns"
+              
               className="text-sm text-sky-600 hover:underline"
             >
               {showAll ? "View less" : "View all"} →
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -268,12 +268,14 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                       />
                     </td>
 
-                    <td
+                    <Link to={`/user-dashboard/campaigns-view-details/${row.id}`} className="group">
+                      <td
                       className="p-4 align-middle text-slate-800 font-medium"
                       title={row.name}
                     >
                       {truncateTitle(row.name)}
                     </td>
+                    </Link>
 
                     <td className="p-4 align-middle">
                       <span
