@@ -75,8 +75,8 @@ const Transactions: React.FC = () => {
           Recent Transactions
         </h2>
         <p className="text-xs text-slate-500">
-          Track your active campaign performance
-        </p>
+          Track your active campaign performance 
+        </p> 
       </div>
 
       {/* TABLE */}
