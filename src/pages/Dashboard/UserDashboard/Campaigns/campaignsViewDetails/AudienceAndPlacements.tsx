@@ -234,7 +234,18 @@ const AudienceAndPlacements: React.FC<AudienceAndPlacementsProps> = ({ campaign 
               </div>
             ))
           ) : (
-            <div className="text-slate-400">No placements found.</div>
+            <div className="col-span-full mt-10 flex items-center justify-center">
+  <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white shadow-md p-6 text-center">
+    <h3 className="text-lg font-semibold text-slate-800">
+      No Placements Found
+    </h3>
+    <p className="mt-2 text-sm text-slate-500">
+      There are no placements available right now.
+    </p>
+
+    
+  </div>
+</div>
           )}
         </div>
       </div>
