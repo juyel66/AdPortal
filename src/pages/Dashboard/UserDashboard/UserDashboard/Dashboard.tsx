@@ -520,6 +520,9 @@ const UserDashboard: React.FC = () => {
             subtitle="Check performance data"
             bgClass="bg-green-600"
             Icon={BarChart2}
+            onClick={ () => 
+              navigate("/user-dashboard/reports")
+            }
           />
         </div>
       </section>
