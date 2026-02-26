@@ -1,4 +1,4 @@
-import React, { useState, } from "react";
+import React, { useState, useEffect } from "react";
 import { Sparkles, Wand2, RefreshCcw, Copy } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../lib/axios";
@@ -59,7 +59,14 @@ const getOrgId = (): string | null => {
 };
 
 const AiTools: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"copy" | "optimization">("copy");
+  const [activeTab, setActiveTab] = useState<"copy" | "optimization">(() => {
+    // Check hash on initial load
+    if (window.location.hash === "#optimization") {
+      return "optimization";
+    }
+    return "copy";
+  });
+  
   const [generated, setGenerated] = useState(false);
   const [copyType, setCopyType] = useState<CopyType>("headlines");
   const [generatedCopies, setGeneratedCopies] = useState<GeneratedItem[]>([]);
@@ -77,10 +84,35 @@ const AiTools: React.FC = () => {
   const [insights, setInsights] = useState<any[]>([]);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
-  React.useEffect(() => {
+  // Handle hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === "#optimization") {
+        setActiveTab("optimization");
+      } else if (window.location.hash === "#copy" || window.location.hash === "") {
+        setActiveTab("copy");
+      }
+    };
+
+    // Add event listener
+    window.addEventListener("hashchange", handleHashChange);
+
+    // Check hash on mount
+    handleHashChange();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
+  // Fetch insights when optimization tab is active
+  useEffect(() => {
     if (activeTab !== "optimization") return;
+    
     const org_id = getOrgId();
     if (!org_id) return;
+    
     setInsightsLoading(true);
     api
       .get(`/main/ai-insights/?org_id=${org_id}`)
@@ -88,6 +120,7 @@ const AiTools: React.FC = () => {
         setInsights(res.data.results || []);
       })
       .catch((err) => {
+        console.error("Error fetching insights:", err);
         setInsights([]);
       })
       .finally(() => setInsightsLoading(false));
@@ -197,6 +230,16 @@ const AiTools: React.FC = () => {
     generateAICopy(true);
   };
 
+  const handleTabChange = (tab: "copy" | "optimization") => {
+    // Update hash based on tab
+    if (tab === "optimization") {
+      window.location.hash = "optimization";
+    } else {
+      window.location.hash = "copy";
+    }
+    setActiveTab(tab);
+  };
+
   return (
     <div className="space-y-6 mt-5 ml-4">
       {/* Header */}
@@ -212,7 +255,7 @@ const AiTools: React.FC = () => {
       {/* Tabs */}
       <div className="flex rounded-xl bg-white p-2 border">
         <button
-          onClick={() => setActiveTab("copy")}
+          onClick={() => handleTabChange("copy")}
           className={`flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium ${
             activeTab === "copy"
               ? "bg-blue-50 text-blue-600"
@@ -221,8 +264,9 @@ const AiTools: React.FC = () => {
         >
           <Wand2 size={16} /> AI Copy Generator
         </button>
+
         <button
-          onClick={() => setActiveTab("optimization")}
+          onClick={() => handleTabChange("optimization")}
           className={`flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium ${
             activeTab === "optimization"
               ? "bg-blue-50 text-blue-600"
@@ -329,18 +373,18 @@ const AiTools: React.FC = () => {
                 <img
                   src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765832904/Icon_13_tqqkug.png"
                   alt="AI Copy Generator"
-                  className="w-26 h-26 "
+                  className="w-26 h-26"
                 />
                 <p className="text-sm mt-2 text-center">
                   Fill in the form and click "Generate Copy" to see AI-generated suggestions
                 </p>
               </div>
             ) : generatedCopies.length === 0 ? (
-              <div className="h-64 flex flex-col items-center justify-center ">
+              <div className="h-64 flex flex-col items-center justify-center">
                 <img
                   src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765832904/Icon_13_tqqkug.png"
                   alt="No results"
-                  className="w-26 h-26 "
+                  className="w-26 h-26"
                 />
                 <p className="text-sm mt-2 text-center">
                   No copy generated. Please try again.
