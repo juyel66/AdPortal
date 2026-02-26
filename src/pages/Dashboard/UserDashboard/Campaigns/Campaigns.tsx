@@ -14,6 +14,7 @@ import { Link } from "react-router";
 
 import Swal from "sweetalert2";
 import api from "@/lib/axios";
+import { toast } from "sonner";
 
 interface Campaign {
   id: number;
@@ -114,14 +115,15 @@ const Campaigns: React.FC = () => {
     // Apply status filter
     if (activeFilter !== "all") {
       filtered = filtered.filter(
-        (campaign) => campaign.status.toLowerCase() === activeFilter.toLowerCase()
+        (campaign) =>
+          campaign.status.toLowerCase() === activeFilter.toLowerCase(),
       );
     }
 
     // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter((campaign) =>
-        campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
+        campaign.name.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -172,10 +174,10 @@ const Campaigns: React.FC = () => {
 
         // Call delete API
         await api.delete(`/main/campaign/${id}/?org_id=${orgId}`);
-        
+
         // Remove from local state
         setCampaigns(campaigns.filter((c) => c.id !== id));
-        
+
         // Show success message
         Swal.fire({
           icon: "success",
@@ -186,12 +188,14 @@ const Campaigns: React.FC = () => {
         });
       } catch (err: any) {
         console.error("Error deleting campaign:", err);
-        
+
         // Show error message
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: err.response?.data?.message || "Failed to delete campaign. Please try again.",
+          text:
+            err.response?.data?.message ||
+            "Failed to delete campaign. Please try again.",
           confirmButtonColor: "#3085d6",
         });
       }
@@ -213,7 +217,9 @@ const Campaigns: React.FC = () => {
 
   const getStatusCount = (status: string) => {
     if (status === "all") return campaigns.length;
-    return campaigns.filter((c) => c.status.toLowerCase() === status.toLowerCase()).length;
+    return campaigns.filter(
+      (c) => c.status.toLowerCase() === status.toLowerCase(),
+    ).length;
   };
 
   // Format currency
@@ -261,10 +267,13 @@ const Campaigns: React.FC = () => {
 
   // Get budget display
   const getBudgetDisplay = (campaign: Campaign): string => {
-    if (campaign.draft_data?.budgets && campaign.draft_data.budgets.length > 0) {
+    if (
+      campaign.draft_data?.budgets &&
+      campaign.draft_data.budgets.length > 0
+    ) {
       const totalBudget = campaign.draft_data.budgets.reduce(
         (sum: number, b: any) => sum + (b.budget || 0),
-        0
+        0,
       );
       if (totalBudget > 0) {
         return `${formatCurrency(totalBudget, campaign.currency)}/day`;
@@ -309,7 +318,38 @@ const Campaigns: React.FC = () => {
         </div>
 
         <div className="flex gap-3">
-          <button className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+          <button
+            className="rounded-lg border cursor-pointer border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+            onClick={async () => {
+              if (!orgId) {
+                Swal.fire({
+                  icon: "error",
+                  title: "No organization selected",
+                  text: "Please select an organization first.",
+                  confirmButtonColor: "#3085d6",
+                });
+                return;
+              }
+              try {
+                await api.post(`/main/sync-ads/?org_id=${orgId}`);
+                toast.success(
+                  "ads syncing initiated successfully! It may take a few moments for the changes to reflect.",
+                );
+                // Optionally, refresh campaigns after sync
+                fetchCampaigns();
+              } catch (err: any) {
+                console.error("Error syncing ads:", err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Sync Failed",
+                  text:
+                    err.response?.data?.message ||
+                    "Failed to sync ads. Please try again.",
+                  confirmButtonColor: "#3085d6",
+                });
+              }
+            }}
+          >
             Sync your Ad
           </button>
 
@@ -464,8 +504,14 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
           </h3>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
             <Badge status={campaign.status} />
-            <Chip>{campaign.objective || "N/A"}</Chip>
-            {displayPlatforms.map((p, idx) => (
+
+            <Chip>
+              {campaign.objective
+                ? campaign.objective.replace(/_/g, " ")
+                : "N/A"}
+            </Chip>
+
+            {displayPlatforms.map((p: string, idx: number) => (
               <span key={`${p}-${idx}`} className="text-slate-500">
                 {p}
               </span>
@@ -474,7 +520,11 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <img src={ACTION_BTN} alt="action" className="h-7 w-7 cursor-pointer" />
+          <img
+            src={ACTION_BTN}
+            alt="action"
+            className="h-7 w-7 cursor-pointer"
+          />
           <button onClick={() => setOpen(!open)}>
             <MoreVertical className="h-5 w-5 text-slate-400" />
           </button>
@@ -483,7 +533,10 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
         <Stat label="Total Budget" value={getBudgetDisplay(campaign)} />
-        <Stat label="Total Spend" value={formatCurrency(campaign.total_spent, campaign.currency)} />
+        <Stat
+          label="Total Spend"
+          value={formatCurrency(campaign.total_spent, campaign.currency)}
+        />
         <Stat label="Impressions" value={formatNumber(campaign.impressions)} />
         <Stat label="Clicks" value={formatNumber(campaign.clicks)} />
       </div>
@@ -491,13 +544,15 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
       <div className="mt-4 grid grid-cols-3 gap-3">
         <Kpi label="CTR" value={formatPercentage(campaign.ctr)} />
         <Kpi label="Conversions" value={formatNumber(campaign.conversions)} />
-        <Kpi label="ROAS" value={campaign.roas.toFixed(1) + "x"} highlight={campaign.roas > 2} />
+        <Kpi
+          label="ROAS"
+          value={campaign.roas.toFixed(1) + "x"}
+          highlight={campaign.roas > 2}
+        />
       </div>
 
       <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-        <span>
-          {new Date(campaign.created_at).toLocaleDateString()}
-        </span>
+        <span>{new Date(campaign.created_at).toLocaleDateString()}</span>
         <Link
           to={`/user-dashboard/campaigns-view-details/${campaign.id}`}
           className="text-blue-600 hover:underline"
@@ -543,7 +598,9 @@ const Badge: React.FC<BadgeProps> = ({ status }) => {
   const statusUpper = status?.toUpperCase() || "DRAFT";
 
   return (
-    <span className={`rounded-full px-2 py-0.5 ${map[statusUpper] || map.DRAFT}`}>
+    <span
+      className={`rounded-full px-2 py-0.5 ${map[statusUpper] || map.DRAFT}`}
+    >
       {status}
     </span>
   );
@@ -575,7 +632,12 @@ const Kpi: React.FC<KpiProps> = ({ label, value, highlight }) => (
   </div>
 );
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon, text, danger = false, onClick }) => (
+const MenuItem: React.FC<MenuItemProps> = ({
+  icon,
+  text,
+  danger = false,
+  onClick,
+}) => (
   <button
     onClick={onClick}
     className={`flex w-full items-center gap-3 px-4 py-3 text-sm ${
