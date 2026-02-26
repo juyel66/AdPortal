@@ -80,7 +80,7 @@ export const router = createBrowserRouter([
         element: <AcceptInvite />,
       },
             {
-        path: "success",
+        path: "payment/success",
         element: <Success />,
       },
             {
