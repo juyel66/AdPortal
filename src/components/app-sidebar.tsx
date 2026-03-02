@@ -366,6 +366,7 @@ import {
   Users,
   Settings,
   LogOut,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../src/hooks/reduxHooks";
 import { logout } from "../../src/features/auth/AuthThunks";
@@ -406,15 +407,16 @@ const adminItems = [
     icon: Users,
   },
   {
+    title: "Organization Management",
+    url: "/admin-dashboard/organization-management",
+    icon: BriefcaseBusiness,
+  },
+  {
     title: "Campaigns Monitoring",
     url: "/admin-dashboard/campaigns-monitoring",
     icon: Megaphone,
   },
-  {
-    title: "Content Moderation",
-    url: "/admin-dashboard/content-moderation",
-    icon: FileText,
-  },
+
   { title: "Finance", url: "/admin-dashboard/finance", icon: CreditCard },
   {
     title: "Platform Analytics",
