@@ -61,6 +61,61 @@ const transformApiReportToUi = (apiReport: ApiReport): RecentReport => {
   };
 };
 
+// Custom Date Range Component
+const DateRangePicker = ({
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
+  error
+}: {
+  startDate: string;
+  endDate: string;
+  onStartDateChange: (date: string) => void;
+  onEndDateChange: (date: string) => void;
+  error?: string;
+}) => {
+  return (
+    <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+      <p className="text-sm font-medium text-slate-700 mb-3">
+        Custom Date Range
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-slate-500 mb-1">
+            Start Date
+          </label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => onStartDateChange(e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            max={endDate || undefined}
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-500 mb-1">
+            End Date
+          </label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => onEndDateChange(e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            min={startDate || undefined}
+          />
+        </div>
+      </div>
+      {error && (
+        <p className="text-xs text-red-500 mt-2">{error}</p>
+      )}
+      <p className="text-xs text-slate-400 mt-2">
+        Select the date range for your custom report
+      </p>
+    </div>
+  );
+};
+
 const Reports: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [generating, setGenerating] = useState<boolean>(false);
@@ -68,11 +123,14 @@ const Reports: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loadingReports, setLoadingReports] = useState<boolean>(true);
+  const [dateError, setDateError] = useState<string>("");
 
   const [form, setForm] = useState<CreateReportForm>({
     reportType: "Weekly",
     platforms: [],
     metrics: [],
+    startDate: "",
+    endDate: ""
   });
 
   useEffect(() => {
@@ -126,6 +184,27 @@ const Reports: React.FC = () => {
     }));
   };
 
+  // Validate custom date range
+  const validateCustomDates = (): boolean => {
+    if (form.reportType !== "Custom") return true;
+    
+    if (!form.startDate || !form.endDate) {
+      setDateError("Both start date and end date are required for custom reports");
+      return false;
+    }
+    
+    const start = new Date(form.startDate);
+    const end = new Date(form.endDate);
+    
+    if (start > end) {
+      setDateError("Start date cannot be after end date");
+      return false;
+    }
+    
+    setDateError("");
+    return true;
+  };
+
   const handleGenerateReport = async (): Promise<void> => {
     const org_id = getOrgId();
     if (!org_id) {
@@ -138,12 +217,23 @@ const Reports: React.FC = () => {
       return;
     }
 
+    // Validate custom dates if report type is Custom
+    if (form.reportType === "Custom" && !validateCustomDates()) {
+      return;
+    }
+
     setGenerating(true);
     try {
-      const payload: ApiReportResponse = {
+      const payload: any = {
         report_type: mapReportTypeToAPI(form.reportType),
         included_metrics: form.metrics.map(mapMetricToAPI)
       };
+
+      // Add date range for custom reports
+      if (form.reportType === "Custom") {
+        payload.start_date = form.startDate;
+        payload.end_date = form.endDate;
+      }
 
       await api.post(`/analysis/generate-report/?org_id=${org_id}`, payload);
       
@@ -152,8 +242,11 @@ const Reports: React.FC = () => {
       setForm({
         reportType: "Weekly",
         platforms: [],
-        metrics: []
+        metrics: [],
+        startDate: "",
+        endDate: ""
       });
+      setDateError("");
       
       fetchRecentReports();
     } catch (error: any) {
@@ -162,7 +255,16 @@ const Reports: React.FC = () => {
       if (error.response?.status === 401) {
         toast.error("Session expired. Please log in again.");
       } else if (error.response?.status === 400) {
-        toast.error(error.response?.data?.message || "Invalid request. Please check your inputs.");
+        // Show specific error message from backend
+        const errorMessage = error.response?.data?.error || 
+                           error.response?.data?.message || 
+                           "Invalid request. Please check your inputs.";
+        toast.error(errorMessage);
+        
+        // If it's a date error, set it in the date picker
+        if (errorMessage.includes("start_date") || errorMessage.includes("end_date")) {
+          setDateError(errorMessage);
+        }
       } else if (error.response?.status === 403) {
         toast.error("You don't have permission to generate reports.");
       } else if (error.response?.status === 429) {
@@ -222,8 +324,11 @@ const Reports: React.FC = () => {
     setForm({
       reportType: "Weekly",
       platforms: [],
-      metrics: []
+      metrics: [],
+      startDate: "",
+      endDate: ""
     });
+    setDateError("");
   };
 
   const handleSelectAllMetrics = (): void => {
@@ -233,6 +338,17 @@ const Reports: React.FC = () => {
 
   const handleClearAllMetrics = (): void => {
     setForm(prev => ({ ...prev, metrics: [] }));
+  };
+
+  // Handle report type change
+  const handleReportTypeChange = (type: ReportType): void => {
+    setForm(prev => ({
+      ...prev,
+      reportType: type,
+      // Clear dates when switching away from Custom
+      ...(type !== "Custom" && { startDate: "", endDate: "" })
+    }));
+    setDateError("");
   };
 
   return (
@@ -367,15 +483,24 @@ const Reports: React.FC = () => {
             </label>
             <select
               value={form.reportType}
-              onChange={(e) =>
-                setForm({ ...form, reportType: e.target.value as ReportType })
-              }
+              onChange={(e) => handleReportTypeChange(e.target.value as ReportType)}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="Weekly">Weekly</option>
               <option value="Monthly">Monthly</option>
               <option value="Custom">Custom</option>
             </select>
+
+            {/* Date Range Picker - Only show for Custom reports */}
+            {form.reportType === "Custom" && (
+              <DateRangePicker
+                startDate={form.startDate || ""}
+                endDate={form.endDate || ""}
+                onStartDateChange={(date) => setForm(prev => ({ ...prev, startDate: date }))}
+                onEndDateChange={(date) => setForm(prev => ({ ...prev, endDate: date }))}
+                error={dateError}
+              />
+            )}
 
             <div className="mt-4">
               <p className="text-sm font-medium text-slate-700 mb-2">
@@ -458,9 +583,9 @@ const Reports: React.FC = () => {
               </button>
               <button
                 onClick={handleGenerateReport}
-                disabled={generating || form.metrics.length === 0}
+                disabled={generating || form.metrics.length === 0 || (form.reportType === "Custom" && (!form.startDate || !form.endDate))}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${
-                  form.metrics.length === 0
+                  form.metrics.length === 0 || (form.reportType === "Custom" && (!form.startDate || !form.endDate))
                     ? "bg-slate-300 text-slate-500 cursor-not-allowed"
                     : "bg-blue-600 text-white hover:bg-blue-700"
                 } ${generating ? "opacity-60 cursor-not-allowed" : ""}`}
