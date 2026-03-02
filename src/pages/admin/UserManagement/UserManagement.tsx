@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MoreVertical,
   CheckCircle,
@@ -8,117 +8,274 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
+import { toast } from "sonner";
+import api from "../../../lib/axios";
 
 import type {
   UserItem,
   UserStatus,
   ActionMenuPosition,
+  UserStats,
+  UserListResponse,
+  ApiUser,
 } from "@/types/userManagement";
 
 /* =========================
-   TOP STATS (API READY)
+   CUSTOM HOOKS
 ========================= */
-const USER_STATS = {
-  total: 467,
-  active: 423,
-  suspended: 12,
-  trial: 32,
+
+// Custom debounce hook
+const useDebounce = <T,>(value: T, delay: number): T => {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 };
 
 /* =========================
-   FAKE USERS (API READY)
+   API INTEGRATION
 ========================= */
-const USERS: UserItem[] = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    initials: "JD",
-    plan: "Growth",
-    status: "active",
-    campaigns: 12,
-    totalSpend: 1245,
-    joined: "2024-01-15",
-    lastActive: "2 hours ago",
-  },
-  {
-    id: 2,
-    name: "John Doe",
-    email: "john@example.com",
-    initials: "JD",
-    plan: "Scale",
-    status: "active",
-    campaigns: 23,
-    totalSpend: 4245,
-    joined: "2024-01-15",
-    lastActive: "2 hours ago",
-  },
-  {
-    id: 3,
-    name: "Alice Smith",
-    email: "alice@example.com",
-    initials: "AS",
-    plan: "Growth",
-    status: "suspended",
-    campaigns: 13,
-    totalSpend: 2245,
-    joined: "2024-01-15",
-    lastActive: "2 hours ago",
-  },
-  {
-    id: 4,
-    name: "Bob Turner",
-    email: "bob@example.com",
-    initials: "BT",
-    plan: "Starter",
-    status: "active",
-    campaigns: 24,
-    totalSpend: 3245,
-    joined: "2024-01-15",
-    lastActive: "2 hours ago",
-  },
-];
 
-
-
-const planBadge = (plan: UserItem["plan"]) => {
-  if (plan === "Growth") return "bg-blue-100 border border-blue-500 text-blue-700";
-  if (plan === "Scale") return "bg-purple-100 border border-purple-500 text-purple-700";
-  return "bg-slate-100 border border-slate-300 text-slate-600";
+// API functions
+const fetchUserStats = async (): Promise<UserStats> => {
+  const response = await api.get('/admin/user-management/');
+  return response.data;
 };
 
-const statusBadge = (status: UserStatus) => {
-  if (status === "active") return "bg-green-100 text-green-700";
-  if (status === "suspended") return "bg-yellow-100 text-yellow-700";
-  return "bg-red-100 text-red-700";
+// Updated fetchUserList with better error handling
+const fetchUserList = async (page: number, search?: string): Promise<UserListResponse> => {
+  // Always start with page 1 for new searches
+  let url = `/admin/user-management-list/?page=${page}`;
+  
+  // Add search parameter if provided
+  if (search && search.trim()) {
+    const encodedSearch = encodeURIComponent(search.trim());
+    url += `&search=${encodedSearch}`;
+    
+    if (import.meta.env.DEV) {
+      console.log(`🔍 Searching users with: "${search}"`);
+      console.log(`📡 API URL: ${url}`);
+    }
+  }
+  
+  try {
+    const response = await api.get(url);
+    return response.data;
+  } catch (error: any) {
+    // Handle 404 specifically for invalid page
+    if (error.response?.status === 404 && error.response?.data?.detail === "Invalid page.") {
+      // If page is invalid, try fetching page 1
+      if (import.meta.env.DEV) {
+        console.log('⚠️ Invalid page, falling back to page 1');
+      }
+      
+      // Reconstruct URL with page=1
+      const fallbackUrl = url.replace(/page=\d+/, 'page=1');
+      const response = await api.get(fallbackUrl);
+      return response.data;
+    }
+    throw error;
+  }
 };
 
+// Helper function to transform API user data to component format
+const transformApiUser = (apiUser: ApiUser, index: number): UserItem => {
+  // Generate initials from full_name or email
+  const getName = () => {
+    if (apiUser.full_name) {
+      return apiUser.full_name;
+    }
+    return apiUser.email.split('@')[0];
+  };
 
-const ITEMS_PER_PAGE = 4;
+  const getInitials = () => {
+    if (apiUser.full_name) {
+      return apiUser.full_name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+    }
+    return apiUser.email.substring(0, 2).toUpperCase();
+  };
+
+  // Format date
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Never';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Get last active time
+  const getLastActive = () => {
+    if (!apiUser.last_login) return 'Never';
+    const lastLogin = new Date(apiUser.last_login);
+    const now = new Date();
+    const diffMs = now.getTime() - lastLogin.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    return `${diffDays} days ago`;
+  };
+
+  // Map API status to component status
+  const mapStatus = (apiStatus: string): UserStatus => {
+    switch (apiStatus.toLowerCase()) {
+      case 'active':
+        return 'active';
+      case 'suspended':
+        return 'suspended';
+      case 'inactive':
+        return 'inactive';
+      default:
+        return 'inactive';
+    }
+  };
+
+  return {
+    id: `${apiUser.email}-${index}`,
+    name: getName(),
+    email: apiUser.email,
+    initials: getInitials(),
+    plan: "Growth",
+    status: mapStatus(apiUser.status),
+    campaigns: 0,
+    totalSpend: 0,
+    joined: formatDate(apiUser.joined_at),
+    lastActive: getLastActive(),
+  };
+};
+
+/* =========================
+   COMPONENT
+========================= */
+
+const ITEMS_PER_PAGE = 10;
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<UserItem[]>(USERS);
+  const [users, setUsers] = useState<UserItem[]>([]);
+  const [stats, setStats] = useState<UserStats>({
+    total_users: { value: 0, last_week: 0 },
+    active_users: 0,
+    suspended_users: 0,
+    trial_users: 0,
+  });
   const [page, setPage] = useState<number>(1);
-  const [openAction, setOpenAction] = useState<number | null>(null);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [nextPage, setNextPage] = useState<string | null>(null);
+  const [prevPage, setPrevPage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [statsLoading, setStatsLoading] = useState<boolean>(true);
+  const [openAction, setOpenAction] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchInputValue, setSearchInputValue] = useState<string>("");
+  
+  // Debounce search term
+  const debouncedSearch = useDebounce(searchInputValue, 500);
 
-  // ✅ FIX: explicit type
   const [actionPos, setActionPos] = useState<ActionMenuPosition>({
     vertical: "bottom",
     horizontal: "right",
   });
 
-  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
+  // Fetch stats on mount
+  useEffect(() => {
+    loadStats();
+  }, []);
 
-  const paginatedUsers = useMemo(() => {
-    const start = (page - 1) * ITEMS_PER_PAGE;
-    return users.slice(start, start + ITEMS_PER_PAGE);
-  }, [page, users]);
+  // Handle search and page changes
+  useEffect(() => {
+    // Update search term when debounced value changes
+    setSearchTerm(debouncedSearch);
+    
+    // Reset to page 1 when search changes
+    if (debouncedSearch !== searchTerm) {
+      setPage(1);
+    }
+  }, [debouncedSearch]);
 
-  // ✅ FIX: explicit return type
-  const calculatePosition = (
-    btn: HTMLButtonElement
-  ): ActionMenuPosition => {
+  // Fetch users when page or search term changes
+  useEffect(() => {
+    loadUsers();
+  }, [page, searchTerm]);
+
+  // Load user statistics
+  const loadStats = async () => {
+    setStatsLoading(true);
+    try {
+      const data = await fetchUserStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to fetch user stats:', error);
+      toast.error('Failed to load user statistics');
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // Load user list with search
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      if (import.meta.env.DEV && searchTerm) {
+        console.log(`🔎 Searching for: "${searchTerm}" on page ${page}`);
+      }
+      
+      const data = await fetchUserList(page, searchTerm);
+      
+      if (import.meta.env.DEV) {
+        console.log(`📊 Found ${data.count} total results`);
+        console.log(`📄 Showing page ${page} with ${data.results.length} users`);
+      }
+      
+      const transformedUsers = data.results.map((apiUser, index) => 
+        transformApiUser(apiUser, index)
+      );
+      
+      setUsers(transformedUsers);
+      setTotalCount(data.count);
+      setNextPage(data.next);
+      setPrevPage(data.previous);
+      
+      // If we got results but page might be invalid, update page from response
+      if (data.next) {
+        const nextPageMatch = data.next.match(/page=(\d+)/);
+        if (nextPageMatch && nextPageMatch[1]) {
+          // Current page is valid
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      toast.error('Failed to load users');
+      
+      // Reset to page 1 on error
+      if (page !== 1) {
+        setPage(1);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculatePosition = (btn: HTMLButtonElement): ActionMenuPosition => {
     const rect = btn.getBoundingClientRect();
 
     const vertical: ActionMenuPosition["vertical"] =
@@ -134,166 +291,357 @@ const UserManagement: React.FC = () => {
     return { vertical, horizontal };
   };
 
-  const updateStatus = (id: number, status: UserStatus) => {
+  const updateStatus = async (id: string, status: UserStatus) => {
     setUsers((prev) =>
       prev.map((u) => (u.id === id ? { ...u, status } : u))
     );
     setOpenAction(null);
+    toast.success(`User status updated to ${status}`);
   };
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInputValue(e.target.value);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchInputValue("");
+    setSearchTerm("");
+    setPage(1);
+  };
+
+  // Handle page change with validation
+  const goToNextPage = () => {
+    if (nextPage) {
+      const nextPageNum = page + 1;
+      // Check if next page would be valid
+      if (nextPageNum <= Math.ceil(totalCount / ITEMS_PER_PAGE)) {
+        setPage(nextPageNum);
+      }
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (prevPage && page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  // Calculate total pages
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    if (totalPages <= 1) return [1];
+    
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
+        range.push(i);
+      }
+    }
+
+    range.forEach((i) => {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    });
+
+    return rangeWithDots;
+  };
+
+ 
+
+  // Show loading state
+  const showInitialLoading = statsLoading && loading && page === 1 && !searchTerm;
+
+  if (showInitialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-slate-600">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* HEADER */}
-      <div>
-        <h1 className="text-xl font-semibold">User management</h1>
-        <p className="text-sm text-slate-500">
-          Manage all platform users and their subscriptions
-        </p>
+      {/* HEADER WITH REFRESH */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-xl font-semibold">User management</h1>
+          <p className="text-sm text-slate-500">
+            Manage all platform users and their subscriptions
+          </p>
+        </div>
+     
       </div>
 
       {/* TOP STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Users" value={USER_STATS.total} sub="+52 this week " />
-        <StatCard title="Active Users" value={USER_STATS.active} sub="90.6% of total" variant="green" />
-        <StatCard title="Suspended" value={USER_STATS.suspended} sub="Requires attention" variant="yellow" />
-        <StatCard title="Trial Users" value={USER_STATS.trial} sub="Converting well" variant="blue" />
+        <StatCard 
+          title="Total Users" 
+          value={stats.total_users.value} 
+          sub={`+${stats.total_users.last_week} this week`}
+          loading={statsLoading}
+        />
+        <StatCard 
+          title="Active Users" 
+          value={stats.active_users} 
+          sub={`${stats.total_users.value ? ((stats.active_users / stats.total_users.value) * 100).toFixed(1) : 0}% of total`} 
+          variant="green"
+          loading={statsLoading}
+        />
+        <StatCard 
+          title="Suspended" 
+          value={stats.suspended_users} 
+          sub="Requires attention" 
+          variant="yellow"
+          loading={statsLoading}
+        />
+        <StatCard 
+          title="Trial Users" 
+          value={stats.trial_users} 
+          sub="Converting well" 
+          variant="blue"
+          loading={statsLoading}
+        />
       </div>
 
-      {/* SEARCH */}
+      {/* SEARCH AND RESULTS COUNT */}
       <div className="rounded-xl border bg-white p-4">
-        <div className="flex items-center gap-2 rounded-lg border bg-slate-50 px-3 py-2">
+        <div className="flex items-center gap-2 rounded-lg border bg-slate-50 px-3 py-2 mb-3">
           <Search size={16} className="text-slate-400" />
           <input
             placeholder="Search by name or email..."
             className="w-full bg-transparent text-sm outline-none"
+            value={searchInputValue}
+            onChange={handleSearchChange}
           />
+          {searchInputValue && (
+            <button
+              onClick={clearSearch}
+              className="text-slate-400 hover:text-slate-600 px-2 text-lg font-bold"
+              title="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <div className="flex justify-between items-center text-xs text-slate-500">
+          <span>
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin h-3 w-3 border-b-2 border-blue-600 rounded-full"></span>
+                {searchTerm ? `Searching for "${searchTerm}"...` : 'Loading...'}
+              </span>
+            ) : (
+              <>
+                Showing {users.length} of {totalCount} total users
+                {searchTerm && ` for "${searchTerm}"`}
+              </>
+            )}
+          </span>
+          {searchTerm && !loading && (
+            <button
+              onClick={clearSearch}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              Clear search
+            </button>
+          )}
         </div>
       </div>
 
       {/* TABLE */}
       <div className="rounded-xl border bg-white overflow-visible">
-        <table className="w-full table-fixed text-sm">
-          <thead className="bg-slate-50 text-slate-500">
-            <tr>
-              <th className="p-3 w-[260px] text-left">User</th>
-              <th className="p-3 w-[100px]">Plan</th>
-              <th className="p-3 w-[120px]">Status</th>
-              <th className="p-3 w-[90px]">Campaigns</th>
-              <th className="p-3 w-[120px]">Spend</th>
-              <th className="p-3 w-[120px]">Joined</th>
-              <th className="p-3 w-[120px]">Last Active</th>
-              <th className="p-3 w-[80px] text-right">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {paginatedUsers.map((u) => (
-              <tr key={u.id} className="border-t">
-                <td className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
-                      {u.initials}
-                    </div>
-                    <div>
-                      <p className="font-medium">{u.name}</p>
-                      <p className="text-xs text-slate-500">{u.email}</p>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="p-3 text-center">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${planBadge(u.plan)}`}>
-                    {u.plan}
-                  </span>
-                </td>
-
-                <td className="p-3 text-center">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadge(u.status)}`}>
-                    {u.status}
-                  </span>
-                </td>
-
-                <td className="p-3 text-center">{u.campaigns}</td>
-                <td className="p-3 text-center">${u.totalSpend.toLocaleString()}</td>
-                <td className="p-3 text-center">{u.joined}</td>
-                <td className="p-3 text-center">{u.lastActive}</td>
-
-                <td className="p-3 text-right relative">
-                  <button
-                    onClick={(e) => {
-                      setActionPos(calculatePosition(e.currentTarget));
-                      setOpenAction(openAction === u.id ? null : u.id);
-                    }}
-                  >
-                    <MoreVertical size={16} />
-                  </button>
-
-                  {openAction === u.id && (
-                    <div
-                      className={`absolute z-50 w-36 rounded-xl border bg-white shadow-md
-                        ${actionPos.vertical === "top" ? "bottom-10" : "top-10"}
-                        ${actionPos.horizontal === "left" ? "right-8" : "right-8"}
-                      `}
-                    >
-                      <Action label="Active" icon={<CheckCircle size={14} />} color="text-green-600" onClick={() => updateStatus(u.id, "active")} />
-                      <Action label="Suspended" icon={<Ban size={14} />} color="text-yellow-600" onClick={() => updateStatus(u.id, "suspended")} />
-                      <Action label="Inactive" icon={<XCircle size={14} />} color="text-red-600" onClick={() => updateStatus(u.id, "inactive")} />
-                    </div>
-                  )}
-                </td>
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <table className="w-full table-fixed text-sm">
+            <thead className="bg-slate-50 text-slate-500">
+              <tr>
+                <th className="p-3 w-[260px] text-left">User</th>
+                <th className="p-3 w-[120px]">Status</th>
+                <th className="p-3 w-[120px]">Joined</th>
+                <th className="p-3 w-[120px]">Last Active</th>
+                <th className="p-3 w-[80px] text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {users.length > 0 ? (
+                users.map((u) => (
+                  <tr key={u.id} className="border-t hover:bg-slate-50">
+                    <td className="p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
+                          {u.initials}
+                        </div>
+                        <div>
+                          <p className="font-medium">{u.name}</p>
+                          <p className="text-xs text-slate-500">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="p-3 text-center">
+                      <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadge(u.status)}`}>
+                        {u.status}
+                      </span>
+                    </td>
+
+                    <td className="p-3 text-center">{u.joined}</td>
+                    <td className="p-3 text-center">{u.lastActive}</td>
+
+                    <td className="p-3 text-right relative">
+                      <button
+                        onClick={(e) => {
+                          setActionPos(calculatePosition(e.currentTarget));
+                          setOpenAction(openAction === u.id ? null : u.id);
+                        }}
+                        className="p-1 hover:bg-slate-100 rounded"
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+
+                      {openAction === u.id && (
+                        <div
+                          className={`absolute z-50 w-36 rounded-xl border bg-white shadow-lg
+                            ${actionPos.vertical === "top" ? "bottom-10" : "top-10"}
+                            ${actionPos.horizontal === "left" ? "right-8" : "right-8"}
+                          `}
+                        >
+                          <Action 
+                            label="Active" 
+                            icon={<CheckCircle size={14} />} 
+                            color="text-green-600" 
+                            onClick={() => updateStatus(u.id, "active")} 
+                          />
+                          <Action 
+                            label="Suspended" 
+                            icon={<Ban size={14} />} 
+                            color="text-yellow-600" 
+                            onClick={() => updateStatus(u.id, "suspended")} 
+                          />
+                          <Action 
+                            label="Inactive" 
+                            icon={<XCircle size={14} />} 
+                            color="text-red-600" 
+                            onClick={() => updateStatus(u.id, "inactive")} 
+                          />
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-12 text-slate-500">
+                    {searchTerm ? (
+                      <div>
+                        <p className="text-lg font-medium mb-2">🔍 No results found</p>
+                        <p className="text-sm mb-4">No users matching "{searchTerm}"</p>
+                        <button
+                          onClick={clearSearch}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                        >
+                          Clear search
+                        </button>
+                      </div>
+                    ) : (
+                      'No users found'
+                    )}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* PAGINATION */}
-      <div className="flex items-center justify-between">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((p) => p - 1)}
-          className="flex items-center gap-1 rounded-lg border px-3 py-1 text-sm disabled:opacity-50"
-        >
-          <ChevronLeft size={14} /> Previous
-        </button>
-
-        <div className="flex gap-2">
-          {Array.from({ length: totalPages }).map((_, i) => (
+      {!loading && totalPages > 0 && users.length > 0 && (
+        <>
+          <div className="flex items-center justify-between">
             <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`h-8 w-8 rounded-lg ${
-                page === i + 1 ? "bg-blue-600 text-white" : "border"
-              }`}
+              disabled={!prevPage || page === 1}
+              onClick={goToPrevPage}
+              className="flex items-center gap-1 rounded-lg border px-3 py-1 text-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
             >
-              {i + 1}
+              <ChevronLeft size={14} /> Previous
             </button>
-          ))}
-        </div>
 
-        <button
-          disabled={page === totalPages}
-          onClick={() => setPage((p) => p + 1)}
-          className="flex items-center gap-1 rounded-lg border px-3 py-1 text-sm disabled:opacity-50"
-        >
-          Next <ChevronRight size={14} />
-        </button>
-      </div>
+            <div className="flex gap-2 items-center">
+              {getPageNumbers().map((pageNum, index) => (
+                <React.Fragment key={index}>
+                  {pageNum === '...' ? (
+                    <span className="px-2 text-slate-400">...</span>
+                  ) : (
+                    <button
+                      onClick={() => setPage(pageNum as number)}
+                      className={`h-8 w-8 rounded-lg transition-colors ${
+                        page === pageNum 
+                          ? "bg-blue-600 text-white" 
+                          : "border hover:bg-slate-50"
+                      }`}
+                      disabled={pageNum === page}
+                    >
+                      {pageNum}
+                    </button>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+
+            <button
+              disabled={!nextPage || page === totalPages}
+              onClick={goToNextPage}
+              className="flex items-center gap-1 rounded-lg border px-3 py-1 text-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
+            >
+              Next <ChevronRight size={14} />
+            </button>
+          </div>
+
+          {/* Page info */}
+          <div className="text-center text-xs text-slate-500">
+            Page {page} of {totalPages} • Total users: {totalCount}
+            {searchTerm && ` • Search results for "${searchTerm}"`}
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
-
+// Helper components
 const StatCard = ({
   title,
   value,
   sub,
   variant,
+  loading,
 }: {
   title: string;
   value: number;
   sub: string;
   variant?: "green" | "yellow" | "blue";
+  loading?: boolean;
 }) => {
   const styles = {
     green: "border-green-300 bg-green-50 text-green-600",
@@ -301,15 +649,24 @@ const StatCard = ({
     blue: "border-blue-300 bg-blue-50 text-blue-600",
   };
 
+  if (loading) {
+    return (
+      <div className="rounded-xl border p-4 bg-white animate-pulse">
+        <div className="h-4 bg-slate-200 rounded w-20 mb-2"></div>
+        <div className="h-8 bg-slate-200 rounded w-16 mb-2"></div>
+        <div className="h-3 bg-slate-200 rounded w-32"></div>
+      </div>
+    );
+  }
+
   return (
     <div className={`rounded-xl border p-4 ${variant ? styles[variant] : "bg-white"}`}>
       <p className="text-sm">{title}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
+      <p className="mt-1 text-2xl font-semibold">{value.toLocaleString()}</p>
       <p className="mt-1 text-xs">{sub}</p>
     </div>
   );
 };
-
 
 const Action = ({
   label,
@@ -324,11 +681,17 @@ const Action = ({
 }) => (
   <button
     onClick={onClick}
-    className={`flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 ${color}`}
+    className={`flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 transition-colors ${color}`}
   >
     {icon}
     {label}
   </button>
 );
+
+const statusBadge = (status: UserStatus) => {
+  if (status === "active") return "bg-green-100 text-green-700";
+  if (status === "suspended") return "bg-yellow-100 text-yellow-700";
+  return "bg-red-100 text-red-700";
+};
 
 export default UserManagement;
