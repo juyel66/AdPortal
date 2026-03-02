@@ -22,12 +22,7 @@ const stats: CampaignStat[] = [
     sub: "81.3% active",
     variant: "green",
   },
-  {
-    title: "Flagged",
-    value: 12,
-    sub: "Needs review",
-    variant: "yellow",
-  },
+
   {
     title: "Total Ad Spend",
     value: "$124K",
@@ -118,7 +113,7 @@ const CampaignMonitoring: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => (
           <div
             key={s.title}
