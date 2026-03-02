@@ -17,7 +17,7 @@ const PLATFORMS: PlatformItem[] = [
     key: "google",
     name: "Google Ads",
     description: "Show ads on Google Search, YouTube, and Display Network",
-    connected: true,
+    connected: false,
     logo: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765754457/Container_11_bdja1x.png",
   },
   {
@@ -48,7 +48,7 @@ const Step2Platforms: React.FC = () => {
     const savedSelection = campaignData.step2?.selectedPlatforms;
     return savedSelection && savedSelection.length > 0 
       ? savedSelection 
-      : ["google", "tiktok"];
+      : [];
   });
 
   const togglePlatform = (key: PlatformKey) => {
@@ -97,20 +97,20 @@ const Step2Platforms: React.FC = () => {
         platforms: apiPlatforms
       };
       
-      console.log("📤 Sending request:", {
+      console.log(" Sending request:", {
         url: `/main/create-ad/?org_id=${org_id}`,
         data: requestData
       });
 
-      // ★★★ Try different formats ★★★
+
       const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData);
 
-      console.log("✅ Platforms saved:", response.data);
+      console.log(" Platforms saved:", response.data);
       navigate("/user-dashboard/campaigns-create/step-3");
 
     } catch (err: any) {
-      // ★★★ Show full error details ★★★
-      console.error("❌ Full error:", err);
+
+      console.error(" Full error:", err);
       
       if (err.response) {
         // The request was made and the server responded with a status code
@@ -136,7 +136,7 @@ const Step2Platforms: React.FC = () => {
 
   useEffect(() => {
     if (!campaignId) {
-      console.warn("⚠️ No campaign ID found in localStorage");
+      console.warn(" No campaign ID found in localStorage");
     }
   }, [campaignId]);
 
