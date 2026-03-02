@@ -1,25 +1,11 @@
-/* =========================
-   USER STATUS
-========================= */
-
 export type UserStatus = "active" | "suspended" | "inactive";
 
-/* =========================
-   USER PLAN
-========================= */
-
-export type UserPlan = "Starter" | "Growth" | "Scale";
-
-/* =========================
-   USER ITEM
-========================= */
-
 export interface UserItem {
-  id: number;
+  id: string; // Changed from number to string for better uniqueness
   name: string;
   email: string;
   initials: string;
-  plan: UserPlan;
+  plan: "Starter" | "Growth" | "Scale";
   status: UserStatus;
   campaigns: number;
   totalSpend: number;
@@ -27,22 +13,33 @@ export interface UserItem {
   lastActive: string;
 }
 
-/* =========================
-   USER STATS (TOP CARDS)
-========================= */
-
-export interface UserStats {
-  total: number;
-  active: number;
-  suspended: number;
-  trial: number;
-}
-
-/* =========================
-   ACTION MENU POSITION
-========================= */
-
 export interface ActionMenuPosition {
   vertical: "top" | "bottom";
   horizontal: "left" | "right";
+}
+
+// API Response Types
+export interface UserStats {
+  total_users: {
+    value: number;
+    last_week: number;
+  };
+  active_users: number;
+  suspended_users: number;
+  trial_users: number;
+}
+
+export interface ApiUser {
+  full_name: string | null;
+  email: string;
+  status: string;
+  joined_at: string;
+  last_login: string | null;
+}
+
+export interface UserListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ApiUser[];
 }
