@@ -61,6 +61,7 @@ import UpdateStep6Creative from "./pages/update-campaign/UpdateStep6Creative";
 import UpdateStep4Audience from "./pages/update-campaign/UpdateStep4Audience";
 import UpdateStep7Review from "./pages/update-campaign/UpdateStep7Review";
 import Success from "./components/Analytics/Subscriptions/Success";
+import OrganizationManagement from "./pages/admin/Organization/OrganizationManagement";
 
 export const router = createBrowserRouter([
   {
@@ -305,6 +306,10 @@ export const router = createBrowserRouter([
       {
         path: "user-management",
         element: <UserManagement />,
+      },
+      {
+        path: "organization-management",
+        element: <OrganizationManagement />,
       },
       {
         path: "campaigns-monitoring",
