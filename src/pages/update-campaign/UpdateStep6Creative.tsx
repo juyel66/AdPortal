@@ -17,14 +17,44 @@ interface GenerateCopyResponse {
   };
 }
 
+interface AdAsset {
+  id: number;
+  file_url: string;
+  file_type: string;
+  status: string;
+}
+
+interface AdData {
+  id: number;
+  name: string;
+  status: string;
+  headline: string;
+  primary_text: string;
+  description: string;
+  destination_url: string;
+  call_to_action: string | null;
+  preview_link: string | null;
+  assets: AdAsset[];
+}
+
+interface CampaignResponse {
+  id: number;
+  name: string;
+  ads: AdData[];
+  file_url: string;
+  audience_targeting: {
+    keywords: string;
+  };
+}
+
 const UpdateStep6Creative: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
   
-  const campaignId = localStorage.getItem("campaignId");
+  const campaignId = localStorage.getItem("campaignId") || "50";
 
-  // Form states - all visible from the start
   const [adName, setAdName] = useState("");
   const [adFormat, setAdFormat] = useState<AdFormat>("image");
   const [product, setProduct] = useState("");
@@ -42,11 +72,24 @@ const UpdateStep6Creative: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [keywords, setKeywords] = useState("");
   const [fileBase64, setFileBase64] = useState<string>("");
+  const [campaignData, setCampaignData] = useState<CampaignResponse | null>(null);
   
-  // State for collapsible AI generator
   const [showAIGenerator, setShowAIGenerator] = useState(false);
 
-  // Get builder data from localStorage
+  const getOrgId = () => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        return orgData.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+      return null;
+    }
+  };
+
   const getCampaignBuilderData = () => {
     try {
       const savedData = localStorage.getItem("campaign_builder_data");
@@ -57,7 +100,6 @@ const UpdateStep6Creative: React.FC = () => {
     }
   };
 
-  // Convert file to base64
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -67,29 +109,178 @@ const UpdateStep6Creative: React.FC = () => {
     });
   };
 
-  // Load saved data if exists
-  useEffect(() => {
-    const builderData = getCampaignBuilderData();
-    if (builderData.step6) {
-      const saved = builderData.step6;
-      setAdName(saved.adName || "");
-      setAdFormat(saved.adFormat || "image");
-      setHeadline(saved.headline || "");
-      setPrimaryText(saved.primaryText || "");
-      setDescription(saved.description || "");
-      setCta(saved.cta || "Learn More");
-      setDestinationUrl(saved.destinationUrl || "");
-      setKeywords(saved.keywords || "");
+  const fetchCampaignData = async () => {
+    const org_id = getOrgId();
+    if (!org_id) {
+      setError("No organization selected");
+      setFetchLoading(false);
+      return;
+    }
+
+    try {
+      const response = await api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`);
+      setCampaignData(response.data);
       
-      // Also load the preview state if there was previously generated content
-      if (saved.headline || saved.primaryText || saved.description) {
+      const data = response.data;
+      
+      if (data.ads && data.ads.length > 0) {
+        const firstAd = data.ads[0];
+        
+        setAdName(firstAd.name || "");
+        setHeadline(firstAd.headline || "");
+        setPrimaryText(firstAd.primary_text || "");
+        setDescription(firstAd.description || "");
+        
+        if (firstAd.call_to_action) {
+          setCta(firstAd.call_to_action);
+        }
+        
+        if (firstAd.destination_url) {
+          setDestinationUrl(firstAd.destination_url);
+        }
+        
+        if (firstAd.assets && firstAd.assets.length > 0) {
+          const imageAsset = firstAd.assets.find(asset => asset.file_type === "IMAGE");
+          if (imageAsset) {
+            setPreviewUrl(imageAsset.file_url);
+            setShowPreview(true);
+          }
+        }
+      }
+      
+      if (data.audience_targeting && data.audience_targeting.keywords) {
+        setKeywords(data.audience_targeting.keywords);
+      }
+      
+      if (data.file_url && !previewUrl) {
+        setPreviewUrl(data.file_url);
         setShowPreview(true);
       }
+      
+      if (data.ads && data.ads.length > 0 && (data.ads[0].headline || data.ads[0].primary_text || data.ads[0].description)) {
+        setShowPreview(true);
+      }
+
+      localStorage.setItem("api_response", JSON.stringify(response.data));
+
+      const builderData = getCampaignBuilderData();
+      const updatedBuilderData = {
+        ...builderData,
+        step6: {
+          adName: data.ads && data.ads.length > 0 ? data.ads[0].name || "" : "",
+          adFormat: "image",
+          headline: data.ads && data.ads.length > 0 ? data.ads[0].headline || "" : "",
+          primaryText: data.ads && data.ads.length > 0 ? data.ads[0].primary_text || "" : "",
+          description: data.ads && data.ads.length > 0 ? data.ads[0].description || "" : "",
+          cta: data.ads && data.ads.length > 0 ? data.ads[0].call_to_action || "Learn More" : "Learn More",
+          destinationUrl: data.ads && data.ads.length > 0 ? data.ads[0].destination_url || "" : "",
+          keywords: data.audience_targeting?.keywords || "",
+          creativeUrl: data.file_url || (data.ads && data.ads.length > 0 && data.ads[0].assets && data.ads[0].assets.length > 0 ? data.ads[0].assets[0].file_url : ""),
+          campaignData: response.data,
+        },
+        metadata: {
+          ...builderData.metadata,
+          fetchedAt: new Date().toISOString(),
+        },
+      };
+      localStorage.setItem("campaign_builder_data", JSON.stringify(updatedBuilderData));
+
+    } catch (err: any) {
+      console.error("Error fetching campaign:", err);
+      setError(err.response?.data?.message || "Failed to fetch campaign data");
+      
+      const storedData = localStorage.getItem("api_response");
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          setCampaignData(parsedData);
+          
+          const data = parsedData;
+          
+          if (data.ads && data.ads.length > 0) {
+            const firstAd = data.ads[0];
+            if (firstAd.name) setAdName(firstAd.name);
+            if (firstAd.headline) setHeadline(firstAd.headline);
+            if (firstAd.primary_text) setPrimaryText(firstAd.primary_text);
+            if (firstAd.description) setDescription(firstAd.description);
+            if (firstAd.call_to_action) setCta(firstAd.call_to_action);
+            if (firstAd.destination_url) setDestinationUrl(firstAd.destination_url);
+            if (firstAd.assets && firstAd.assets.length > 0) {
+              const imageAsset = firstAd.assets.find(asset => asset.file_type === "IMAGE");
+              if (imageAsset) {
+                setPreviewUrl(imageAsset.file_url);
+              }
+            }
+          }
+          
+          if (data.audience_targeting && data.audience_targeting.keywords) {
+            setKeywords(data.audience_targeting.keywords);
+          }
+          
+          if (data.file_url && !previewUrl) {
+            setPreviewUrl(data.file_url);
+          }
+        } catch (e) {
+          console.error("Error parsing stored campaign data:", e);
+        }
+      }
+    } finally {
+      setFetchLoading(false);
     }
+  };
+
+  useEffect(() => {
+    const loadSavedData = async () => {
+      const storedApiResponse = localStorage.getItem("api_response");
+      if (storedApiResponse) {
+        try {
+          const parsedData = JSON.parse(storedApiResponse);
+          setCampaignData(parsedData);
+          
+          const data = parsedData;
+          
+          if (data.ads && data.ads.length > 0) {
+            const firstAd = data.ads[0];
+            if (!adName && firstAd.name) setAdName(firstAd.name);
+            if (!headline && firstAd.headline) setHeadline(firstAd.headline);
+            if (!primaryText && firstAd.primary_text) setPrimaryText(firstAd.primary_text);
+            if (!description && firstAd.description) setDescription(firstAd.description);
+            if (!cta && firstAd.call_to_action) setCta(firstAd.call_to_action);
+            if (!destinationUrl && firstAd.destination_url) setDestinationUrl(firstAd.destination_url);
+          }
+          
+          if (!keywords && data.audience_targeting && data.audience_targeting.keywords) {
+            setKeywords(data.audience_targeting.keywords);
+          }
+        } catch (e) {
+          console.error("Error parsing stored API response:", e);
+        }
+      }
+
+      const builderData = getCampaignBuilderData();
+      if (builderData.step6) {
+        const saved = builderData.step6;
+        if (!adName && saved.adName) setAdName(saved.adName);
+        if (!adFormat && saved.adFormat) setAdFormat(saved.adFormat);
+        if (!headline && saved.headline) setHeadline(saved.headline);
+        if (!primaryText && saved.primaryText) setPrimaryText(saved.primaryText);
+        if (!description && saved.description) setDescription(saved.description);
+        if (!cta && saved.cta) setCta(saved.cta);
+        if (!destinationUrl && saved.destinationUrl) setDestinationUrl(saved.destinationUrl);
+        if (!keywords && saved.keywords) setKeywords(saved.keywords);
+        
+        if (saved.headline || saved.primaryText || saved.description) {
+          setShowPreview(true);
+        }
+      }
+
+      await fetchCampaignData();
+    };
+
+    loadSavedData();
   }, []);
 
   const handleFileUpload = async (file: File) => {
-    // Show warning but don't block if file type doesn't match
     if (adFormat === "image" && !file.type.startsWith("image/")) {
       Swal.fire({
         icon: "warning",
@@ -107,7 +298,6 @@ const UpdateStep6Creative: React.FC = () => {
 
     setUploadedFile(file);
     
-    // Convert to base64
     try {
       const base64 = await fileToBase64(file);
       setFileBase64(base64);
@@ -115,8 +305,7 @@ const UpdateStep6Creative: React.FC = () => {
       console.error("Error converting file to base64:", error);
     }
     
-    // Create preview URL
-    if (previewUrl) {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
       URL.revokeObjectURL(previewUrl);
     }
     const url = URL.createObjectURL(file);
@@ -136,7 +325,6 @@ const UpdateStep6Creative: React.FC = () => {
     try {
       setIsGenerating(true);
 
-      // Get org_id
       const selectedOrg = localStorage.getItem("selectedOrganization");
       let org_id = "";
       if (selectedOrg) {
@@ -151,8 +339,6 @@ const UpdateStep6Creative: React.FC = () => {
         tone: tone.toLowerCase(),
       };
 
-      console.log("📤 Generating ad copy:", payload);
-
       const response = await api.post<GenerateCopyResponse>(
         `/main/generate-ad-copy/?org_id=${org_id}`,
         payload
@@ -161,17 +347,14 @@ const UpdateStep6Creative: React.FC = () => {
       if (response.data?.["Ad copy"]) {
         const adCopy = response.data["Ad copy"];
         
-        // Update all the form fields with generated content
         setHeadline(adCopy.headline || "");
         setPrimaryText(adCopy.primary_text || "");
         setDescription(adCopy.description || "");
         setCta(adCopy.call_to_action || "Learn More");
         setKeywords(benefits);
         
-        // Show the preview section
         setShowPreview(true);
         
-        // Scroll to preview after generation
         setTimeout(() => {
           const previewElement = document.getElementById('ad-preview-section');
           if (previewElement) {
@@ -188,7 +371,7 @@ const UpdateStep6Creative: React.FC = () => {
         });
       }
     } catch (err: any) {
-      console.error("❌ Error generating ad copy:", err);
+      console.error("Error generating ad copy:", err);
       Swal.fire({
         icon: "error",
         title: "Generation Failed",
@@ -209,7 +392,6 @@ const UpdateStep6Creative: React.FC = () => {
     setError("");
 
     try {
-      // Get org_id
       const selectedOrg = localStorage.getItem("selectedOrganization");
       let org_id = "";
       if (selectedOrg) {
@@ -218,7 +400,6 @@ const UpdateStep6Creative: React.FC = () => {
       }
 
       let response;
-      // If a file is uploaded, use FormData
       if (uploadedFile) {
         const formData = new FormData();
         formData.append("campaign_id", campaignId ? String(campaignId) : "");
@@ -239,15 +420,12 @@ const UpdateStep6Creative: React.FC = () => {
         formData.append("file_name", uploadedFile.name);
         formData.append("file_type", uploadedFile.type);
 
-        console.log("📤 Sending ad data (FormData):", formData);
-
         response = await api.post(`/main/create-ad/?org_id=${org_id}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
       } else {
-        // No file, send as JSON
         const requestData: any = {
           campaign_id: parseInt(campaignId),
         };
@@ -265,7 +443,6 @@ const UpdateStep6Creative: React.FC = () => {
         }
         if (keywords) requestData.keywords = keywords;
         
-        console.log("📤 Sending ad data (JSON):", requestData);
         response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData, {
           headers: {
             "Content-Type": "application/json",
@@ -273,13 +450,8 @@ const UpdateStep6Creative: React.FC = () => {
         });
       }
 
-      console.log("✅ Ad created:", response.data);
-
-      // Store the complete API response in localStorage with key "api_response"
       localStorage.setItem("api_response", JSON.stringify(response.data));
-      console.log("💾 Complete API response stored in localStorage with key: api_response");
 
-      // Save to localStorage for next steps
       const builderData = getCampaignBuilderData();
       const updatedBuilderData = {
         ...builderData,
@@ -310,18 +482,15 @@ const UpdateStep6Creative: React.FC = () => {
         timer: 1500,
         showConfirmButton: false,
       }).then(() => {
-        // Navigate to update review page
         navigate(`/user-dashboard/campaigns-update/${campaignId}/update-step-7`);
       });
 
     } catch (err: any) {
-      console.error(" Error updating ad:", err);
+      console.error("Error updating ad:", err);
       
       let errorMessage = "Failed to update ad. Please try again.";
       
       if (err.response?.data) {
-        console.log("API Error Response:", err.response.data);
-        
         if (typeof err.response.data === 'object') {
           const errors = [];
           for (const [key, value] of Object.entries(err.response.data)) {
@@ -347,41 +516,63 @@ const UpdateStep6Creative: React.FC = () => {
     }
   };
 
-  // Clean up preview URL on unmount
   useEffect(() => {
     return () => {
-      if (previewUrl) {
+      if (previewUrl && previewUrl.startsWith('blob:')) {
         URL.revokeObjectURL(previewUrl);
       }
     };
   }, [previewUrl]);
 
+  if (fetchLoading) {
+    return (
+      <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Update Your Ad</h2>
+          <p className="text-sm text-gray-500">Loading campaign data...</p>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-500">Fetching campaign data for ID: {campaignId}...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-900">Update Your Ad</h2>
         <p className="text-sm text-gray-500">
           Update creative assets and ad copy
         </p>
         
-        {/* Show campaign ID like Step5Budget */}
-        {campaignId && (
-          <p className="text-xs text-gray-400 mt-1">Campaign ID: {campaignId}</p>
+        {campaignId && campaignData && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
+            <p className="text-xs font-medium text-blue-800">
+              Campaign ID: <span className="font-bold">{campaignId}</span>
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Campaign Name: <span className="font-medium">{campaignData.name || 'N/A'}</span>
+            </p>
+            {campaignData.ads && campaignData.ads.length > 0 && (
+              <p className="text-xs text-blue-600">
+                Ad Name: <span className="font-medium">{campaignData.ads[0].name || 'N/A'}</span>
+              </p>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Error message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
           <p className="text-sm text-red-600 whitespace-pre-wrap">{error}</p>
         </div>
       )}
 
-      {/* Ad Name - Optional */}
       <div className="mb-5">
         <label className="text-sm font-medium text-gray-700 block mb-1">
-          Ad Name <span className="text-gray-400 text-xs">(Optional)</span>
+          Ad Name
         </label>
         <input
           value={adName}
@@ -391,10 +582,9 @@ const UpdateStep6Creative: React.FC = () => {
         />
       </div>
 
-      {/* Ad Format - Optional */}
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 block mb-2">
-          Ad Format <span className="text-gray-400 text-xs">(Optional)</span>
+          Ad Format
         </label>
 
         <div className="grid grid-cols-2 gap-4">
@@ -403,16 +593,19 @@ const UpdateStep6Creative: React.FC = () => {
               setAdFormat("image");
               setUploadedFile(null);
               setFileBase64("");
-              setPreviewUrl("");
-              setShowPreview(false);
-            }}
-            className={`rounded-xl border p-4 flex flex-col items-center gap-2
-              ${
-                adFormat === "image"
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200"
+              if (campaignData?.file_url) {
+                setPreviewUrl(campaignData.file_url);
+              } else if (campaignData?.ads && campaignData.ads.length > 0 && campaignData.ads[0].assets && campaignData.ads[0].assets.length > 0) {
+                setPreviewUrl(campaignData.ads[0].assets[0].file_url);
+              } else {
+                setPreviewUrl("");
               }
-            `}
+            }}
+            className={`rounded-xl border p-4 flex flex-col items-center gap-2 ${
+              adFormat === "image"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200"
+            }`}
           >
             <ImageIcon className="w-5 h-5 text-gray-700" />
             <span className="text-sm font-medium">Image Ad</span>
@@ -424,15 +617,12 @@ const UpdateStep6Creative: React.FC = () => {
               setUploadedFile(null);
               setFileBase64("");
               setPreviewUrl("");
-              setShowPreview(false);
             }}
-            className={`rounded-xl border p-4 flex flex-col items-center gap-2
-              ${
-                adFormat === "video"
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200"
-              }
-            `}
+            className={`rounded-xl border p-4 flex flex-col items-center gap-2 ${
+              adFormat === "video"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200"
+            }`}
           >
             <Video className="w-5 h-5 text-gray-700" />
             <span className="text-sm font-medium">Video Ad</span>
@@ -440,11 +630,19 @@ const UpdateStep6Creative: React.FC = () => {
         </div>
       </div>
 
-      {/* Upload Creative - Optional */}
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 block mb-2">
-          Upload Creative <span className="text-gray-400 text-xs">(Optional)</span>
+          Upload Creative
         </label>
+
+        {previewUrl && !uploadedFile && (
+          <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-xs text-green-700 mb-1">✓ Existing creative available</p>
+            <p className="text-xs text-gray-500 mt-2">
+              Upload a new file below to replace it
+            </p>
+          </div>
+        )}
 
         <label className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer block hover:bg-gray-50 transition-colors">
           <UploadCloud className="w-6 h-6 mx-auto text-gray-400 mb-2" />
@@ -474,10 +672,9 @@ const UpdateStep6Creative: React.FC = () => {
         )}
       </div>
 
-      {/* Keywords - Optional */}
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 block mb-1">
-          Keywords <span className="text-gray-400 text-xs">(Optional)</span>
+          Keywords
         </label>
         <input
           value={keywords}
@@ -487,10 +684,9 @@ const UpdateStep6Creative: React.FC = () => {
         />
       </div>
 
-      {/* Destination URL - Optional */}
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 block mb-1">
-          Destination URL <span className="text-gray-400 text-xs">(Optional)</span>
+          Destination URL
         </label>
         <input
           value={destinationUrl}
@@ -500,10 +696,7 @@ const UpdateStep6Creative: React.FC = () => {
         />
       </div>
 
-
-
-           <div className="mb-6 border border-gray-200 rounded-xl overflow-hidden">
-        {/* Header/Button */}
+      <div className="mb-6 border border-gray-200 rounded-xl overflow-hidden">
         <button
           onClick={() => setShowAIGenerator(!showAIGenerator)}
           className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
@@ -513,7 +706,7 @@ const UpdateStep6Creative: React.FC = () => {
             <span className="text-sm font-semibold text-gray-900">
               AI Copy Generator
             </span>
-            <span className="text-xs text-gray-500">  (AI will generate and fill the fields below) Click to expand</span>
+            <span className="text-xs text-gray-500">(AI will generate and fill the fields below) Click to expand</span>
           </div>
           {showAIGenerator ? (
             <ChevronUp className="w-5 h-5 text-gray-500" />
@@ -522,7 +715,6 @@ const UpdateStep6Creative: React.FC = () => {
           )}
         </button>
 
-        {/* Collapsible Content */}
         {showAIGenerator && (
           <div className="p-4 bg-blue-50/30 border-t border-gray-200">
             <p className="text-xs text-gray-600 mb-3">
@@ -598,9 +790,6 @@ const UpdateStep6Creative: React.FC = () => {
         )}
       </div>
 
-
-
-      {/* Ad Copy Fields - Always visible and editable */}
       <div className="mb-6 border border-gray-200 rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold text-gray-900">
@@ -613,7 +802,6 @@ const UpdateStep6Creative: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          {/* Headline */}
           <div>
             <label className="text-sm text-gray-600 block mb-1">
               Headline
@@ -626,7 +814,6 @@ const UpdateStep6Creative: React.FC = () => {
             />
           </div>
 
-          {/* Primary Text */}
           <div>
             <label className="text-sm text-gray-600 block mb-1">
               Primary Text
@@ -640,7 +827,6 @@ const UpdateStep6Creative: React.FC = () => {
             />
           </div>
 
-          {/* Description */}
           <div>
             <label className="text-sm text-gray-600 block mb-1">
               Description
@@ -653,7 +839,6 @@ const UpdateStep6Creative: React.FC = () => {
             />
           </div>
 
-          {/* Call to Action */}
           <div>
             <label className="text-sm text-gray-600 block mb-1">
               Call to Action
@@ -675,11 +860,7 @@ const UpdateStep6Creative: React.FC = () => {
         </div>
       </div>
 
-      {/* AI Copy Generator - Collapsible Section */}
- 
-
-      {/* Preview Section - Shows only if there's content */}
-      {(showPreview || headline || primaryText || description) && (
+      {(showPreview || headline || primaryText || description || previewUrl) && (
         <div id="ad-preview-section" className="mb-6 border-t pt-6">
           <h3 className="text-md font-semibold text-gray-900 mb-4">Ad Preview</h3>
           <CopyGeneratePreview
@@ -698,7 +879,6 @@ const UpdateStep6Creative: React.FC = () => {
         </div>
       )}
 
-      {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
         <Link
           to={`/user-dashboard/campaigns-update/${campaignId}/update-step-5`}
