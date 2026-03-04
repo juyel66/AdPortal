@@ -2,23 +2,17 @@ import React, { useState } from "react";
 import {
   ShieldCheck,
   Bell,
-  Settings as SettingsIcon,
 } from "lucide-react";
-import General from "./General";
 import Security from "./Security";
 import SettingNotification from "./SettingNotification";
 
-
-
 type AdminSettingsTab =
-  | "general"
   | "security"
   | "notifications";
 
-
 const AdminSettings: React.FC = () => {
   const [activeTab, setActiveTab] =
-    useState<AdminSettingsTab>("general");
+    useState<AdminSettingsTab>("security");
 
   return (
     <div className="space-y-6 mt-5">
@@ -32,15 +26,7 @@ const AdminSettings: React.FC = () => {
         </p>
       </div>
 
-
       <div className="flex gap-2 rounded-xl border bg-white p-2 w-fit">
-        <TabButton
-          active={activeTab === "general"}
-          icon={<SettingsIcon size={16} />}
-          label="General"
-          onClick={() => setActiveTab("general")}
-        />
-
         <TabButton
           active={activeTab === "security"}
           icon={<ShieldCheck size={16} />}
@@ -58,10 +44,7 @@ const AdminSettings: React.FC = () => {
 
       {/* ================= CONTENT ================= */}
       <div className="rounded-xl border bg-white p-6">
-        {activeTab === "general" && <General />}
-
         {activeTab === "security" && <Security />}
-
         {activeTab === "notifications" && (
           <SettingNotification />
         )}
@@ -71,7 +54,6 @@ const AdminSettings: React.FC = () => {
 };
 
 export default AdminSettings;
-
 
 type TabButtonProps = {
   active: boolean;
