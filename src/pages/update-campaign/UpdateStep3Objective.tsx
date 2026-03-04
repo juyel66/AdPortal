@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, Eye, MessageCircle, Users } from "lucide-react";
+import { ShoppingCart, Eye, MessageCircle, Users, MousePointer, CircleStar } from "lucide-react";
 import type { CampaignObjective, ObjectiveKey } from "@/types/createCampaignStep2";
 import { Link, useNavigate, useParams } from "react-router";
 import api from "@/lib/axios";
@@ -63,20 +63,8 @@ const ICONS: Record<ObjectiveKey, React.ReactNode> = {
   awareness: <Eye size={18} />,
   engagement: <MessageCircle size={18} />,
   lead_generation: <Users size={18} />,
-  traffic: (
-    <img
-      src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765755317/Icon_12_qrf7xm.png"
-      alt="Traffic"
-      className="h-4 w-4 object-contain"
-    />
-  ),
-  app_promotion: (
-    <img
-      src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765755317/Icon_11_qjtbfj.png"
-      alt="App Promotion"
-      className="h-4 w-4 object-contain"
-    />
-  ),
+  traffic: <MousePointer size={18} />,
+  app_promotion: <CircleStar size={18} />
 };
 
 const Step3Objective: React.FC = () => {
