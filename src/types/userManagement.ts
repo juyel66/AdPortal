@@ -1,24 +1,26 @@
-export type UserStatus = "active" | "suspended" | "inactive";
+// types/userManagement.ts
+
+export type UserStatus = 'active' | 'suspended' | 'inactive';
 
 export interface UserItem {
-  id: string; // Changed from number to string for better uniqueness
+  id: string;
   name: string;
   email: string;
   initials: string;
-  plan: "Starter" | "Growth" | "Scale";
+  plan: string;
   status: UserStatus;
   campaigns: number;
   totalSpend: number;
   joined: string;
   lastActive: string;
+  isAdmin?: boolean; // Added admin flag
 }
 
 export interface ActionMenuPosition {
-  vertical: "top" | "bottom";
-  horizontal: "left" | "right";
+  vertical: 'top' | 'bottom';
+  horizontal: 'left' | 'right';
 }
 
-// API Response Types
 export interface UserStats {
   total_users: {
     value: number;
@@ -29,12 +31,20 @@ export interface UserStats {
   trial_users: number;
 }
 
+// API Response Types
 export interface ApiUser {
-  full_name: string | null;
+  id?: string; // Make id optional for fallback
   email: string;
+  full_name: string | null;
   status: string;
-  joined_at: string;
   last_login: string | null;
+  joined_at: string;
+  is_active: boolean;
+  is_suspended: boolean;
+  is_admin?: boolean; // Added admin flag for API response
+  subscription_tier?: string;
+  campaigns_count?: number;
+  total_spend?: number;
 }
 
 export interface UserListResponse {
@@ -42,4 +52,32 @@ export interface UserListResponse {
   next: string | null;
   previous: string | null;
   results: ApiUser[];
+}
+
+// API Request Types
+export interface UpdateUserStatusRequest {
+  status: UserStatus;
+}
+
+// Props Types
+export interface StatCardProps {
+  title: string;
+  value: number;
+  sub: string;
+  variant?: 'green' | 'yellow' | 'blue';
+  loading?: boolean;
+}
+
+export interface ActionProps {
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+// Admin context type (if using context)
+export interface AdminContextType {
+  adminEmail: string;
+  setAdminEmail: (email: string) => void;
 }
