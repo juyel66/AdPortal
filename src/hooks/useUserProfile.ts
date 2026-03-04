@@ -16,6 +16,12 @@ export const useUserProfile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get('/accounts/profile/');
         setUser(res.data);
