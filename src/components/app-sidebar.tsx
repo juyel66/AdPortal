@@ -411,11 +411,7 @@ const adminItems = [
     url: "/admin-dashboard/organization-management",
     icon: BriefcaseBusiness,
   },
-  {
-    title: "Campaigns Monitoring",
-    url: "/admin-dashboard/campaigns-monitoring",
-    icon: Megaphone,
-  },
+
 
   { title: "Finance", url: "/admin-dashboard/finance", icon: CreditCard },
   {
@@ -442,6 +438,8 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  
+
   
   const { user, organizations, selectedOrganization } = useAppSelector((state) => state.auth);
   
