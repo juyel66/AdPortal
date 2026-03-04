@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   MoreVertical,
   CheckCircle,
@@ -39,6 +39,26 @@ const useDebounce = <T,>(value: T, delay: number): T => {
   }, [value, delay]);
 
   return debouncedValue;
+};
+
+// Custom hook for click outside
+const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void) => {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return;
+      }
+      handler();
+    };
+
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [ref, handler]);
 };
 
 /* =========================
@@ -85,6 +105,15 @@ const fetchUserList = async (page: number, search?: string): Promise<UserListRes
     }
     throw error;
   }
+};
+
+// Update user status API call
+const updateUserStatus = async (userId: string, status: UserStatus): Promise<void> => {
+  // Use only the actual user ID (not email)
+  if (import.meta.env.DEV) {
+    console.log(`📡 Updating user ID ${userId} status to: ${status}`);
+  }
+  await api.patch(`/admin/user-management/${userId}/`, { status });
 };
 
 // Helper function to transform API user data to component format
@@ -151,7 +180,7 @@ const transformApiUser = (apiUser: ApiUser, index: number): UserItem => {
   };
 
   return {
-    id: `${apiUser.email}-${index}`,
+    id: apiUser.id || `${apiUser.email}-${index}`,
     name: getName(),
     email: apiUser.email,
     initials: getInitials(),
@@ -161,6 +190,7 @@ const transformApiUser = (apiUser: ApiUser, index: number): UserItem => {
     totalSpend: 0,
     joined: formatDate(apiUser.joined_at),
     lastActive: getLastActive(),
+    isAdmin: apiUser.is_admin || false, // Add admin flag
   };
 };
 
@@ -171,6 +201,9 @@ const transformApiUser = (apiUser: ApiUser, index: number): UserItem => {
 const ITEMS_PER_PAGE = 10;
 
 const UserManagement: React.FC = () => {
+  // Get current admin email from localStorage or context
+  const [currentAdminEmail, setCurrentAdminEmail] = useState<string>("");
+  
   const [users, setUsers] = useState<UserItem[]>([]);
   const [stats, setStats] = useState<UserStats>({
     total_users: { value: 0, last_week: 0 },
@@ -187,6 +220,10 @@ const UserManagement: React.FC = () => {
   const [openAction, setOpenAction] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchInputValue, setSearchInputValue] = useState<string>("");
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  
+  // Ref for action menu to detect clicks outside
+  const actionMenuRef = useRef<HTMLDivElement>(null);
   
   // Debounce search term
   const debouncedSearch = useDebounce(searchInputValue, 500);
@@ -194,6 +231,21 @@ const UserManagement: React.FC = () => {
   const [actionPos, setActionPos] = useState<ActionMenuPosition>({
     vertical: "bottom",
     horizontal: "right",
+  });
+
+  // Get current admin email on mount
+  useEffect(() => {
+    // Get admin email from localStorage or auth context
+    // Adjust this based on where you store the admin email
+    const adminEmail = localStorage.getItem('adminEmail') || '';
+    setCurrentAdminEmail(adminEmail);
+  }, []);
+
+  // Use click outside hook to close action menu
+  useClickOutside(actionMenuRef, () => {
+    if (openAction) {
+      setOpenAction(null);
+    }
   });
 
   // Fetch stats on mount
@@ -291,12 +343,59 @@ const UserManagement: React.FC = () => {
     return { vertical, horizontal };
   };
 
-  const updateStatus = async (id: string, status: UserStatus) => {
+  const updateStatus = async (userId: string, newStatus: UserStatus) => {
+    // Store the original user data for rollback in case of error
+    const originalUser = users.find(u => u.id === userId);
+    if (!originalUser) return;
+
+    // Check if this is the current admin user
+    if (originalUser.email === currentAdminEmail) {
+      toast.error("You cannot change your own account status");
+      setOpenAction(null);
+      return;
+    }
+
+    // Optimistic update
     setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status } : u))
+      prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
     );
     setOpenAction(null);
-    toast.success(`User status updated to ${status}`);
+    setUpdatingUserId(userId);
+
+    try {
+      // Call API to update status
+      await updateUserStatus(userId, newStatus);
+      
+      // Refresh stats after status update
+      await loadStats();
+      
+      toast.success(`User status updated to ${newStatus} successfully`);
+    } catch (error) {
+      console.error('Failed to update user status:', error);
+      
+      // Rollback on error
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? originalUser : u))
+      );
+      
+      toast.error('Failed to update user status. Please try again.');
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  // Handle action button click
+  const handleActionClick = (e: React.MouseEvent, userId: string) => {
+    const user = users.find(u => u.id === userId);
+    
+    // Check if this is the current admin user
+    if (user?.email === currentAdminEmail) {
+      toast.error("You cannot change your own account status");
+      return;
+    }
+    
+    setActionPos(calculatePosition(e.currentTarget as HTMLButtonElement));
+    setOpenAction(openAction === userId ? null : userId);
   };
 
   // Handle search input change
@@ -361,8 +460,6 @@ const UserManagement: React.FC = () => {
     return rangeWithDots;
   };
 
- 
-
   // Show loading state
   const showInitialLoading = statsLoading && loading && page === 1 && !searchTerm;
 
@@ -385,9 +482,12 @@ const UserManagement: React.FC = () => {
           <h1 className="text-xl font-semibold">User management</h1>
           <p className="text-sm text-slate-500">
             Manage all platform users and their subscriptions
-          </p>
-        </div>
-     
+          </p> 
+        </div> 
+
+       
+        
+        
       </div>
 
       {/* TOP STATS */}
@@ -486,70 +586,93 @@ const UserManagement: React.FC = () => {
 
             <tbody>
               {users.length > 0 ? (
-                users.map((u) => (
-                  <tr key={u.id} className="border-t hover:bg-slate-50">
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
-                          {u.initials}
+                users.map((u) => {
+                  const isCurrentAdmin = u.email === currentAdminEmail;
+                  
+                  return (
+                    <tr key={u.id} className={`border-t hover:bg-slate-50 ${isCurrentAdmin ? 'bg-blue-50' : ''}`}>
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
+                            {u.initials}
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              {u.name}
+                              {isCurrentAdmin && (
+                                <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                  You
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-slate-500">{u.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{u.name}</p>
-                          <p className="text-xs text-slate-500">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="p-3 text-center">
-                      <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadge(u.status)}`}>
-                        {u.status}
-                      </span>
-                    </td>
+                      <td className="p-3 text-center">
+                        {updatingUserId === u.id ? (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="animate-spin h-3 w-3 border-b-2 border-blue-600 rounded-full"></span>
+                            <span className="text-xs text-slate-500">Updating...</span>
+                          </span>
+                        ) : (
+                          <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadge(u.status)}`}>
+                            {u.status}
+                          </span>
+                        )}
+                      </td>
 
-                    <td className="p-3 text-center">{u.joined}</td>
-                    <td className="p-3 text-center">{u.lastActive}</td>
+                      <td className="p-3 text-center">{u.joined}</td>
+                      <td className="p-3 text-center">{u.lastActive}</td>
 
-                    <td className="p-3 text-right relative">
-                      <button
-                        onClick={(e) => {
-                          setActionPos(calculatePosition(e.currentTarget));
-                          setOpenAction(openAction === u.id ? null : u.id);
-                        }}
-                        className="p-1 hover:bg-slate-100 rounded"
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-
-                      {openAction === u.id && (
-                        <div
-                          className={`absolute z-50 w-36 rounded-xl border bg-white shadow-lg
-                            ${actionPos.vertical === "top" ? "bottom-10" : "top-10"}
-                            ${actionPos.horizontal === "left" ? "right-8" : "right-8"}
-                          `}
+                      <td className="p-3 text-right relative">
+                        <button
+                          onClick={(e) => handleActionClick(e, u.id)}
+                          className={`p-1 hover:bg-slate-100 rounded transition-colors ${
+                            isCurrentAdmin ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          disabled={updatingUserId === u.id || isCurrentAdmin}
+                          title={isCurrentAdmin ? "You cannot change your own status" : "Change user status"}
                         >
-                          <Action 
-                            label="Active" 
-                            icon={<CheckCircle size={14} />} 
-                            color="text-green-600" 
-                            onClick={() => updateStatus(u.id, "active")} 
-                          />
-                          <Action 
-                            label="Suspended" 
-                            icon={<Ban size={14} />} 
-                            color="text-yellow-600" 
-                            onClick={() => updateStatus(u.id, "suspended")} 
-                          />
-                          <Action 
-                            label="Inactive" 
-                            icon={<XCircle size={14} />} 
-                            color="text-red-600" 
-                            onClick={() => updateStatus(u.id, "inactive")} 
-                          />
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                          <MoreVertical size={16} />
+                        </button>
+
+                        {openAction === u.id && (
+                          <div
+                            ref={actionMenuRef}
+                            className={`absolute z-50 w-36 rounded-xl border bg-white shadow-lg
+                              ${actionPos.vertical === "top" ? "bottom-10" : "top-10"}
+                              ${actionPos.horizontal === "left" ? "right-8" : "right-8"}
+                            `}
+                          >
+                            <Action 
+                              label="Active" 
+                              icon={<CheckCircle size={14} />} 
+                              color="text-green-600" 
+                              onClick={() => updateStatus(u.id, "active")}
+                              disabled={updatingUserId === u.id || u.status === "active"}
+                            />
+                            <Action 
+                              label="Suspended" 
+                              icon={<Ban size={14} />} 
+                              color="text-yellow-600" 
+                              onClick={() => updateStatus(u.id, "suspended")}
+                              disabled={updatingUserId === u.id || u.status === "suspended"}
+                            />
+                            <Action 
+                              label="Inactive" 
+                              icon={<XCircle size={14} />} 
+                              color="text-red-600" 
+                              onClick={() => updateStatus(u.id, "inactive")}
+                              disabled={updatingUserId === u.id || u.status === "inactive"}
+                            />
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={5} className="text-center py-12 text-slate-500">
@@ -578,6 +701,7 @@ const UserManagement: React.FC = () => {
       {/* PAGINATION */}
       {!loading && totalPages > 0 && users.length > 0 && (
         <>
+        
           <div className="flex items-center justify-between">
             <button
               disabled={!prevPage || page === 1}
@@ -673,15 +797,20 @@ const Action = ({
   icon,
   color,
   onClick,
+  disabled,
 }: {
   label: string;
   icon: React.ReactNode;
   color: string;
   onClick: () => void;
+  disabled?: boolean;
 }) => (
   <button
     onClick={onClick}
-    className={`flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 transition-colors ${color}`}
+    disabled={disabled}
+    className={`flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 transition-colors ${
+      color
+    } ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50' : ''}`}
   >
     {icon}
     {label}
