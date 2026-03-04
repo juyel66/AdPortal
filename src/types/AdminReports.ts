@@ -1,4 +1,4 @@
-export type ReportType = "Weekly" | "Monthly" | "Quarterly" | "Custom";
+// types/AdminReports.ts
 
 export type ReportMetric =
   | "Revenue Overview"
@@ -10,14 +10,66 @@ export type ReportMetric =
   | "Total Transactions"
   | "Failed Payments";
 
-export type ReportCard = {
+export type ReportType = "Weekly" | "Monthly" | "Quarterly" | "Custom";
+
+export interface ReportCard {
   id: number;
   title: string;
-  type: ReportType;
+  type: string;
   date: string;
-};
+  status?: string;
+  fileUrl?: string;
+  fileName?: string;
+  includedMetrics?: string[];
+  startDate?: string;
+  endDate?: string;
+}
 
-export type CreateReportForm = {
+export interface CreateReportForm {
   reportType: ReportType;
   metrics: ReportMetric[];
-};
+  startDate?: string;
+  endDate?: string;
+}
+
+// API Types
+export interface ApiReport {
+  id: number;
+  name: string;
+  created_at: string;
+  report_type: string;
+  status: string;
+  included_metrics: string[];
+  start_date?: string;
+  end_date?: string;
+  file: string;
+}
+
+export interface ReportListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ApiReport[];
+}
+
+export interface GenerateReportRequest {
+  report_type: string;
+  included_metrics: string[];
+  start_date?: string;
+  end_date?: string;
+}
+
+// Component Props Types
+export interface ReportTypeCardProps {
+  icon: React.ReactNode;
+  title: string;
+  bgColor: string;
+}
+
+export interface DateRangePickerProps {
+  startDate: string;
+  endDate: string;
+  onStartDateChange: (date: string) => void;
+  onEndDateChange: (date: string) => void;
+  error?: string;
+}
