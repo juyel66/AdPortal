@@ -1,4 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 import api from "../../lib/axios";
 import { toast } from "sonner";
 
@@ -404,7 +405,7 @@ export const resendOtp = createAsyncThunk<
 
 
 export const refreshToken = createAsyncThunk<
-  { access: string },
+  { access: string; refresh: string },
   void,
   { rejectValue: any }
 >("auth/refresh-token", async (_, { rejectWithValue }) => {
@@ -419,12 +420,21 @@ export const refreshToken = createAsyncThunk<
     }
 
     console.log(' Attempting to refresh token...');
-    
-    const response = await api.post<{ access: string }>("/accounts/token/refresh/", {
-      refresh: refreshToken
-    });
+
+    // Use raw axios (no interceptors) to avoid attaching expired access tokens
+    // or triggering the 401 retry loop on the refresh endpoint itself
+    const response = await axios.post<{ access: string; refresh: string }>(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/accounts/token/refresh/`,
+      { refresh: refreshToken },
+      { headers: { "Content-Type": "application/json" } }
+    );
 
     console.log(' Token refreshed successfully');
+
+    localStorage.setItem("accessToken", response.data.access);
+    if (response.data.refresh) {
+      localStorage.setItem("refreshToken", response.data.refresh);
+    }
     
     // Optional: Show toast only in development
     // if (import.meta.env.DEV) {
