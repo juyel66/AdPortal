@@ -68,11 +68,20 @@ export const router = createBrowserRouter([
     path: "/",
     element: <Root />,
     
+    
     errorElement: <ErrorPage />,
     children: [
       {
         index: true,
         element: <Home />,
+      },
+        {
+        path: "privacy-policy",
+        element: <PrivacyPolicy />
+      },
+      {
+        path: "terms-and-conditions",
+        element: <TermsConditions />
       },
 
       
@@ -101,14 +110,8 @@ export const router = createBrowserRouter([
         path: "pricing",
         element: <Pricing />,
       },
-      {
-        path: "privacy-policy",
-        element: <PrivacyPolicy />
-      },
-      {
-        path: "terms-and-conditions",
-        element: <TermsConditions />
-      },
+    
+   
       {
         path: "security",
         element: <SecurityPage />
