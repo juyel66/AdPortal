@@ -78,10 +78,10 @@ const PlatformAnalytics: React.FC = () => {
         }));
         setFeatureUsageData(transformedFeatureUsage);
         
-        toast.success('Analytics data loaded successfully', {
-          duration: 3000,
-          position: 'top-center',
-        });
+        // toast.success('Analytics data loaded successfully', {
+        //   duration: 3000,
+        //   position: 'top-center',
+        // });
       }
     } catch (error: any) {
       console.error("Error fetching analytics data:", error);
@@ -206,6 +206,44 @@ const PlatformAnalytics: React.FC = () => {
         </button>
       </div>
 
+
+         {userGrowthData.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-xl border bg-white p-4">
+            <div className="flex items-center gap-2 text-slate-600 mb-2">
+              <Users size={16} />
+              <span className="text-xs font-medium">Total New Users (Last 6 months)</span>
+            </div>
+            <p className="text-2xl font-semibold text-slate-900">
+              {userGrowthData.reduce((sum, item) => sum + item.newUsers, 0)}
+            </p>
+          </div>
+          
+          <div className="rounded-xl border bg-white p-4">
+            <div className="flex items-center gap-2 text-slate-600 mb-2">
+              <Activity size={16} />
+              <span className="text-xs font-medium">Avg. Active Users</span>
+            </div>
+            <p className="text-2xl font-semibold text-slate-900">
+              {Math.round(userGrowthData.reduce((sum, item) => sum + item.activeUsers, 0) / userGrowthData.length)}
+            </p>
+          </div>
+          
+          <div className="rounded-xl border bg-white p-4">
+            <div className="flex items-center gap-2 text-slate-600 mb-2">
+              <span className="text-xs font-medium">Most Used Feature</span>
+            </div>
+            <p className="text-lg font-semibold text-slate-900">
+              {featureUsageData.length > 0 
+                ? featureUsageData.reduce((max, item) => item.value > max.value ? item : max, featureUsageData[0]).name
+                : 'N/A'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      
+
       {/* USER GROWTH CHART */}
       <div className="rounded-xl border bg-white p-6">
         <div className="flex items-center justify-between mb-4">
@@ -261,6 +299,9 @@ const PlatformAnalytics: React.FC = () => {
       </div>
 
       {/* FEATURE USAGE CHART */}
+
+
+      
       <div className="rounded-xl border bg-white p-6">
         <h2 className="mb-4 text-sm font-semibold text-slate-900">
           Feature Usage (%)
@@ -302,40 +343,7 @@ const PlatformAnalytics: React.FC = () => {
       </div>
 
       {/* Summary Stats (Optional) */}
-      {userGrowthData.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-xl border bg-white p-4">
-            <div className="flex items-center gap-2 text-slate-600 mb-2">
-              <Users size={16} />
-              <span className="text-xs font-medium">Total New Users (Last 6 months)</span>
-            </div>
-            <p className="text-2xl font-semibold text-slate-900">
-              {userGrowthData.reduce((sum, item) => sum + item.newUsers, 0)}
-            </p>
-          </div>
-          
-          <div className="rounded-xl border bg-white p-4">
-            <div className="flex items-center gap-2 text-slate-600 mb-2">
-              <Activity size={16} />
-              <span className="text-xs font-medium">Avg. Active Users</span>
-            </div>
-            <p className="text-2xl font-semibold text-slate-900">
-              {Math.round(userGrowthData.reduce((sum, item) => sum + item.activeUsers, 0) / userGrowthData.length)}
-            </p>
-          </div>
-          
-          <div className="rounded-xl border bg-white p-4">
-            <div className="flex items-center gap-2 text-slate-600 mb-2">
-              <span className="text-xs font-medium">Most Used Feature</span>
-            </div>
-            <p className="text-lg font-semibold text-slate-900">
-              {featureUsageData.length > 0 
-                ? featureUsageData.reduce((max, item) => item.value > max.value ? item : max, featureUsageData[0]).name
-                : 'N/A'}
-            </p>
-          </div>
-        </div>
-      )}
+   
     </div>
   );
 };
