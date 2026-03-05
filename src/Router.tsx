@@ -49,7 +49,7 @@ import TermsConditions from "./pages/TermsConditions/TermsConditions";
 import SecurityPage from "./pages/SecurityPage/SecurityPage";
 import AboutUs from "./pages/AboutUs/AboutUs";
 import ContactUs from "./pages/Contact/ContactUs";
-import NotificationsPage from "./pages/NotificationsPage/Notificationspage";
+
 import AcceptInvite from "./components/Team/AcceptInvite";
 import UpdateCampaignLayout from "./pages/update-campaign/UpdateCampaignLayout";
 import MetaAuthCallback from "./components/Settings/MetaAuthCallback";
@@ -62,6 +62,7 @@ import UpdateStep4Audience from "./pages/update-campaign/UpdateStep4Audience";
 import UpdateStep7Review from "./pages/update-campaign/UpdateStep7Review";
 import Success from "./components/Analytics/Subscriptions/Success";
 import OrganizationManagement from "./pages/admin/Organization/OrganizationManagement";
+import UserNotificationPage from "./Notification/UserNotificationPage";
 
 export const router = createBrowserRouter([
   {
@@ -206,8 +207,8 @@ export const router = createBrowserRouter([
         element: <Settings />,
       },
       {
-        path: "notification",
-        element: <NotificationsPage />,
+        path: "notifications",
+        element: <UserNotificationPage />,
       },
 
 
