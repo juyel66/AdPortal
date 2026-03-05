@@ -6,6 +6,7 @@ import {
   TrendingUp,
   TrendingDown,
   RefreshCw,
+  MousePointer,
 } from "lucide-react";
 import {
   LineChart,
@@ -227,7 +228,7 @@ const Analytics: React.FC = () => {
         value: `${data.top_metrics.click_rate.value}%`,
         change: `${data.top_metrics.click_rate.change_percent > 0 ? '+' : ''}${data.top_metrics.click_rate.change_percent}%`,
         positive: data.top_metrics.click_rate.change_percent >= 0,
-        icon: <Target size={16} className="text-indigo-600" />,
+        icon: <MousePointer size={16} className="text-blue-500" />,
       },
       {
         label: "Conversions",
