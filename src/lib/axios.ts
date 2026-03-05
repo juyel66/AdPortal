@@ -175,8 +175,8 @@ api.interceptors.response.use(
             onClick: () => window.location.href = '/auth/signIn'
           }
         });
-        
-       
+
+  
         store.dispatch(logout());
         
        
@@ -188,7 +188,7 @@ api.interceptors.response.use(
       }
     }
 
-    
+
     if (error.response?.status === 403) {
       toast.error('You do not have permission to perform this action.', {
         duration: 4000,
@@ -203,6 +203,8 @@ api.interceptors.response.use(
       // });
 
        console.log("resource not found");
+
+
 
 
 
