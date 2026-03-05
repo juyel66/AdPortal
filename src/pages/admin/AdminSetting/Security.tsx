@@ -1,13 +1,18 @@
-import api from "@/lib/axios";
 import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-
+import api from "../../../lib/axios";
 
 const Security: React.FC = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // State for password visibility
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateForm = () => {
     if (!currentPassword) {
@@ -87,15 +92,18 @@ const Security: React.FC = () => {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
+        
+        // Reset visibility states
+        setShowCurrentPassword(false);
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
       }
     } catch (error: any) {
       console.error("Password change error:", error);
 
-      // Handle different error responses
       if (error.response?.data) {
         const errorData = error.response.data;
 
-        // Handle field-specific errors
         if (errorData.old_password) {
           toast.error(errorData.old_password[0] || "Current password is incorrect", {
             duration: 4000,
@@ -147,11 +155,13 @@ const Security: React.FC = () => {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      
       <div>
         <h2 className="text-base font-semibold text-slate-900">
           Change Password
@@ -164,14 +174,28 @@ const Security: React.FC = () => {
           <label className="mb-1 block text-sm font-medium text-slate-700">
             Current Password
           </label>
-          <input
-            type="password"
-            placeholder="Enter current password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            disabled={loading}
-            className="w-full rounded-lg bg-slate-50 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          />
+          <div className="relative">
+            <input
+              type={showCurrentPassword ? "text" : "password"}
+              placeholder="Enter current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              disabled={loading}
+              className="w-full rounded-lg bg-slate-50 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 pr-10 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+              tabIndex={-1}
+            >
+              {showCurrentPassword ? (
+                <EyeOff size={18} className="text-slate-500" />
+              ) : (
+                <Eye size={18} className="text-slate-500" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* New Password */}
@@ -179,14 +203,28 @@ const Security: React.FC = () => {
           <label className="mb-1 block text-sm font-medium text-slate-700">
             New Password
           </label>
-          <input
-            type="password"
-            placeholder="Enter new password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            disabled={loading}
-            className="w-full rounded-lg bg-slate-50 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          />
+          <div className="relative">
+            <input
+              type={showNewPassword ? "text" : "password"}
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              disabled={loading}
+              className="w-full rounded-lg bg-slate-50 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 pr-10 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+              tabIndex={-1}
+            >
+              {showNewPassword ? (
+                <EyeOff size={18} className="text-slate-500" />
+              ) : (
+                <Eye size={18} className="text-slate-500" />
+              )}
+            </button>
+          </div>
           <p className="mt-1 text-xs text-slate-500">Must be at least 6 characters long</p>
         </div>
 
@@ -195,14 +233,28 @@ const Security: React.FC = () => {
           <label className="mb-1 block text-sm font-medium text-slate-700">
             Confirm New Password
           </label>
-          <input
-            type="password"
-            placeholder="Confirm new password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            disabled={loading}
-            className="w-full rounded-lg bg-slate-50 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          />
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
+              className="w-full rounded-lg bg-slate-50 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 pr-10 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+              tabIndex={-1}
+            >
+              {showConfirmPassword ? (
+                <EyeOff size={18} className="text-slate-500" />
+              ) : (
+                <Eye size={18} className="text-slate-500" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -211,7 +263,7 @@ const Security: React.FC = () => {
           type="button"
           onClick={handleCancel}
           disabled={loading}
-          className="rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition"
         >
           Cancel
         </button>
@@ -219,7 +271,7 @@ const Security: React.FC = () => {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
           {loading ? "Updating..." : "Update Password"}
         </button>
