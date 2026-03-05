@@ -320,7 +320,7 @@ const AiTools: React.FC = () => {
 
             {/* Copy Type */}
             <div className="flex gap-2 flex-wrap">
-              {["headlines", "primary", "descriptions", "ctas"].map((t) => (
+              {["headlines", "primary", "descriptions", "CTAs"].map((t) => (
                 <button
                   key={t}
                   onClick={() => setCopyType(t as CopyType)}
