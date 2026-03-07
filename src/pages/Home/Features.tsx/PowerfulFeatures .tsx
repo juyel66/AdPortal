@@ -36,7 +36,7 @@ const PowerfulFeatures = () => {
             </p>
 
                        <Link
-  to="/auth/signin"
+  to="/user-dashboard/dashboard"
   className="
     inline-flex items-center justify-center
     rounded-xl
@@ -100,7 +100,7 @@ const PowerfulFeatures = () => {
             </p>
 
                      <Link
-  to="/auth/signin"
+  to="/user-dashboard/dashboard"
   className="
     inline-flex items-center justify-center
     rounded-xl
@@ -145,7 +145,7 @@ const PowerfulFeatures = () => {
             </p>
 
                      <Link
-  to="/auth/signin"
+  to="/user-dashboard/dashboard"
   className="
     inline-flex items-center justify-center
     rounded-xl
@@ -215,7 +215,7 @@ const PowerfulFeatures = () => {
             </p>
 
            <Link
-  to="/auth/signin"
+  to="/user-dashboard/dashboard"
   className="
     inline-flex items-center justify-center
     rounded-xl
