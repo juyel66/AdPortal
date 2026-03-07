@@ -424,6 +424,11 @@ const adminItems = [
     url: "/admin-dashboard/reports",
     icon: FileText,
   },
+  {
+    title: "All Contact",
+    url: "/admin-dashboard/contact-management",
+    icon: FileText,
+  },
   { title: "Settings", url: "/admin-dashboard/settings", icon: Settings },
 ];
 
