@@ -1,7 +1,15 @@
 import { Link } from "react-router-dom";
 import bannerImg from "../../../assets/bannerImg.svg"
+import { toast } from "sonner";
 
 const CreateOnes = () => {
+
+  const handleVideoClick = () =>{
+    toast.info("Demo Video is coming soon! Stay tuned.", {
+      position: "top-center",
+
+    });
+  }
   return (
     <section className="relative overflow-hidden bg-white container mx-auto lg:mt-0 mt-5 lg:p-0 p-2 ">
       <div className="max-w-7xl mx-auto ">
@@ -31,7 +39,7 @@ const CreateOnes = () => {
             {/* Buttons */}
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
-                to="/auth/signin"
+                to="/user-dashboard/campaigns"
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
               >
                 Launch Campaign 
@@ -39,7 +47,8 @@ const CreateOnes = () => {
               </Link>
 
               <Link
-                to="/auth/signin"
+                to="/"
+                onClick={handleVideoClick}
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
               >
 
