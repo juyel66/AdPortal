@@ -23,7 +23,7 @@ const ReadyToTransform = () => {
         {/* CTA */}
         <div className="mt-8">
                             <Link
-  to="/auth/signin"
+  to="/user-dashboard/dashboard"
   className="
     inline-flex items-center justify-center
     rounded-xl
