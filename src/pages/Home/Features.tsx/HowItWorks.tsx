@@ -65,7 +65,7 @@ const HowItWorks = () => {
 
             {/* CTA */}
                                 <Link
-  to="/auth/signin"
+  to="/user-dashboard/dashboard"
   className="
     inline-flex items-center justify-center
     rounded-xl
