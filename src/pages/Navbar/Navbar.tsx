@@ -89,7 +89,7 @@ const Navbar = () => {
             {!email ? (
               <>
                 <Link
-                  to="/auth/signin"
+                  to="/user-dashboard/dashboard"
                   className="text-[15px] font-medium text-gray-700 hover:text-blue-600"
                 >
                   Log In
@@ -175,7 +175,7 @@ const Navbar = () => {
             {!email ? (
               <>
                 <Link
-                  to="/auth/signin"
+                  to="/user-dashboard/dashboard"
                   onClick={handleLinkClick}
                   className="block text-gray-700 hover:text-blue-600"
                 >
@@ -204,7 +204,7 @@ const Navbar = () => {
           </div>
 
           <Link
-            to="/start-free-trial"
+            to="/user-dashboard/dashboard"
             onClick={handleLinkClick}
             className="block text-center rounded-md bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700 transition"
           >
