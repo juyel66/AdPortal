@@ -6,7 +6,7 @@ import CreativePerformance from "./CreativePerformance";
 
 import { useEffect, useState } from "react";
 import axios from "../../../../../../src/lib/axios";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 
 const CampaignsViewDetails = () => {
     const [campaign, setCampaign] = useState<any>(null);
@@ -38,7 +38,34 @@ const CampaignsViewDetails = () => {
     }, [id]);
 
     if (loading) return <div>Loading...</div>;
-    if (!campaign) return <div>No campaign found.</div>;
+    if (!campaign) return <div className="bg-white rounded-lg p-8 text-center max-w-md mx-auto my-10 shadow-sm border border-gray-200">
+  <div className="mb-4">
+    {/* Empty state icon */}
+    <svg 
+      className="w-16 h-16 mx-auto text-gray-300" 
+      fill="none" 
+      stroke="currentColor" 
+      viewBox="0 0 24 24"
+    >
+      <path 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        strokeWidth="1.5" 
+        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+      />
+    </svg>
+  </div>
+  
+  <h3 className="text-lg font-medium text-gray-900 mb-2">No Campaign Found</h3>
+  
+  <p className="text-gray-500 text-sm mb-6">
+    You haven't created any campaigns yet. Get started by creating your first campaign.
+  </p>
+  
+  <Link to="/user-dashboard/campaigns-create/step-1" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+    + Create New Campaign
+  </Link>
+</div>;
 
     return (
         <div className="mt-5">
