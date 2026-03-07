@@ -63,6 +63,7 @@ import UpdateStep7Review from "./pages/update-campaign/UpdateStep7Review";
 import Success from "./components/Analytics/Subscriptions/Success";
 import OrganizationManagement from "./pages/admin/Organization/OrganizationManagement";
 import UserNotificationPage from "./Notification/UserNotificationPage";
+import AdminContact from "./pages/Contact/AdminContact";
 
 export const router = createBrowserRouter([
   {
@@ -339,6 +340,10 @@ export const router = createBrowserRouter([
         path: "reports",
         element: <AdminReports />,
       },
+      {
+        path: "contact-management",
+        element: <AdminContact />,
+      }
     ],
   },
 ]);
