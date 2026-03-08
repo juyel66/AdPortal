@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CheckCircle, AlertTriangle } from "lucide-react";
-import { Link, useNavigate } from "react-router";
-import api from "@/lib/axios";
-import Swal from "sweetalert2";
+import { Link } from "react-router";
 
 interface CampaignResponse {
   campaign_id: number;
@@ -33,25 +31,9 @@ interface CampaignResponse {
 }
 
 const Step7Review: React.FC = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const loading = false;
   const [campaignData, setCampaignData] = useState<CampaignResponse | null>(null);
   const campaignId = localStorage.getItem("campaignId");
-
-  const getOrgId = () => {
-    try {
-      const selectedOrg = localStorage.getItem("selectedOrganization");
-      if (selectedOrg) {
-        const orgData = JSON.parse(selectedOrg);
-        return orgData.id;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error parsing organization data:", error);
-      return null;
-    }
-  };
-
   useEffect(() => {
     const storedData = localStorage.getItem("api_response");
     if (storedData) {
@@ -63,47 +45,6 @@ const Step7Review: React.FC = () => {
       }
     }
   }, []);
-
-  const handlePublish = async () => {
-    if (!campaignId) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Campaign ID not found",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const org_id = getOrgId();
-      
-      const response = await api.post(`/main/campaign/publish/?org_id=${org_id}`, {
-        campaign_id: parseInt(campaignId)
-      });
-
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Campaign published successfully",
-        timer: 1500,
-        showConfirmButton: false,
-      }).then(() => {
-        navigate("/user-dashboard/campaigns");
-      });
-
-    } catch (err: any) {
-      console.error("Error publishing campaign:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Failed to Publish",
-        text: err.response?.data?.message || "Something went wrong",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
