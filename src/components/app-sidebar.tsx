@@ -473,7 +473,15 @@ export function AppSidebar() {
     ? `${user.first_name} ${user.last_name}`
     : user?.email || "User";
 
-  const userInitial = userName.charAt(0).toUpperCase();
+  // Parse selectedOrganization from JSON string to Organization object
+  const parsedSelectedOrganization = (() => {
+    if (!selectedOrganization) return null;
+    try {
+      return JSON.parse(selectedOrganization) as { id: string; name: string | null };
+    } catch {
+      return null;
+    }
+  })();
 
   const [planData, setPlanData] = useState<CurrentPlan | null>(null);
   const [planLoading, setPlanLoading] = useState(true);
@@ -586,11 +594,10 @@ export function AppSidebar() {
           {!isAdmin && (
             <div className="px-1 py-1">
               <AccountDropdown 
-                userName={userName}
-                userInitial={userInitial}
+                first_name={user?.first_name || userName}
                 email={user?.email || ""}
                 organizations={organizations}
-                selectedOrganization={selectedOrganization}
+                selectedOrganization={parsedSelectedOrganization}
               />
             </div>
           )}
