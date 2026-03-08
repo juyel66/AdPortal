@@ -140,14 +140,14 @@ const Step7Review: React.FC = () => {
 
         {/* Platforms */}
 
-     {apiResponse?.platforms && apiResponse.platforms.length > 0 && (
+     {apiResponse?.platform && apiResponse.platform.length > 0 && (
   <div className="bg-white rounded-xl border p-4">
     <h3 className="text-sm font-semibold text-gray-900 mb-2">
       Platforms
     </h3>
 
     <div className="flex gap-2 flex-wrap">
-      {apiResponse.platforms.map((platform: string) => (
+      {apiResponse.platform.map((platform: string) => (
         <span
           key={platform}
           className="px-3 py-1 text-xs rounded-full border border-blue-500 text-blue-600 bg-blue-50"
