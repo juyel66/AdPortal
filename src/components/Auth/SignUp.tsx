@@ -40,6 +40,7 @@ const SignUp: React.FC = () => {
     confirmPassword: "",
     remember: false,
     acceptTerms: false,
+    full_name: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -208,7 +209,7 @@ const SignUp: React.FC = () => {
     try {
       await dispatch(
         register({
-          full_name,
+          first_name: full_name,
           last_name,
           email: form.email,
           password: form.password,
