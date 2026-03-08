@@ -387,7 +387,7 @@
 
 
 import React, { useState, useEffect } from "react";
-import { Check, X, FileText, ExternalLink } from "lucide-react";
+import { Check, FileText } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../../lib/axios";
 import type {
@@ -395,7 +395,6 @@ import type {
   BillingHistoryItem,
   PlanKey,
   ApiPlan,
-  ApiBillingHistoryItem,
   ApiFeature,
   CheckoutResponse
 } from "@/types/subscription";
@@ -431,7 +430,8 @@ const SubscriptionBilling: React.FC = () => {
         setActivePlan(response.data.plan_name);
       }
     } catch (error) {
-      if (error && error.response && error.response.status === 404 && error.response.data?.error === "No active subscription found.") {
+      const axErr = error as { response?: { status?: number; data?: { error?: string } } };
+      if (axErr?.response?.status === 404 && axErr?.response?.data?.error === "No active subscription found.") {
         setActivePlan("");
       } else {
         // Optionally show a toast or handle other errors
@@ -660,7 +660,7 @@ const SubscriptionBilling: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan) => {
-              const activeIndex = planOrder.indexOf(activePlan);
+              const activeIndex = planOrder.indexOf(activePlan as PlanKey);
               const planIndex = planOrder.indexOf(plan.key);
 
 
