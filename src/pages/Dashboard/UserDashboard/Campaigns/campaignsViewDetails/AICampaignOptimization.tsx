@@ -1,6 +1,5 @@
 import React from "react";
 import type {
-  OptimizationItem,
   ImpactLevel,
 } from "@/types/aiCampaignOptimization";
 
