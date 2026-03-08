@@ -89,7 +89,7 @@ const Navbar = () => {
             {!email ? (
               <>
                 <Link
-                  to="/user-dashboard/dashboard"
+                  to="/auth/signin"
                   className="text-[15px] font-medium text-gray-700 hover:text-blue-600"
                 >
                   Log In
