@@ -1,6 +1,5 @@
 import { useUserProfile } from "@/hooks/useUserProfile";
 import NotificationBell from "@/Notification/NotificationBell";
-import { Link } from "react-router";
 
 
 const AdminNavbar = () => {
