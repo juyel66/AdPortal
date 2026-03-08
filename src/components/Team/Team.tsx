@@ -8,7 +8,6 @@ import {
   X,
   Mail,
   AlertTriangle,
-  Check,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -22,7 +21,7 @@ import {
   updateTeamMemberRole,
 } from "../../../src/features/Team/teamThunks";
 
-import type { TeamMember, Role, InviteForm } from "@/types/team";
+import type { TeamMember, InviteForm } from "@/types/team";
 import { clearTeamError, clearTeamMessage } from "@/features/Team/teamSlice";
 
 // Get current user email from localStorage
@@ -265,7 +264,7 @@ const Team: React.FC = () => {
         <button
           onClick={() => setOpen(true)}
           disabled={inviteLoading}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="flex items-center cursor-pointer gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <UserPlus size={16} /> Invite Member
         </button>
@@ -464,7 +463,7 @@ const Team: React.FC = () => {
               onChange={(e) =>
                 setInvite({
                   ...invite,
-                  role: e.target.value as Role,
+                  role: e.target.value as 'ADMIN' | 'MEMBER',
                 })
               }
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:bg-slate-50 disabled:cursor-not-allowed"
