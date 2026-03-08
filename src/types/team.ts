@@ -27,6 +27,13 @@ export interface InviteTeamMemberPayload {
   role: 'ADMIN' | 'MEMBER';
 }
 
+export type Role = 'OWNER' | 'ADMIN' | 'MEMBER';
+
+export interface InviteForm {
+  email: string;
+  role: 'ADMIN' | 'MEMBER';
+}
+
 export interface TeamState {
   members: TeamMember[];
   team: Team | null;
