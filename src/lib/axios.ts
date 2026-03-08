@@ -209,10 +209,7 @@ api.interceptors.response.use(
 
 
     } else if (error.response?.status === 500) {
-      toast.error('Server error. Please try again later.', {
-        duration: 4000,
-        position: 'top-center',
-      });
+      console.log("");
     } else if (error.code === 'ERR_NETWORK') {
       toast.error('Network error. Please check your connection.', {
         duration: 4000,
