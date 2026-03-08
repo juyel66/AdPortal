@@ -47,6 +47,7 @@ const PlatformAnalytics: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [analyticsData, setAnalyticsData] = useState<PlatformAnalyticsData | null>(null);
+  void analyticsData;
   
   // Transformed data for charts
   const [userGrowthData, setUserGrowthData] = useState<UserGrowthData[]>([]);
