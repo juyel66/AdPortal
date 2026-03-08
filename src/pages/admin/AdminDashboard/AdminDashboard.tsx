@@ -18,23 +18,6 @@ import api from "@/lib/axios";
 import AdminRecentCampaign from "./AdminManagementPages";
 
 // Types based on actual API response
-interface DashboardStats {
-  users: {
-    value: number;
-    past_month: number;
-    percentage: string;
-  };
-  campaings: {
-    value: number;
-    last_month: number;
-    percentage: string;
-  };
-  revenue: {
-    value: number;
-    percentage: number;
-  };
-}
-
 interface ChartDataPoint {
   month: string;
   users: number;
