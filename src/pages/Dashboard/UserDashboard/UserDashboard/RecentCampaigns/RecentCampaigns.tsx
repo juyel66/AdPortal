@@ -345,7 +345,7 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                           className="p-2 bg-white rounded-md shadow-sm border border-slate-100 hover:bg-slate-50 transition-colors group relative"
                           title="Edit campaign"
                         >
-                          <img src={ICONS.edit} alt="edit" className="w-4 h-4" />
+                          <img src={ICONS.edit} alt="edit" className="w-5 h-5" />
                         </Link>
 
                         <button
@@ -357,7 +357,7 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                           {deleteLoading === row.id ? (
                             <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                           ) : (
-                            <img src={ICONS.trash} alt="delete" className="w-4 h-4" />
+                            <img src={ICONS.trash} alt="delete" className="w-5 h-5" />
                           )}
                         </button>
 
