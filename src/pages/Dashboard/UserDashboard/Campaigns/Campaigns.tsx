@@ -202,7 +202,7 @@ const Campaigns: React.FC = () => {
     }
   };
 
-  const handleDuplicate = async (campaign: Campaign) => {
+  const handleDuplicate = async (_campaign: Campaign) => {
     try {
       Swal.fire({
         icon: "info",
