@@ -45,6 +45,9 @@ const OPTIMIZATION_DATA: OptimizationItem[] = [
   },
 ];
 
+// suppress unused-variable warning — kept for future optimization panel
+void OPTIMIZATION_DATA;
+
 const getOrgId = (): string | null => {
   const selectedOrg = localStorage.getItem("selectedOrganization");
   if (selectedOrg) {
