@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+import type { ReactNode } from 'react';
 
 // Type definitions for platforms
 export type PlatformKey = "facebook" | "google" | "tiktok" | "instagram" | "linkedin" | "twitter" | "pinterest";
@@ -25,6 +26,7 @@ interface Step3Data {
   objective: string;
   targetAudience: string;
   kpis: string[];
+  savedResponse?: any;
 }
 
 interface Step4Data {
@@ -618,12 +620,12 @@ export const useCampaignStep = (stepNumber: number) => {
       console.log(`🔧 useCampaignStep(${stepNumber}): Updating ${stepKey}`, data);
       return context.updateCampaignData(stepKey, data);
     },
+    ...context,
     isStepValid: () => {
       const isValid = context.isStepValid(stepKey);
       console.log(`✅ useCampaignStep(${stepNumber}): Step ${stepNumber} validity: ${isValid}`);
       return isValid;
     },
-    ...context
   };
 };
 
