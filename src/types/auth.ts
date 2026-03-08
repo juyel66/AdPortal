@@ -65,3 +65,11 @@ export interface VerifyEmailPayload {
   email: string;
   otp: string;
 }
+
+export interface LoginResponse {
+  access: string;
+  refresh: string;
+  user: UserProfile;
+  organizations?: string[];
+  current_plan?: any;
+}
