@@ -41,7 +41,7 @@ const Step6Creative: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [keywords, setKeywords] = useState("");
-  const [fileBase64, setFileBase64] = useState<string>("");
+  const [, setFileBase64] = useState<string>("");
   
   // State for collapsible AI generator
   const [showAIGenerator, setShowAIGenerator] = useState(false);
