@@ -71,7 +71,7 @@ const UpdateStep6Creative: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [keywords, setKeywords] = useState("");
-  const [fileBase64, setFileBase64] = useState<string>("");
+  const [, setFileBase64] = useState<string>("");
   const [campaignData, setCampaignData] = useState<CampaignResponse | null>(null);
   
   const [showAIGenerator, setShowAIGenerator] = useState(false);
@@ -140,7 +140,7 @@ const UpdateStep6Creative: React.FC = () => {
         }
         
         if (firstAd.assets && firstAd.assets.length > 0) {
-          const imageAsset = firstAd.assets.find(asset => asset.file_type === "IMAGE");
+          const imageAsset = firstAd.assets.find((asset: any) => asset.file_type === "IMAGE");
           if (imageAsset) {
             setPreviewUrl(imageAsset.file_url);
             setShowPreview(true);
@@ -206,7 +206,7 @@ const UpdateStep6Creative: React.FC = () => {
             if (firstAd.call_to_action) setCta(firstAd.call_to_action);
             if (firstAd.destination_url) setDestinationUrl(firstAd.destination_url);
             if (firstAd.assets && firstAd.assets.length > 0) {
-              const imageAsset = firstAd.assets.find(asset => asset.file_type === "IMAGE");
+              const imageAsset = firstAd.assets.find((asset: any) => asset.file_type === "IMAGE");
               if (imageAsset) {
                 setPreviewUrl(imageAsset.file_url);
               }
