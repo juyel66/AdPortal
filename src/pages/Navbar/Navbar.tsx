@@ -3,7 +3,7 @@ import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import logo from "../../assets/whiteLogo.svg";
 
-import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
+import { useAppDispatch } from "../../hooks/reduxHooks";
 import { logout } from "../../features/auth/AuthThunks"; 
 
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -20,7 +20,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { user, loading, is_admin, email } = useUserProfile();
+  const { user, is_admin, email } = useUserProfile();
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
