@@ -8,7 +8,6 @@ import type {
   Metric,
   RecentReport,
   CreateReportForm,
-  ApiReportResponse,
   ApiReport,
   PaginatedReportsResponse
 } from "@/types/reports";
