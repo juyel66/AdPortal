@@ -112,7 +112,7 @@ export const logout = createAsyncThunk<
   boolean,
   void,
   { rejectValue: any }
->("auth/logout", async (_, { rejectWithValue }) => {
+>("auth/logout", async (_, { rejectWithValue: _rejectWithValue }) => {
   try {
     const refreshToken = localStorage.getItem("refreshToken");
 
@@ -187,7 +187,7 @@ export const changePassword = createAsyncThunk<
 >("auth/change-password", async (payload, { rejectWithValue }) => {
   try {
     console.log(' Changing password...');
-    const res = await api.post("/accounts/change-password/", payload);
+    await api.post("/accounts/change-password/", payload);
     console.log(' Password changed');
     
     toast.success('Password changed successfully!', {
@@ -220,7 +220,7 @@ export const forgotPassword = createAsyncThunk<
 >("auth/forgot-password", async (payload, { rejectWithValue }) => {
   try {
     console.log(' Forgot password request for:', payload.email);
-    const res = await api.post("/accounts/password-reset/", {
+    await api.post("/accounts/password-reset/", {
       email: payload.email,
     });
     console.log(' Reset email sent');
@@ -259,7 +259,7 @@ export const resetPasswordConfirm = createAsyncThunk<
   try {
     console.log(' Resetting password...');
     
-    const response = await api.post("/accounts/password-reset-confirm/", {
+    await api.post("/accounts/password-reset-confirm/", {
       email: payload.email,
       otp: payload.otp,
       new_password: payload.password
@@ -297,7 +297,7 @@ export const verifyEmail = createAsyncThunk<
 >("auth/verify-email", async (payload, { rejectWithValue }) => {
   try {
     console.log(' Verifying email:', payload.email);
-    const res = await api.post("/accounts/verify-email/", {
+    await api.post("/accounts/verify-email/", {
       email: payload.email,
       otp: payload.otp,
     });
@@ -334,7 +334,7 @@ export const checkOTP = createAsyncThunk<
 >("auth/check-otp", async (payload, { rejectWithValue }) => {
   try {
     console.log(' Checking OTP for:', payload.email);
-    const res = await api.post("/accounts/check-otp/", {
+    await api.post("/accounts/check-otp/", {
       email: payload.email,
       otp: payload.otp,
     });
@@ -375,7 +375,7 @@ export const resendOtp = createAsyncThunk<
 >("auth/resend-otp", async (payload, { rejectWithValue }) => {
   try {
     console.log(' Resending OTP to:', payload.email);
-    const res = await api.post("/accounts/resend-otp/", {
+    await api.post("/accounts/resend-otp/", {
       email: payload.email,
     });
     
