@@ -153,7 +153,6 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({
         // Extract success message
         const successMessage = 
           result.payload?.message || 
-          result.payload?.detail || 
           "Password reset email sent successfully!";
         
         // Show success toast
