@@ -142,7 +142,7 @@ const teamSlice = createSlice({
       })
       .addCase(inviteTeamMember.fulfilled, (state, action: any) => {
         state.inviteLoading = false;
-        state.message = action.payload?.message || "Invitation sent successfully!";
+        
         
         // If the API returns the invited member, add it to the list
         if (action.payload?.member) {
