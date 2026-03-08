@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Trash2, Edit, MoreHorizontal, Eye } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import api from "@/lib/axios";
 
 interface Campaign {
@@ -47,11 +47,10 @@ const formatNumber = (value: number): string => {
 };
 
 export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTableProps) {
-  const navigate = useNavigate();
   const [data, setData] = useState<Campaign[]>([]);
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, _setShowAll] = useState(false);
   const [selectedCampaigns, setSelectedCampaigns] = useState<number[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  const [deleteLoading, _setDeleteLoading] = useState<number | null>(null);
 
   const ICONS: Record<string, string> = {
     facebook:
@@ -92,10 +91,6 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
       console.error("Error parsing organization data:", error);
     }
     return "";
-  };
-
-  const handleEdit = (campaignId: number) => {
-    navigate(`/user-dashboard/campaigns-update/${campaignId}`);
   };
 
   const handleDelete = async (campaign: Campaign) => {
