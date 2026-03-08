@@ -1,4 +1,4 @@
-export type ImpactLevel = "high" | "medium";
+export type ImpactLevel = "high" | "medium" | "low";
 
 export interface OptimizationItem {
   id: number;
