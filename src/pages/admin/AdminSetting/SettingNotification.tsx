@@ -124,7 +124,7 @@ const SettingNotification: React.FC = () => {
       // Show error message
       if (error.response?.data) {
         const errorData = error.response.data;
-        const errorMessage = Object.values(errorData).flat()[0] || "Failed to save setting";
+        const errorMessage = (Object.values(errorData).flat()[0] as string) || "Failed to save setting";
         toast.error(errorMessage, {
           duration: 4000,
           position: "top-center",
