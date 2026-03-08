@@ -107,7 +107,7 @@ const CheckEmail: React.FC = () => {
     }
 
     try {
-      const result = await dispatch(
+      await dispatch(
         verifyOTP({
           email,
           otp,
