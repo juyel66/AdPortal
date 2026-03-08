@@ -112,12 +112,13 @@ const Analytics: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  void analyticsData;
   
   // Transformed data for UI
   const [stats, setStats] = useState<StatCard[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyPerformanceData[]>([]);
   const [spendPlatform, setSpendPlatform] = useState<PlatformSpend[]>([]);
-  const [deviceData, setDeviceData] = useState<DeviceData[]>(DEFAULT_DEVICE_DATA);
+  const [deviceData] = useState<DeviceData[]>(DEFAULT_DEVICE_DATA);
   const [selectedOrgId, setSelectedOrgId] = useState<string>("");
 
   // Get org_id from localStorage selectedOrganization
@@ -531,7 +532,7 @@ const Analytics: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={spendPlatform}
+                      data={spendPlatform as any[]}
                       dataKey="value"
                       nameKey="name"
                       cx="50%"
