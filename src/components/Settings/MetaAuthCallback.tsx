@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from "../../lib/axios";
 
@@ -54,7 +54,7 @@ const MetaAuthCallback = () => {
     const [selectedAccount, setSelectedAccount] = useState<AdAccount | null>(null);
     const [selectedPage, setSelectedPage] = useState<Page | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [pagingCursors, setPagingCursors] = useState<PagingCursors | null>(null);
+    const [_pagingCursors, setPagingCursors] = useState<PagingCursors | null>(null);
     
     // Get org_id from localStorage or URL params
     const getOrgId = (): string => {
