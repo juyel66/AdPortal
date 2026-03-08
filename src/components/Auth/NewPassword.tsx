@@ -250,7 +250,7 @@ const NewPassword: React.FC = () => {
             )}
 
             {/* API ERROR DETAILS (for debugging) */}
-            {apiErrorDetails && process.env.NODE_ENV === 'development' && (
+            {apiErrorDetails && import.meta.env.DEV && (
               <div className="mb-4 rounded-md bg-yellow-50 border border-yellow-200 px-4 py-3">
                 <p className="text-xs font-medium text-yellow-800 mb-1">API Error Details:</p>
                 <pre className="text-xs text-yellow-700 overflow-auto max-h-32">
