@@ -228,7 +228,7 @@ const Team: React.FC = () => {
       ).unwrap();
 
       if (result) {
-        toast.success("Team member removed successfully!");
+       
         setDeleteModal({ open: false, member: null });
         
         // Refresh data
