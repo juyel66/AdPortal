@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Mail, Lock, AlertCircle } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
@@ -10,6 +10,7 @@ import { clearAuthError } from "@/features/auth/authSlice";
 const SignIn: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const { loading, error, isAuthenticated, user, organizations } = useAppSelector(
     (state) => state.auth
@@ -57,7 +58,10 @@ const SignIn: React.FC = () => {
       setShowPassword(false);
 
   
-      if (user.is_admin === true || user.is_admin === "true") {
+      const redirectTo = searchParams.get("redirect");
+      if (redirectTo) {
+        navigate(redirectTo);
+      } else if (user.is_admin === true || user.is_admin === "true") {
         navigate("/admin-dashboard/dashboard");
       } else {
         navigate("/user-dashboard/dashboard");
