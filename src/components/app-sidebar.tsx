@@ -355,6 +355,7 @@
 
 
 
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -368,8 +369,10 @@ import {
   LogOut,
   BriefcaseBusiness,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../src/hooks/reduxHooks";
 import { logout } from "../../src/features/auth/AuthThunks";
+import api from "@/lib/axios";
 
 import {
   Sidebar,
@@ -439,21 +442,87 @@ const ACTIVE_TEXT = "#FFFFFF";
 const INACTIVE_TEXT = "#4B5563";
 const INACTIVE_ICON = "#6B7280";
 
+interface CurrentPlan {
+  plan_name: string;
+  campaign_limit: number | "Unlimited";
+  campaign_used: number;
+}
+
+const getOrgId = (): string | null => {
+  try {
+    const savedOrg = localStorage.getItem("selectedOrganization");
+    if (savedOrg) {
+      const parsed = JSON.parse(savedOrg);
+      if (parsed?.id) return parsed.id;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+};
+
 export function AppSidebar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  
 
-  
   const { user, organizations, selectedOrganization } = useAppSelector((state) => state.auth);
-  
+
   const isAdmin = user?.is_admin || false;
-  const userName = user?.first_name && user?.last_name 
+  const userName = user?.first_name && user?.last_name
     ? `${user.first_name} ${user.last_name}`
     : user?.email || "User";
-  
+
   const userInitial = userName.charAt(0).toUpperCase();
+
+  const [planData, setPlanData] = useState<CurrentPlan | null>(null);
+  const [planLoading, setPlanLoading] = useState(true);
+  const [noSubscription, setNoSubscription] = useState(false);
+
+  const fetchCurrentPlan = async () => {
+    const org_id = getOrgId();
+    if (!org_id) {
+      setPlanLoading(false);
+      return;
+    }
+    setPlanLoading(true);
+    setNoSubscription(false);
+    setPlanData(null);
+    try {
+      const response = await api.get(`/finance/get-current-plan/?org_id=${org_id}`);
+      // Handle both {current_plan: {...}} and plan object at root
+      const plan: CurrentPlan =
+        response.data?.current_plan ?? (response.data?.plan_name ? response.data : null);
+      if (plan) {
+        setPlanData(plan);
+      } else {
+        setNoSubscription(true);
+      }
+    } catch (error) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError?.response?.status === 404) {
+        setNoSubscription(true);
+        setPlanData(null);
+      }
+    } finally {
+      setPlanLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAdmin) {
+      fetchCurrentPlan();
+    }
+
+    const handleOrgChange = () => {
+      if (!isAdmin) {
+        fetchCurrentPlan();
+      }
+    };
+
+    window.addEventListener("organizationChanged", handleOrgChange);
+    return () => window.removeEventListener("organizationChanged", handleOrgChange);
+  }, [isAdmin]);
 
   const handleLogout = async () => {
     try {
@@ -558,35 +627,67 @@ export function AppSidebar() {
           {/* PLAN CARD only for user, not admin */}
           {!isAdmin && (
             <div className="mx-4 mt-6 rounded-2xl bg-[#F6F7FB] p-4 text-xs text-gray-600 shadow-sm">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-medium text-gray-500 flex items-center gap-1">
-                  Current Plan
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
+              {planLoading ? (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-2 bg-gray-200 rounded-full w-full"></div>
+                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  <div className="h-8 bg-gray-200 rounded-xl w-full"></div>
                 </div>
-              </div>
-              <div  className="text-lg cursor-pointer font-semibold text-gray-800 mb-2">
-                Growth Plan
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
-                <div className="h-full bg-[#2D6FF8] rounded-full" style={{ width: "65%" }}></div>
-              </div>
-              <div className="text-xs text-gray-500 mb-4">
-                65 of 100 campaigns used
-              </div>
-              <Link to="/user-dashboard/subscriptions">
-                <button className="w-full cursor-pointer rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
-                Upgrade Plan
-              </button>
-              </Link>
+              ) : noSubscription ? (
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-1">No Active Plan</div>
+                  <div className="text-xs text-gray-500 mb-4">
+                    You don't have an active subscription.
+                  </div>
+                  <Link to="/user-dashboard/subscriptions">
+                    <button className="w-full cursor-pointer rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
+                      View Plans
+                    </button>
+                  </Link>
+                </div>
+              ) : planData ? (
+                <div>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      Current Plan
+                    </div>
+                  </div>
+                  <div className="text-lg font-semibold text-gray-800 mb-2 capitalize">
+                    {planData.plan_name}
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                    <div
+                      className="h-full bg-[#2D6FF8] rounded-full transition-all"
+                      style={{
+                        width:
+                          planData.campaign_limit === "Unlimited"
+                            ? "0%"
+                            : `${Math.min(
+                                100,
+                                Math.round(
+                                  (planData.campaign_used /
+                                    (planData.campaign_limit as number)) *
+                                    100
+                                )
+                              )}%`,
+                      }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-500 mb-4">
+                    {planData.campaign_limit === "Unlimited"
+                      ? `${planData.campaign_used} campaigns used (Unlimited)`
+                      : `${planData.campaign_used} of ${planData.campaign_limit} campaigns used`}
+                  </div>
+                  <Link to="/user-dashboard/subscriptions">
+                    <button className="w-full cursor-pointer rounded-xl bg-[#2D6FF8] py-2 text-sm font-medium text-white hover:bg-[#1E5FD8] transition-colors">
+                      Upgrade Plan
+                    </button>
+                  </Link>
+                </div>
+              ) : null}
             </div>
           )}
         </div>
