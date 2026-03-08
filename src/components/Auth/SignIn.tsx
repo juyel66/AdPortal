@@ -61,7 +61,7 @@ const SignIn: React.FC = () => {
       const redirectTo = searchParams.get("redirect");
       if (redirectTo) {
         navigate(redirectTo);
-      } else if (user.is_admin === true || user.is_admin === "true") {
+      } else if (user.is_admin === true) {
         navigate("/admin-dashboard/dashboard");
       } else {
         navigate("/user-dashboard/dashboard");
