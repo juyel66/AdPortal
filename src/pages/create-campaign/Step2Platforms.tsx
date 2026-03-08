@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { useCampaign } from "./CampaignContext";
 import { useNavigate, Link } from "react-router";
-import type { PlatformItem, PlatformKey } from "@/types/createCampaignStep1";
+import type { PlatformItem } from "@/types/createCampaignStep1";
+import type { PlatformKey } from "./CampaignContext";
 import api from "@/lib/axios";
 
 const PLATFORMS: PlatformItem[] = [
@@ -32,7 +33,11 @@ const PLATFORMS: PlatformItem[] = [
 const platformToApiValue: Record<PlatformKey, string> = {
   facebook: "META",
   google: "GOOGLE",
-  tiktok: "TIKTOK"
+  tiktok: "TIKTOK",
+  instagram: "INSTAGRAM",
+  linkedin: "LINKEDIN",
+  twitter: "TWITTER",
+  pinterest: "PINTEREST",
 };
 
 const Step2Platforms: React.FC = () => {
