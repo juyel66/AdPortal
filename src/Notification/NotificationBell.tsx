@@ -1,12 +1,13 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "@/hooks/reduxHooks";
 import { useNavigate } from "react-router-dom";
 import type { RootState } from "@/store";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import {
- 
+  markAsRead,
   type Notification,
 } from "../features/auth/Context/notificationsSlice";
 
@@ -20,12 +21,12 @@ const NotificationBell: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [showAll, setShowAll] = useState(false); 
   const ref = useRef<HTMLDivElement | null>(null);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
 
 
-  const userRole = useSelector((s: RootState) => s.auth?.user?.role || '');
+  const userRole = useSelector((s: RootState) => s.auth?.user?.is_admin ? 'admin' : 'user');
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -58,24 +59,16 @@ const NotificationBell: React.FC = () => {
 
   const onClickNotif = (notif: Notification) => {
     if (!notif.read) {
-
-      dispatch(markAsReadLocal(notif.id));
+      dispatch(markAsRead({ id: notif.id }));
     }
-
-
-    dispatch(markAsReadAsync({ id: notif.id }) as any);
-
     setOpen(false);
-
     const url =
       notif.data?.url ?? notif.data?.redirect ?? undefined;
     if (url) navigate(url);
   };
 
- 
   const getNotificationPageUrl = () => {
     const basePath = "/user-dashboard";
-    
     switch (userRole?.toLowerCase()) {
       case 'admin':
         return `${basePath}/admin/notifications`;
@@ -86,11 +79,9 @@ const NotificationBell: React.FC = () => {
       case 'user':
         return `${basePath}/user/notifications`;
       default:
-
         return `${basePath}/notifications`;
     }
   };
-
 
   const getViewAllUrl = () => {
     const baseUrl = getNotificationPageUrl();
