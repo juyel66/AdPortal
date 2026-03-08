@@ -8,6 +8,7 @@ import type { Plan, CardForm, PlanKey } from "@/types/subscription";
 
 const plans: Plan[] = [
   {
+    id: 1,
     key: "starter",
     title: "Starter",
     price: 79,
@@ -27,6 +28,7 @@ const plans: Plan[] = [
     ],
   },
   {
+    id: 2,
     key: "growth",
     title: "Growth",
     price: 199,
@@ -47,6 +49,7 @@ const plans: Plan[] = [
     ],
   },
   {
+    id: 3,
     key: "scale",
     title: "Scale",
     price: 499,
