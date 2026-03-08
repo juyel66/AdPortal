@@ -42,7 +42,7 @@ const useDebounce = <T,>(value: T, delay: number): T => {
 };
 
 // Custom hook for click outside
-const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void) => {
+const useClickOutside = (ref: React.RefObject<HTMLElement | null>, handler: () => void) => {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       if (!ref.current || ref.current.contains(event.target as Node)) {
@@ -436,8 +436,8 @@ const UserManagement: React.FC = () => {
     
     const delta = 2;
     const range = [];
-    const rangeWithDots = [];
-    let l;
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined;
 
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
