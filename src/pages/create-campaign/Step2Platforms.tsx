@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
-import { useCampaign } from "./CampaignContext";
+// import { useCampaign } from "./CampaignContext";
 import { useNavigate, Link } from "react-router";
 import type { PlatformItem } from "@/types/createCampaignStep1";
 import type { PlatformKey } from "./CampaignContext";
@@ -18,7 +18,7 @@ const PLATFORMS: PlatformItem[] = [
     key: "google",
     name: "Google Ads",
     description: "Show ads on Google Search, YouTube, and Display Network",
-    connected: false,
+    connected: true,
     logo: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765754457/Container_11_bdja1x.png",
   },
   {
@@ -41,31 +41,30 @@ const platformToApiValue: Record<PlatformKey, string> = {
 };
 
 const Step2Platforms: React.FC = () => {
-  const { campaignData, updateCampaignData } = useCampaign();
+  // const { campaignData, updateCampaignData } = useCampaign();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
+  const [integrationStatus, setIntegrationStatus] = useState<Record<string, boolean>>({});
+  const [integrationLoading, setIntegrationLoading] = useState(true);
   
   const campaignId = localStorage.getItem("campaignId");
 
-  const [selected, setSelected] = useState<PlatformKey[]>(() => {
-    const savedSelection = campaignData.step2?.selectedPlatforms;
-    return savedSelection && savedSelection.length > 0 
-      ? savedSelection 
-      : [];
-  });
+  const [selected, setSelected] = useState<PlatformKey[]>([]);
 
   const togglePlatform = (key: PlatformKey) => {
+    const apiKey = platformToApiValue[key];
+    if (!integrationStatus[apiKey]) return;
     setSelected((prev) => {
       const newSelected = prev.includes(key) 
         ? prev.filter((p) => p !== key) 
         : [...prev, key];
       
-      updateCampaignData('step2', {
-        platforms: PLATFORMS,
-        selectedPlatforms: newSelected
-      });
+      // updateCampaignData('step2', {
+      //   platforms: PLATFORMS,
+      //   selectedPlatforms: newSelected
+      // });
       
       return newSelected;
     });
@@ -113,25 +112,19 @@ const Step2Platforms: React.FC = () => {
       console.log(" Platforms saved:", response.data);
       navigate("/user-dashboard/campaigns-create/step-3");
 
-    } catch (err: any) {
-
+    } catch (err: unknown) {
       console.error(" Full error:", err);
-      
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        console.error("Error response data:", err.response.data);
-        console.error("Error response status:", err.response.status);
-        console.error("Error response headers:", err.response.headers);
-        
-        setError(err.response.data?.message || "Failed to save platforms");
-        setDebugInfo(JSON.stringify(err.response.data, null, 2));
-      } else if (err.request) {
-        // The request was made but no response was received
-        console.error("No response received:", err.request);
+      const e = err as { response?: { data: unknown; status: number; headers: unknown }; request?: unknown; message?: string };
+      if (e.response) {
+        console.error("Error response data:", e.response.data);
+        console.error("Error response status:", e.response.status);
+        setError((e.response.data as { message?: string })?.message || "Failed to save platforms");
+        setDebugInfo(JSON.stringify(e.response.data, null, 2));
+      } else if (e.request) {
+        console.error("No response received:", e.request);
         setError("No response from server");
       } else {
-        // Something happened in setting up the request
-        console.error("Error setting up request:", err.message);
+        console.error("Error setting up request:", e.message);
         setError("Request setup failed");
       }
     } finally {
@@ -140,6 +133,28 @@ const Step2Platforms: React.FC = () => {
   };
 
   useEffect(() => {
+    const fetchIntegrationStatus = async () => {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      let org_id = "";
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        org_id = orgData.id;
+      }
+      try {
+        const response = await api.get(`/main/integrations-status/?org_id=${org_id}`);
+        const statusMap: Record<string, boolean> = {};
+        response.data.integrations.forEach((item: { platform: string; status: boolean }) => {
+          statusMap[item.platform] = item.status;
+        });
+        setIntegrationStatus(statusMap);
+      } catch (err) {
+        console.error("Failed to fetch integration status:", err);
+      } finally {
+        setIntegrationLoading(false);
+      }
+    };
+
+    fetchIntegrationStatus();
     if (!campaignId) {
       console.warn(" No campaign ID found in localStorage");
     }
@@ -177,67 +192,76 @@ const Step2Platforms: React.FC = () => {
 
       {/* Platform Cards */}
       <div className="space-y-4">
-        {PLATFORMS.map((platform) => {
-          const isSelected = selected.includes(platform.key);
+        {integrationLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          PLATFORMS.map((platform) => {
+            const isSelected = selected.includes(platform.key);
+            const isConnected = integrationStatus[platformToApiValue[platform.key]] === true;
 
-          return (
-            <div
-              key={platform.key}
-              onClick={() => !loading && togglePlatform(platform.key)}
-              className={`cursor-pointer rounded-xl border p-4 flex items-center justify-between transition
-                ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-                ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
-                    : "border-slate-200 hover:border-slate-300"
-                }
-              `}
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-white">
-                  <img
-                    src={platform.logo}
-                    alt={platform.name}
-                    className="object-contain"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-slate-900">
-                      {platform.name}
-                    </p>
-                    <span className="text-xs text-gray-400">
-                      → {platformToApiValue[platform.key]}
-                    </span>
-
-                    {platform.connected && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                        Connected
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-slate-500">
-                    {platform.description}
-                  </p>
-                </div>
-              </div>
-
+            return (
               <div
-                className={`flex h-5 w-5 items-center justify-center rounded-full border
+                key={platform.key}
+                onClick={() => !loading && isConnected && togglePlatform(platform.key)}
+                className={`rounded-xl border p-4 flex items-center justify-between transition
+                  ${!isConnected ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer'}
+                  ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                   ${
                     isSelected
-                      ? "border-blue-600 bg-blue-600"
-                      : "border-slate-300 bg-white"
+                      ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
+                      : isConnected ? "border-slate-200 hover:border-slate-300" : "border-slate-200"
                   }
                 `}
               >
-                {isSelected && <Check size={14} className="text-white" />}
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-white">
+                    <img
+                      src={platform.logo}
+                      alt={platform.name}
+                      className="object-contain"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-900">
+                        {platform.name}
+                      </p>
+
+                      {isConnected ? (
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                          Connected
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+                          Not Connected
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-slate-500">
+                      {platform.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={`flex h-5 w-5 items-center justify-center rounded-full border
+                    ${
+                      isSelected
+                        ? "border-blue-600 bg-blue-600"
+                        : "border-slate-300 bg-white"
+                    }
+                  `}
+                >
+                  {isSelected && <Check size={14} className="text-white" />}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       {/* Selected Platforms Preview */}
