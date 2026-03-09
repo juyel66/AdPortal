@@ -187,7 +187,7 @@ export default function SpendOverview({
   return (
     <div className="w-full grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Left / Main: Chart + KPIs (span 2 on lg) */}
-      <div className="lg:col-span-2 rounded-xl bg-white p-6 shadow-sm">
+      <div className="lg:col-span-2 rounded-xl bg-white p-6 shadow-sm ">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div>
