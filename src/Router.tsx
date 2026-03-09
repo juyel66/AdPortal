@@ -64,6 +64,7 @@ import Success from "./components/Analytics/Subscriptions/Success";
 import OrganizationManagement from "./pages/admin/Organization/OrganizationManagement";
 import UserNotificationPage from "./Notification/UserNotificationPage";
 import AdminContact from "./pages/Contact/AdminContact";
+import AdminNotificationPage from "./Notification/AdminNotificationPage";
 
 export const router = createBrowserRouter([
   {
@@ -343,7 +344,11 @@ export const router = createBrowserRouter([
       {
         path: "contact-management",
         element: <AdminContact />,
-      }
+      },
+        {
+        path: "notifications",
+        element: <AdminNotificationPage />,
+      },
     ],
   },
 ]);
