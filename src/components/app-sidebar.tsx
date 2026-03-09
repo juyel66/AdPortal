@@ -469,9 +469,7 @@ export function AppSidebar() {
   const { user, organizations, selectedOrganization } = useAppSelector((state) => state.auth);
 
   const isAdmin = user?.is_admin || false;
-  const userName = user?.first_name && user?.last_name
-    ? `${user.first_name} ${user.last_name}`
-    : user?.email || "User";
+
 
   // Parse selectedOrganization from JSON string to Organization object
   const parsedSelectedOrganization = (() => {
@@ -593,8 +591,8 @@ export function AppSidebar() {
           {/* Account Dropdown only for user, not admin */}
           {!isAdmin && (
             <div className="px-1 py-1">
-              <AccountDropdown 
-                first_name={user?.first_name || userName}
+              <AccountDropdown
+                first_name={user?.first_name || ""}
                 email={user?.email || ""}
                 organizations={organizations}
                 selectedOrganization={parsedSelectedOrganization}
