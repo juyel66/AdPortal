@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Filter,
   Trash2,
   AlertTriangle,
   X
@@ -27,6 +26,13 @@ interface Contact {
   created_at: string;
 }
 
+interface PaginatedResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Contact[];
+}
+
 
 
 const AdminContact: React.FC = () => {
@@ -40,19 +46,20 @@ const AdminContact: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
-  
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+
   const itemsPerPage: number = 5;
+  const totalPages: number = Math.ceil(totalCount / itemsPerPage);
 
-  // Fetch contacts on component mount
-  useEffect(() => {
-    fetchContacts();
-  }, []);
-
-  const fetchContacts = async (): Promise<void> => {
+  const fetchContacts = async (page: number = 1, search: string = ''): Promise<void> => {
     setLoading(true);
     try {
-      const response = await api.get<Contact[]>('/admin/contact-messages/');
-      setContacts(response.data);
+      const params: { page: number; search?: string } = { page };
+      if (search) params.search = search;
+      const response = await api.get<PaginatedResponse>('/admin/contact-messages/', { params });
+      setContacts(response.data.results);
+      setTotalCount(response.data.count);
       setError(null);
     } catch (err) {
       console.error('Error fetching contacts:', err);
@@ -66,23 +73,22 @@ const AdminContact: React.FC = () => {
     }
   };
 
-  // Filter contacts based on search
-  const filteredContacts: Contact[] = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.subject.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Pagination
-  const indexOfLastItem: number = currentPage * itemsPerPage;
-  const indexOfFirstItem: number = indexOfLastItem - itemsPerPage;
-  const currentContacts: Contact[] = filteredContacts.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages: number = Math.ceil(filteredContacts.length / itemsPerPage);
-
-  // Reset to first page when searching
+  // Debounce search term and reset page
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Fetch contacts when page or debounced search changes
+  useEffect(() => {
+    fetchContacts(currentPage, debouncedSearch);
+  }, [currentPage, debouncedSearch]);
+
+  const indexOfFirstItem: number = (currentPage - 1) * itemsPerPage;
+  const indexOfLastItem: number = currentPage * itemsPerPage;
 
   // Truncate text to 17 characters
   const truncateText = (text: string): string => {
@@ -124,9 +130,9 @@ const AdminContact: React.FC = () => {
     try {
       await api.delete(`/admin/contact-messages/${contactToDelete.id}/`);
       
-      // Remove contact from state
-      setContacts(contacts.filter(c => c.id !== contactToDelete.id));
-      
+      // Re-fetch to update list after deletion
+      await fetchContacts(currentPage, debouncedSearch);
+
       // Close modals
       closeDeleteModal();
       if (selectedContact?.id === contactToDelete.id) {
@@ -169,16 +175,16 @@ const AdminContact: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div className="min-h-screen  p-2">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Contact Management</h1>
+        <h1 className="lg:text-3xl text-2xl font-bold text-gray-800 mb-2">Contact Management</h1>
         <p className="text-gray-600">Manage and view all contact form submissions</p>
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
@@ -188,10 +194,6 @@ const AdminContact: React.FC = () => {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-          <Filter className="w-5 h-5 text-gray-600" />
-          <span>Filter</span>
-        </button>
       </div>
 
       {/* Loading State */}
@@ -212,7 +214,7 @@ const AdminContact: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-700 mb-2">Error Loading Contacts</h3>
             <p className="text-gray-500 mb-4">{error}</p>
             <button
-              onClick={fetchContacts}
+              onClick={() => fetchContacts(currentPage, debouncedSearch)}
               className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
               Try Again
@@ -227,7 +229,7 @@ const AdminContact: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r bg-gray-100 text-gray-800">
+                <tr className="bg-linear-to-r bg-gray-100 text-gray-800">
                   <th className="px-6 py-4 text-left text-sm font-semibold">Name</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold">Email</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold">Subject</th>
@@ -237,7 +239,7 @@ const AdminContact: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {currentContacts.map((contact: Contact, index: number) => (
+                {contacts.map((contact: Contact, index: number) => (
                   <tr 
                     key={contact.id} 
                     className="hover:bg-gray-50 transition-colors"
@@ -295,7 +297,7 @@ const AdminContact: React.FC = () => {
           </div>
 
           {/* Empty State */}
-          {filteredContacts.length === 0 && (
+          {contacts.length === 0 && (
             <div className="text-center py-12">
               <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-700 mb-2">No contacts found</h3>
@@ -304,10 +306,10 @@ const AdminContact: React.FC = () => {
           )}
 
           {/* Pagination */}
-          {filteredContacts.length > 0 && (
+          {totalCount > 0 && (
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredContacts.length)} of {filteredContacts.length} results
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalCount)} of {totalCount} results
               </div>
               <div className="flex gap-2">
                 <button
