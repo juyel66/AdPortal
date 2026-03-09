@@ -215,20 +215,11 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-sm table-fixed">
-            <colgroup>
-              <col style={{ width: "48px" }} />
-              <col style={{ width: "35%" }} />
-              <col style={{ width: "100px" }} />
-              <col style={{ width: "140px" }} />
-              <col style={{ width: "100px" }} />
-              <col style={{ width: "140px" }} />
-              <col style={{ width: "100px" }} />
-            </colgroup>
+          <table className="w-full text-sm table-fixed min-w-[700px]">
 
             <thead className="bg-slate-50">
-              <tr className="text-left text-xs font-extrabold text-slate-700">
-                <th className="p-4">
+              <tr className="text-xs font-extrabold text-slate-700">
+                <th className="p-4 w-[5%] text-center">
                   <input
                     type="checkbox"
                     checked={selectedCampaigns.length === data.length && data.length > 0}
@@ -236,12 +227,12 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                     className="w-4 h-4 rounded border-slate-200 text-blue-600 focus:ring-blue-500"
                   />
                 </th>
-                <th className="p-4">Campaign</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Platforms</th>
-                <th className="p-4">Spend</th>
-                <th className="p-4">Performance</th>
-                <th className="pr-9 text-right">Actions</th>
+                <th className="p-4 w-[22%] text-center">Campaign</th>
+                <th className="p-4 w-[11%] text-center">Status</th>
+                <th className="p-4 w-[15%] text-center">Platforms</th>
+                <th className="p-4 w-[10%] text-center">Spend</th>
+                <th className="p-4 w-[22%] text-center">Performance</th>
+                <th className="p-4 w-[15%] text-center">Actions</th>
               </tr>
             </thead>
 
@@ -254,7 +245,7 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                       selectedCampaigns.includes(row.id) ? 'bg-blue-50/50' : ''
                     }`}
                   >
-                    <td className="p-4 align-middle">
+                    <td className="p-4 align-middle text-center">
                       <input
                         type="checkbox"
                         checked={selectedCampaigns.includes(row.id)}
@@ -263,26 +254,26 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                       />
                     </td>
 
-                    <Link to={`/user-dashboard/campaigns-view-details/${row.id}`} className="group">
-                      <td
-                      className="p-4 align-middle text-slate-800 font-medium"
+                    <td
+                      className="p-4 align-middle text-center text-slate-800 font-medium"
                       title={row.name}
                     >
-                      {truncateTitle(row.name)}
+                      <Link to={`/user-dashboard/campaigns-view-details/${row.id}`} className="hover:underline">
+                        {truncateTitle(row.name)}
+                      </Link>
                     </td>
-                    </Link>
 
-                    <td className="p-4 align-middle">
+                    <td className="p-4 align-middle text-center">
                       <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(row.status)}`}
+                        className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(row.status)}`}
                       >
                         {row.status}
                       </span>
                     </td>
 
                     {/* Platforms */}
-                    <td className="p-4 align-middle">
-                      <div className="flex items-center gap-3">
+                    <td className="p-4 align-middle text-center">
+                      <div className="flex items-center justify-center gap-2">
                         {row.platforms && row.platforms.map((p) => (
                           <div
                             key={p}
@@ -302,13 +293,13 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                       </div>
                     </td>
 
-                    <td className="p-4 align-middle text-slate-800 font-medium">
+                    <td className="p-4 align-middle text-center text-slate-800 font-medium">
                       {formatCurrency(row.spend)}
                     </td>
 
                     {/* Performance icons */}
-                    <td className="p-4 align-middle text-slate-600">
-                      <div className="flex items-center gap-6">
+                    <td className="p-4 align-middle text-center text-slate-600">
+                      <div className="flex items-center justify-center gap-6">
                         {/* Eye icon - impressions */}
                         <div className="flex items-center gap-2 group relative">
                           <img
@@ -338,11 +329,11 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                     </td>
 
                     {/* Actions */}
-                    <td className="p-4 align-middle text-right">
-                      <div className="inline-flex items-center gap-2">
+                    <td className="p-4 align-middle text-center">
+                      <div className="inline-flex items-center justify-center gap-2">
                         <Link
                           to={`/user-dashboard/campaigns-update/${row.id}`}
-                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100 hover:bg-slate-50 transition-colors group relative"
+                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100 hover:bg-slate-50 transition-colors"
                           title="Edit campaign"
                         >
                           <img src={ICONS.edit} alt="edit" className="w-5 h-5" />
@@ -351,16 +342,15 @@ export default function CampaignsTable({ campaigns = [], onDelete }: CampaignsTa
                         <button
                           onClick={() => handleDelete(row)}
                           disabled={deleteLoading === row.id}
-                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100 hover:bg-slate-50 hover:border-red-200 transition-colors group relative disabled:opacity-50"
+                          className="p-2 bg-white rounded-md shadow-sm border border-slate-100 hover:bg-slate-50 hover:border-red-200 transition-colors disabled:opacity-50"
                           title="Delete campaign"
                         >
                           {deleteLoading === row.id ? (
-                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                            <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                           ) : (
                             <img src={ICONS.trash} alt="delete" className="w-5 h-5" />
                           )}
                         </button>
-
                       </div>
                     </td>
                   </tr>
