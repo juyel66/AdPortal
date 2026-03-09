@@ -567,16 +567,17 @@ const UserManagement: React.FC = () => {
       </div>
 
       {/* TABLE */}
-      <div className="rounded-xl border bg-white overflow-visible">
+      <div className="rounded-xl border bg-white overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <table className="w-full table-fixed text-sm">
-            <thead className="bg-slate-50 text-slate-500">
+          <div className="overflow-x-auto">
+          <table className="w-full table-fixed text-sm min-w-[600px]">
+            <thead className="bg-slate-50 text-slate-500 ">
               <tr>
-                <th className="p-3 w-[260px] text-left">User</th>
+                <th className="p-3  w-[260px] text-left">User</th>
                 <th className="p-3 w-[120px]">Status</th>
                 <th className="p-3 w-[120px]">Joined</th>
                 <th className="p-3 w-[120px]">Last Active</th>
@@ -695,6 +696,7 @@ const UserManagement: React.FC = () => {
               )}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
@@ -706,7 +708,7 @@ const UserManagement: React.FC = () => {
             <button
               disabled={!prevPage || page === 1}
               onClick={goToPrevPage}
-              className="flex items-center gap-1 rounded-lg border px-3 py-1 text-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1 rounded-lg border lg:px-3 px-2 py-1 text-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
             >
               <ChevronLeft size={14} /> Previous
             </button>
@@ -736,7 +738,7 @@ const UserManagement: React.FC = () => {
             <button
               disabled={!nextPage || page === totalPages}
               onClick={goToNextPage}
-              className="flex items-center gap-1 rounded-lg border px-3 py-1 text-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1 rounded-lg  border lg:px-3 px-2 py-1 text-sm disabled:opacity-50 hover:bg-slate-50 transition-colors"
             >
               Next <ChevronRight size={14} />
             </button>
@@ -784,7 +786,7 @@ const StatCard = ({
   }
 
   return (
-    <div className={`rounded-xl border p-4 ${variant ? styles[variant] : "bg-white"}`}>
+    <div className={`rounded-xl border p-4 lg:text-start text-center ${variant ? styles[variant] : "bg-white"}`}>
       <p className="text-sm">{title}</p>
       <p className="mt-1 text-2xl font-semibold">{value.toLocaleString()}</p>
       <p className="mt-1 text-xs">{sub}</p>
