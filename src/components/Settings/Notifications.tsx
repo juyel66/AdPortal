@@ -161,7 +161,7 @@ const Notifications: React.FC = () => {
 
   if (fetching) {
     return (
-      <div className="rounded-xl bg-white p-6">
+      <div className="rounded-xl bg-white ">
         <div className="flex justify-center items-center py-10">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent"></div>
         </div>
@@ -170,7 +170,7 @@ const Notifications: React.FC = () => {
   }
 
   return (
-    <div className="rounded-xl bg-white p-6">
+    <div className="rounded-xl bg-white ">
       <h2 className="text-base font-semibold text-slate-900 mb-6">
         Notification Preferences
       </h2>
