@@ -397,10 +397,10 @@ const AdminReports: React.FC = () => {
   return (
     <div className="space-y-6 mt-5">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
+      <div className="lg:flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Reports</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-xl  font-semibold lg:text-start text-center  text-slate-900">Reports</h1>
+          <p className="text-sm text-center text-slate-500">
             Generate and download comprehensive campaign reports
           </p>
         </div>
@@ -408,7 +408,7 @@ const AdminReports: React.FC = () => {
         <button
           onClick={() => setOpenModal(true)}
           disabled={generating}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors flex gap-1 items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg mt-2 mx-auto lg:mx-0 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors flex gap-1 items-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FileText size={16} />
           Create Reports
@@ -457,65 +457,109 @@ const AdminReports: React.FC = () => {
           </div>
         ) : reports.length > 0 ? (
           <>
-            {reports.map((r) => (
-              <div
-                key={r.id}
-                className="flex items-center justify-between px-6 py-4 border-b last:border-b-0 hover:bg-slate-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <FileText className="text-blue-600" size={18} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">
-                      {r.title}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {r.date} · {r.type}
-                      {r.status !== 'COMPLETED' && (
-                        <span className="ml-2 text-yellow-600">
-                          ({r.status})
-                        </span>
-                      )}
-                      {r.startDate && r.endDate && (
-                        <span className="ml-2 text-blue-600">
-                          ({r.startDate} to {r.endDate})
-                        </span>
-                      )}
-                    </p>
-                    {r.includedMetrics && r.includedMetrics.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {r.includedMetrics.slice(0, 3).map((metric, idx) => (
-                          <span
-                            key={idx}
-                            className="text-xs bg-slate-100 px-2 py-0.5 rounded-full"
-                          >
-                            {metric.replace(/_/g, ' ')}
-                          </span>
-                        ))}
-                        {r.includedMetrics.length > 3 && (
-                          <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
-                            +{r.includedMetrics.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleDownload(r)}
-                  disabled={r.status !== 'COMPLETED'}
-                  className={`rounded-md cursor-pointer border border-slate-300 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1 ${
-                    r.status !== 'COMPLETED' ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  title={r.status !== 'COMPLETED' ? 'Report is still processing' : 'Download report'}
+            {/* Desktop list */}
+            <div className="hidden sm:block">
+              {reports.map((r) => (
+                <div
+                  key={r.id}
+                  className="flex items-center justify-between px-6 py-4 border-b last:border-b-0 hover:bg-slate-50 transition-colors"
                 >
-                  <Download size={12} />
-                  {r.status === 'COMPLETED' ? 'Download' : r.status}
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                      <FileText className="text-blue-600" size={18} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
+                        {r.title}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {r.date} · {r.type}
+                        {r.status !== 'COMPLETED' && (
+                          <span className="ml-2 text-yellow-600">({r.status})</span>
+                        )}
+                        {r.startDate && r.endDate && (
+                          <span className="ml-2 text-blue-600">({r.startDate} to {r.endDate})</span>
+                        )}
+                      </p>
+                      {r.includedMetrics && r.includedMetrics.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {r.includedMetrics.slice(0, 3).map((metric, idx) => (
+                            <span key={idx} className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
+                              {metric.replace(/_/g, ' ')}
+                            </span>
+                          ))}
+                          {r.includedMetrics.length > 3 && (
+                            <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
+                              +{r.includedMetrics.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDownload(r)}
+                    disabled={r.status !== 'COMPLETED'}
+                    className={`rounded-md cursor-pointer border border-slate-300 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1 ${
+                      r.status !== 'COMPLETED' ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    title={r.status !== 'COMPLETED' ? 'Report is still processing' : 'Download report'}
+                  >
+                    <Download size={12} />
+                    {r.status === 'COMPLETED' ? 'Download' : r.status}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y">
+              {reports.map((r) => (
+                <div key={r.id} className="p-4 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <FileText className="text-blue-600" size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{r.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {r.date} · {r.type}
+                        {r.status !== 'COMPLETED' && (
+                          <span className="ml-1 text-yellow-600">({r.status})</span>
+                        )}
+                      </p>
+                      {r.startDate && r.endDate && (
+                        <p className="text-xs text-blue-600 mt-0.5">{r.startDate} → {r.endDate}</p>
+                      )}
+                    </div>
+                  </div>
+                  {r.includedMetrics && r.includedMetrics.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3 pl-12">
+                      {r.includedMetrics.slice(0, 3).map((metric, idx) => (
+                        <span key={idx} className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
+                          {metric.replace(/_/g, ' ')}
+                        </span>
+                      ))}
+                      {r.includedMetrics.length > 3 && (
+                        <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
+                          +{r.includedMetrics.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => handleDownload(r)}
+                    disabled={r.status !== 'COMPLETED'}
+                    className={`w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5 ${
+                      r.status !== 'COMPLETED' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    }`}
+                  >
+                    <Download size={12} />
+                    {r.status === 'COMPLETED' ? 'Download Report' : r.status}
+                  </button>
+                </div>
+              ))}
+            </div>
           </>
         ) : (
           <div className="px-6 py-8 text-center">
