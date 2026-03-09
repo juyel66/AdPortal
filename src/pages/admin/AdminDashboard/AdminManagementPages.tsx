@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight } from "lucide-react";
+
 import type { RecentCampaignItem, SystemStatusItem } from "@/types/admin.types";
 
 interface AdminRecentCampaignProps {
@@ -46,9 +46,9 @@ const AdminRecentCampaign: React.FC<AdminRecentCampaignProps> = ({
             <h2 className="text-sm font-semibold text-slate-900">
               Recent Campaigns
             </h2>
-            <button className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+            {/* <button className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
               View all <ArrowRight size={14} />
-            </button>
+            </button> */}
           </div>
 
           <div className="divide-y">
@@ -118,4 +118,4 @@ const AdminRecentCampaign: React.FC<AdminRecentCampaignProps> = ({
   );
 };
 
-export default AdminRecentCampaign;
+export default AdminRecentCampaign; 
