@@ -233,7 +233,7 @@ export default function AccountDropdown({
       >
         <div className="flex items-center gap-2">
           <img
-            src="https://avatars.githubusercontent.com/u/155250069?v=4"
+            src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1773093792/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector_ufimxp.jpg"
             alt="user"
             className="h-5 w-5 rounded-full"
           />
@@ -313,7 +313,7 @@ export default function AccountDropdown({
               <div className="border-b border-gray-100 p-2 bg-gray-50 rounded-t-xl">
             <div className="flex items-center gap-2">
               <img
-                src="https://avatars.githubusercontent.com/u/155250069?v=4"
+                src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1773093792/avatar-profile-icon-in-flat-style-male-user-profile-illustration-on-isolated-background-man-profile-sign-business-concept-vector_ufimxp.jpg"
                 className="h-6 w-6 rounded-full"
                 alt="User"
               />
