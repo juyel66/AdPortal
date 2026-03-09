@@ -309,22 +309,22 @@ const PlatformAnalytics: React.FC = () => {
         </h2>
 
         {featureUsageData.length > 0 ? (
-          <div className="h-64">
+          <div className="h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={featureUsageData}
                 layout="vertical"
-                margin={{ left: 120, right: 20, top: 20, bottom: 20 }}
+                margin={{ left: 10, right: 20, top: 10, bottom: 10 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" domain={[0, 100]} />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  width={100}
-                  tick={{ fontSize: 12 }}
+                <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={90}
+                  tick={{ fontSize: 11 }}
                 />
-                <Tooltip 
+                <Tooltip
                   formatter={(value: number) => [`${value}%`, 'Usage']}
                 />
                 <Bar
