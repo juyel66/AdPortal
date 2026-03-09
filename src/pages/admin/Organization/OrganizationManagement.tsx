@@ -8,7 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  Filter,
+
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -17,7 +17,6 @@ import api from "../../../lib/axios";
 import type {
   Organization,
   OrganizationsResponse,
-  OrganizationsFilters,
 } from "./organizations";
 
 // API function to fetch organizations
@@ -83,11 +82,6 @@ const Organizations: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchInputValue, setSearchInputValue] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<OrganizationsFilters>({
-    industry: "",
-    companySize: "",
-  });
 
   // Debounce search
   useEffect(() => {
@@ -99,40 +93,25 @@ const Organizations: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchInputValue]);
 
-  // Fetch organizations when page, search, or filters change
+  // Fetch organizations when page or search changes
   useEffect(() => {
     loadOrganizations();
-  }, [currentPage, searchTerm, filters]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchTerm]);
 
   const loadOrganizations = async () => {
     setLoading(true);
     try {
       const data = await fetchOrganizations(currentPage, searchTerm);
-      
-      // Filter results based on selected filters
-      let filteredResults = data.results;
-      
-      if (filters.industry) {
-        filteredResults = filteredResults.filter(
-          org => org.industry?.toLowerCase() === filters.industry.toLowerCase()
-        );
-      }
-      
-      if (filters.companySize) {
-        filteredResults = filteredResults.filter(
-          org => org.company_size === filters.companySize
-        );
-      }
-      
-      setOrganizations(filteredResults);
+      setOrganizations(data.results);
       setTotalCount(data.count);
-      setTotalPages(Math.ceil(data.count / 10)); // Assuming 10 items per page
-    } catch (error: any) {
+      setTotalPages(Math.ceil(data.count / 10));
+    } catch (error: unknown) {
       console.error("Failed to fetch organizations:", error);
-      
-      if (error.response?.status === 401) {
+      const err = error as { response?: { status: number } };
+      if (err.response?.status === 401) {
         toast.error("Session expired. Please log in again.");
-      } else if (error.response?.status === 403) {
+      } else if (err.response?.status === 403) {
         toast.error("You don't have permission to view organizations.");
       } else {
         toast.error("Failed to load organizations");
@@ -162,31 +141,9 @@ const Organizations: React.FC = () => {
     setCurrentPage(prev => Math.min(totalPages, prev + 1));
   };
 
-  const resetFilters = () => {
-    setFilters({
-      industry: "",
-      companySize: "",
-    });
-    setCurrentPage(1);
-  };
 
   // Get unique industries for filter dropdown
-  const uniqueIndustries = React.useMemo(() => {
-    const industries = new Set<string>();
-    organizations.forEach(org => {
-      if (org.industry) industries.add(org.industry);
-    });
-    return Array.from(industries).sort();
-  }, [organizations]);
 
-  // Get unique company sizes for filter dropdown
-  const uniqueCompanySizes = React.useMemo(() => {
-    const sizes = new Set<string>();
-    organizations.forEach(org => {
-      if (org.company_size) sizes.add(org.company_size);
-    });
-    return Array.from(sizes).sort();
-  }, [organizations]);
 
   return (
     <div className="space-y-6 mt-5">
@@ -199,6 +156,8 @@ const Organizations: React.FC = () => {
           </p>
         </div>
       </div>
+      
+
 
       {/* Search and Filter Bar */}
       <div className="rounded-xl border bg-white p-4">
@@ -225,81 +184,13 @@ const Organizations: React.FC = () => {
             )}
           </div>
           
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors ${
-              showFilters || filters.industry || filters.companySize
-                ? "border-blue-300 bg-blue-50 text-blue-600"
-                : "border-slate-300 text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            <Filter size={16} />
-            Filters
-            {(filters.industry || filters.companySize) && (
-              <span className="ml-1 rounded-full bg-blue-600 w-5 h-5 text-xs text-white flex items-center justify-center">
-                {Object.values(filters).filter(Boolean).length}
-              </span>
-            )}
-          </button>
+        
         </div>
 
-        {/* Filter Panel */}
-        {showFilters && (
-          <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-slate-700">Filters</h3>
-              {(filters.industry || filters.companySize) && (
-                <button
-                  onClick={resetFilters}
-                  className="text-xs text-blue-600 hover:text-blue-700"
-                >
-                  Clear all filters
-                </button>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Industry Filter */}
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">
-                  Industry
-                </label>
-                <select
-                  value={filters.industry}
-                  onChange={(e) => setFilters(prev => ({ ...prev, industry: e.target.value }))}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Industries</option>
-                  {uniqueIndustries.map(industry => (
-                    <option key={industry} value={industry}>
-                      {industry.charAt(0).toUpperCase() + industry.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-
-              {/* Company Size Filter */}
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">
-                  Company Size
-                </label>
-                <select
-                  value={filters.companySize}
-                  onChange={(e) => setFilters(prev => ({ ...prev, companySize: e.target.value }))}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Sizes</option>
-                  {uniqueCompanySizes.map(size => (
-                    <option key={size} value={size}>
-                      {size} employees
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
+      
+        
+      
+       
 
         {/* Results Info */}
         <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
@@ -361,7 +252,7 @@ const Organizations: React.FC = () => {
                         </div>
                         <div>
                           <p className="font-medium text-slate-900">
-                            {formatDisplayValue(org.name)}
+                            {formatDisplayValue(org.name || "Unnamed Organization")}
                           </p>
                           <p className="text-xs text-slate-500 font-mono">
                             {org.snowflake_id.slice(0, 8)}...{org.snowflake_id.slice(-4)}
@@ -379,12 +270,12 @@ const Organizations: React.FC = () => {
                           className="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
                         >
                           <Globe size={14} />
-                          <span className="text-sm truncate max-w-[150px]">
+                          <span className="text-sm truncate max-w-37.5">
                             {org.website.replace(/^https?:\/\//, '')}
                           </span>
                         </a>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-400">N/A</span>
                       )}
                     </td>
                     
@@ -395,18 +286,18 @@ const Organizations: React.FC = () => {
                           {org.industry.charAt(0).toUpperCase() + org.industry.slice(1)}
                         </span>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-400">N/A</span>
                       )}
                     </td>
                     
                     <td className="px-6 py-4">
                       {org.company_size ? (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCompanySizeColor(org.company_size)}`}>
+                        <span className={`inline-flex items-center lg:px-2.5 lg:py-0.5 lg:p-0 p-1 rounded-full text-xs font-medium ${getCompanySizeColor(org.company_size)}`}>
                           <Users size={12} className="mr-1" />
                           {org.company_size}
                         </span>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-400">N/A</span>
                       )}
                     </td>
                     
