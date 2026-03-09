@@ -251,7 +251,7 @@ const Team: React.FC = () => {
   return (
     <div className="space-y-6 mt-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="md:flex items-center md:text-start text-center   justify-between">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">
             Team Collaboration
@@ -264,7 +264,7 @@ const Team: React.FC = () => {
         <button
           onClick={() => setOpen(true)}
           disabled={inviteLoading}
-          className="flex items-center cursor-pointer gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="flex mt-3 mx-auto md:mx-0 items-center cursor-pointer gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <UserPlus size={16} /> Invite Member
         </button>
