@@ -132,10 +132,10 @@ export const logout = createAsyncThunk<
 
     console.log(' Logout successful');
     
-    toast.success('Logged out successfully!', {
-      duration: 3000,
-      position: 'top-center',
-    });
+    // toast.success('Logged out successfully!', {
+    //   duration: 3000,
+    //   position: 'top-center',
+    // });
     
     return true;
   } catch (err: any) {
