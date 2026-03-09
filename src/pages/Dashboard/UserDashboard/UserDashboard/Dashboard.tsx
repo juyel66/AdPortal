@@ -402,7 +402,7 @@ const UserDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <main className="p-8">
+      <main className="p">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
@@ -412,7 +412,7 @@ const UserDashboard: React.FC = () => {
 
   if (error || !orgId) {
     return (
-      <main className="p-8">
+      <main className="">
         <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
           {error || "No organization selected"}
         </div>
@@ -421,7 +421,7 @@ const UserDashboard: React.FC = () => {
   }
 
   return (
-    <main className="p-8">
+    <main className="">
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
@@ -432,13 +432,13 @@ const UserDashboard: React.FC = () => {
       />
 
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between p-2">
         <div>
-          <div className="mb-1 flex items-center gap-3">
+          <div className="mb-1 lg:flex  items-center gap-3">
             <h1 className="text-2xl font-semibold text-gray-900">
               Dashboard
             </h1>
-            <span className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+            <span className="inline-flex mt-2 items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
               <Sparkles className="h-4 w-4" />
               <span>AI Powered</span>
             </span>
@@ -457,7 +457,7 @@ const UserDashboard: React.FC = () => {
       </div>
 
       {/* Stat Cards */}
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 p-2">
         <StatCard
           iconImg={ICONS.dollar}
           label="Total Spend"
@@ -489,7 +489,7 @@ const UserDashboard: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      <section className="rounded-xl bg-white p-6 shadow-sm">
+      <section className="rounded-xl bg-white p-6 shadow-sm p-2">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Quick Actions
         </h2>
