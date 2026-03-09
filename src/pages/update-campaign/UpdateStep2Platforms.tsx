@@ -47,7 +47,8 @@ const Step2Platforms: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
-  const [campaignData, setCampaignData] = useState<any>(null);
+  const [campaignData, setCampaignData] = useState<{ id: number; status: string; platforms: string[] } | null>(null);
+  const [integrationStatus, setIntegrationStatus] = useState<Record<string, boolean>>({});
   
   const campaignId = id || localStorage.getItem("campaignId");
 
@@ -80,24 +81,32 @@ const Step2Platforms: React.FC = () => {
     }
 
     try {
-      const response = await api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`);
-      console.log("📥 Campaign data:", response.data);
-      
-      setCampaignData(response.data);
-      
-      const apiPlatforms = response.data.platforms || [];
-      
+      const [campaignResponse, integrationResponse] = await Promise.all([
+        api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`),
+        api.get(`/main/integrations-status/?org_id=${org_id}`),
+      ]);
+
+      console.log("📥 Campaign data:", campaignResponse.data);
+      setCampaignData(campaignResponse.data);
+
+      const statusMap: Record<string, boolean> = {};
+      (integrationResponse.data.integrations as { platform: string; status: boolean }[]).forEach((item) => {
+        statusMap[item.platform] = item.status;
+      });
+      setIntegrationStatus(statusMap);
+
+      const apiPlatforms = campaignResponse.data.platforms || [];
       const selectedPlatforms = apiPlatforms
         .map((apiPlatform: string) => apiValueToPlatform[apiPlatform])
         .filter((platform: PlatformKey | undefined) => platform !== undefined);
-      
+
       console.log("Selected platforms from API:", selectedPlatforms);
-      
       setSelected(selectedPlatforms);
-      
-    } catch (err: any) {
+
+    } catch (err: unknown) {
       console.error("Error fetching campaign:", err);
-      setError(err.response?.data?.message || "Failed to fetch campaign data");
+      const e = err as { response?: { data: { message?: string } } };
+      setError(e.response?.data?.message || "Failed to fetch campaign data");
     } finally {
       setFetchLoading(false);
     }
@@ -105,9 +114,12 @@ const Step2Platforms: React.FC = () => {
 
   useEffect(() => {
     fetchCampaignData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId]);
 
   const togglePlatform = (key: PlatformKey) => {
+    const apiKey = platformToApiValue[key];
+    if (!integrationStatus[apiKey]) return;
     setSelected((prev) => {
       const newSelected = prev.includes(key) 
         ? prev.filter((p) => p !== key) 
@@ -160,9 +172,10 @@ const Step2Platforms: React.FC = () => {
 
       navigate(`/user-dashboard/campaigns-update/${campaignId}/update-step-3`);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ Error updating platforms:", err);
-      setError(err.response?.data?.message || "Something went wrong");
+      const e = err as { response?: { data: { message?: string } } };
+      setError(e.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -229,17 +242,19 @@ const Step2Platforms: React.FC = () => {
       <div className="space-y-4">
         {PLATFORMS.map((platform) => {
           const isSelected = selected.includes(platform.key);
+          const isConnected = integrationStatus[platformToApiValue[platform.key]] === true;
 
           return (
             <div
               key={platform.key}
-              onClick={() => !loading && togglePlatform(platform.key)}
-              className={`cursor-pointer rounded-xl border p-4 flex items-center justify-between transition
+              onClick={() => !loading && isConnected && togglePlatform(platform.key)}
+              className={`rounded-xl border p-4 flex items-center justify-between transition
+                ${!isConnected ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer'}
                 ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                 ${
                   isSelected
                     ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
-                    : "border-slate-200 hover:border-slate-300"
+                    : isConnected ? "border-slate-200 hover:border-slate-300" : "border-slate-200"
                 }
               `}
             >
@@ -257,13 +272,14 @@ const Step2Platforms: React.FC = () => {
                     <p className="font-medium text-slate-900">
                       {platform.name}
                     </p>
-                    <span className="text-xs text-gray-400">
-                      → {platformToApiValue[platform.key]}
-                    </span>
 
-                    {platform.connected && (
+                    {isConnected ? (
                       <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
                         Connected
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+                        Not Connected
                       </span>
                     )}
                   </div>
