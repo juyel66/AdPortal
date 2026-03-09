@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 
 import { useSelector } from "react-redux";
@@ -12,21 +11,17 @@ import {
 } from "../features/auth/Context/notificationsSlice";
 
 const NotificationBell: React.FC = () => {
-  const unread = useSelector(
-    (s: RootState) => s.notifications.unreadCount
-  );
-  const allItems = useSelector(
-    (s: RootState) => s.notifications.items
-  );
+  const unread = useSelector((s: RootState) => s.notifications.unreadCount);
+  const allItems = useSelector((s: RootState) => s.notifications.items);
   const [open, setOpen] = useState(false);
-  const [showAll, setShowAll] = useState(false); 
+  const [showAll, setShowAll] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-
-
-  const userRole = useSelector((s: RootState) => s.auth?.user?.is_admin ? 'admin' : 'user');
+  const userRole = useSelector((s: RootState) =>
+    s.auth?.user?.is_admin ? "admin" : "user",
+  );
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -36,7 +31,6 @@ const NotificationBell: React.FC = () => {
     document.addEventListener("click", onDoc);
     return () => document.removeEventListener("click", onDoc);
   }, []);
-
 
   useEffect(() => {
     if (open) setShowAll(false);
@@ -52,9 +46,7 @@ const NotificationBell: React.FC = () => {
   };
 
   const previewItems = (
-    showAll
-      ? allItems
-      : allItems.filter((i) => !i.read)
+    showAll ? allItems : allItems.filter((i) => !i.read)
   ).slice(0, 20);
 
   const onClickNotif = (notif: Notification) => {
@@ -62,32 +54,20 @@ const NotificationBell: React.FC = () => {
       dispatch(markAsRead({ id: notif.id }));
     }
     setOpen(false);
-    const url =
-      notif.data?.url ?? notif.data?.redirect ?? undefined;
+    const url = notif.data?.url ?? notif.data?.redirect ?? undefined;
     if (url) navigate(url);
   };
 
   const getNotificationPageUrl = () => {
-    const basePath = "/user-dashboard";
-    switch (userRole?.toLowerCase()) {
-      case 'admin':
-        return `${basePath}/admin/notifications`;
-      case 'agent':
-        return `${basePath}/agent/notifications`;
-      case 'customer':
-        return `${basePath}/customer/notifications`;
-      case 'user':
-        return `${basePath}/user/notifications`;
-      default:
-        return `${basePath}/notifications`;
-    }
+    return userRole === "admin"
+      ? "/admin-dashboard/notifications"
+      : "/user-dashboard/notifications";
   };
 
   const getViewAllUrl = () => {
     const baseUrl = getNotificationPageUrl();
     return showAll ? baseUrl : `${baseUrl}?filter=unseen`;
   };
-
 
   const getOpenNotificationsUrl = () => {
     return getNotificationPageUrl();
@@ -100,8 +80,6 @@ const NotificationBell: React.FC = () => {
         onClick={() => setOpen((v) => !v)}
         aria-label="Notifications"
       >
-        
-       
         <IoMdNotificationsOutline size={25} />
         {unread > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs px-1 rounded-full">
@@ -109,6 +87,7 @@ const NotificationBell: React.FC = () => {
           </span>
         )}
       </button>
+      
 
       {open && (
         <div className="absolute  right-0  mt-2 lg:w-96 w-60  bg-white border shadow-lg rounded z-50">
@@ -119,7 +98,7 @@ const NotificationBell: React.FC = () => {
                 onClick={() => setShowAll((v) => !v)}
                 className="text-sm text-gray-600 underline"
               >
-                {showAll ? "Show unseen only" : "Show all"}
+                {showAll ? "Show unseen only" :""}
               </button>
             </div>
 
@@ -136,10 +115,12 @@ const NotificationBell: React.FC = () => {
 
           <div className="max-h-72 overflow-auto">
             {previewItems.length === 0 && (
-              <div className="p-4 text-sm text-gray-500">
-                {showAll
-                  ? "No notifications."
-                  : "No unseen notifications."}
+              <div className="p-4">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 text-center">
+                  <p className="text-sm text-gray-500">
+                    {showAll ? "No notifications." : "No unseen notifications."}
+                  </p>
+                </div>
               </div>
             )}
 
@@ -152,9 +133,7 @@ const NotificationBell: React.FC = () => {
                 onClick={() => onClickNotif(n)}
               >
                 <div className="flex-1 pr-3">
-                  <div className="text-sm font-medium">
-                    {n.title}
-                  </div>
+                  <div className="text-sm font-medium">{n.title}</div>
 
                   {/* Show message if present */}
                   <div className="text-xs text-gray-700 truncate">
