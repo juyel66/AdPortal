@@ -139,7 +139,7 @@ const ConnectedPlatforms: React.FC = () => {
   };
 
   return (
-    <div className="rounded-xl bg-white p-6">
+    <div className="rounded-xl bg-white ">
       <h2 className="text-base font-semibold text-slate-900 mb-6">
         Connected Platforms
       </h2>
@@ -152,10 +152,10 @@ const ConnectedPlatforms: React.FC = () => {
           return (
             <div
               key={platform.key}
-              className="flex items-center justify-between rounded-xl p-4 hover:bg-slate-50 transition-colors"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl p-4 hover:bg-slate-50 transition-colors"
             >
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
                   <img
                     src={platform.logo}
                     alt={platform.name}
@@ -182,11 +182,11 @@ const ConnectedPlatforms: React.FC = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="sm:flex-shrink-0">
                 {isConnected ? (
                   <button
                     onClick={() => handleDisconnect(platform.key)}
-                    className="rounded-lg border border-red-400 px-4 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 transition"
+                    className="w-full sm:w-auto rounded-lg border border-red-400 px-4 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 transition"
                   >
                     Disconnect
                   </button>
@@ -194,7 +194,7 @@ const ConnectedPlatforms: React.FC = () => {
                   <button
                     onClick={() => handleConnect(platform)}
                     disabled={isLoading || !organizationId}
-                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition disabled:opacity-70"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition disabled:opacity-70"
                   >
                     {isLoading && <Loader2 size={16} className="animate-spin" />}
                     {!organizationId ? (
