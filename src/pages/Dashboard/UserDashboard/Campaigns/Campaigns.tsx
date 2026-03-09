@@ -307,7 +307,7 @@ const Campaigns: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className=" space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -433,7 +433,7 @@ const Campaigns: React.FC = () => {
 
       {/* Campaign Cards */}
       {filteredCampaigns.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 p-2">
           {filteredCampaigns.map((item) => (
             <CampaignCard
               key={item.id}
