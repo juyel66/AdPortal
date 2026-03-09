@@ -415,8 +415,11 @@ const Reports: React.FC = () => {
                     <FileText className="text-blue-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm  md:flex hidden font-medium text-slate-900">
                       {r.title}
+                    </p>
+                    <p className="text-sm md:hidden font-medium text-slate-900">
+                      {r.title.slice(0, 15)}{r.title.length > 15 ? "..." : ""}
                     </p>
                     <p className="text-xs text-slate-500">
                       {r.date} · {r.frequency}
