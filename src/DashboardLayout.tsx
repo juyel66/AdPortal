@@ -13,7 +13,7 @@ const DashboardLayout: React.FC = () => {
         <AppSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="relative flex-1 w-full flex justify-center items-start pl-4 pr-4 pb-4">
+        <main className="relative flex-1 w-full flex justify-center items-start  pb-4">
           
           {/* Sidebar toggle (top-left) */}
           <div className="absolute left-4 top-5 z-50">
@@ -23,7 +23,7 @@ const DashboardLayout: React.FC = () => {
           {/* Page Content */}
           <div className="w-full">
               <AdminNavbar />
-           <div className="mt-4">
+           <div className="mt-4 px-2">
              <Outlet />
            </div>
           </div>
