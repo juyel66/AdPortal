@@ -691,7 +691,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
         <Stat label="Clicks" value={formatNumber(campaign.clicks)} />
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-3 ">
         <Kpi label="CTR" value={formatPercentage(campaign.ctr)} />
         <Kpi label="Conversions" value={formatNumber(campaign.conversions)} />
         <Kpi
@@ -773,7 +773,7 @@ const Kpi: React.FC<KpiProps> = ({ label, value, highlight }) => (
   <div
     className={`rounded-lg p-3 text-center text-sm ${
       highlight
-        ? "bg-green-50 text-green-600 border border-green-200"
+        ? "bg-green-50 text-green-300 border border-green-100"
         : "bg-slate-50"
     }`}
   >
