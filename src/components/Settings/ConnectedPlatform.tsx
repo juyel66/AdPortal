@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import api from "../../lib/axios";
-
+import Swal from "sweetalert2";
 type PlatformKey = "meta" | "google" | "tiktok";
 
 type Platform = {
@@ -44,6 +44,7 @@ const ConnectedPlatforms: React.FC = () => {
   });
 
   const [loading, setLoading] = useState<PlatformKey | null>(null);
+  const [disconnecting, setDisconnecting] = useState<PlatformKey | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -106,31 +107,55 @@ const ConnectedPlatforms: React.FC = () => {
 
       if (response.data.redirect_url) {
         window.open(response.data.redirect_url, "_blank");
-        
-        // Optionally, you can set connected to true after successful connection
-        // This would require polling or webhook to check connection status
-        // For now, we'll keep it optimistic or implement polling
-        setTimeout(() => {
-          setConnected((prev) => ({
-            ...prev,
-            [platform.key]: true,
-          }));
-          setLoading(null);
-        }, 2000);
       }
     } catch (error) {
       console.error(`Error connecting to ${platform.name}:`, error);
+    } finally {
       setLoading(null);
     }
   };
 
-  const handleDisconnect = (key: PlatformKey) => {
-    // Note: You might need to implement disconnect API endpoint
-    // For now, just update the local state
-    setConnected((prev) => ({
-      ...prev,
-      [key]: false,
-    }));
+  const handleDisconnect = async (key: PlatformKey) => {
+    if (!organizationId) return;
+
+    const result = await Swal.fire({
+      title: "Disconnect platform?",
+      text: `Are you sure you want to disconnect ${platforms.find((p) => p.key === key)?.name}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, disconnect",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setDisconnecting(key);
+    try {
+      await api.post(
+        `/main/disconnect-integration/?org_id=${organizationId}`,
+        { platform: key.toUpperCase() }
+      );
+      setConnected((prev) => ({ ...prev, [key]: false }));
+      Swal.fire({
+        icon: "success",
+        title: "Disconnected!",
+        text: `${platforms.find((p) => p.key === key)?.name} has been disconnected.`,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } catch (error: any) {
+      console.error(`Error disconnecting ${key}:`, error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error.response?.data?.message || "Failed to disconnect. Please try again.",
+        confirmButtonColor: "#3085d6",
+      });
+    } finally {
+      setDisconnecting(null);
+    }
   };
 
   const getPlatformConnectionStatus = (key: PlatformKey) => {
@@ -148,6 +173,7 @@ const ConnectedPlatforms: React.FC = () => {
         {platforms.map((platform) => {
           const isConnected = getPlatformConnectionStatus(platform.key);
           const isLoading = loading === platform.key;
+          const isDisconnecting = disconnecting === platform.key;
 
           return (
             <div
@@ -186,9 +212,11 @@ const ConnectedPlatforms: React.FC = () => {
                 {isConnected ? (
                   <button
                     onClick={() => handleDisconnect(platform.key)}
-                    className="w-full sm:w-auto rounded-lg border border-red-400 px-4 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 transition"
+                    disabled={isDisconnecting}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg border border-red-400 px-4 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 transition disabled:opacity-70"
                   >
-                    Disconnect
+                    {isDisconnecting && <Loader2 size={16} className="animate-spin" />}
+                    {isDisconnecting ? "Disconnecting..." : "Disconnect"}
                   </button>
                 ) : (
                   <button
