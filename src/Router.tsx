@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Dashboard
 import UserDashboard from "./pages/Dashboard/UserDashboard/UserDashboard/Dashboard";
@@ -166,7 +167,7 @@ export const router = createBrowserRouter([
 
   {
     path: "/user-dashboard",
-    element: <DashboardLayout />,
+    element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
     children: [
       {
         index: true,
@@ -299,7 +300,7 @@ export const router = createBrowserRouter([
 
   {
     path: "/admin-dashboard",
-    element: <DashboardLayout />,
+    element: <ProtectedRoute><DashboardLayout /></ProtectedRoute>,
     children: [
       {
         index: true,
