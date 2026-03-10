@@ -369,7 +369,7 @@ import {
   LogOut,
   BriefcaseBusiness,
 } from "lucide-react";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../src/hooks/reduxHooks";
 import { logout } from "../../src/features/auth/AuthThunks";
 import api from "@/lib/axios";
@@ -534,7 +534,7 @@ export function AppSidebar() {
     try {
       await dispatch(logout()).unwrap();
       navigate("/auth/signin");
-      toast.success("Logged out successfully!");
+      // toast.success("Logged out successfully!");
     } catch (error) {
       console.error("Logout failed:", error);
       navigate("/auth/signin");
