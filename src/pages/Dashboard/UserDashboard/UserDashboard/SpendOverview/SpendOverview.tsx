@@ -8,7 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { SlidersHorizontal } from "lucide-react";
+import { TrendingUp, Sparkles, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ai from "/src/assets/ai22.svg";
 import ai2 from "/src/assets/aaiiiiiiiiii.svg";
@@ -73,27 +73,48 @@ function InsightCard({
   body: string;
   severity?: "High" | "Medium" | "Low";
 }) {
-  const color =
+  const badgeColor =
     severity === "High"
       ? "bg-green-50 text-green-700"
       : severity === "Medium"
         ? "bg-yellow-50 text-yellow-700"
         : "bg-gray-50 text-gray-700";
 
+  const iconBg =
+    severity === "High"
+      ? "bg-green-100"
+      : severity === "Medium"
+        ? "bg-orange-100"
+        : "bg-gray-100";
+
+  const IconComponent =
+    severity === "High"
+      ? TrendingUp
+      : severity === "Medium"
+        ? Sparkles
+        : Target;
+
+  const iconColor =
+    severity === "High"
+      ? "text-green-600"
+      : severity === "Medium"
+        ? "text-orange-500"
+        : "text-gray-500";
+
   return (
-    <div className="mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+    <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-800">
-            <SlidersHorizontal className="h-4 w-4 text-gray-400" />
-            <span>{title}</span>
+        <div className="flex items-start gap-3">
+          <div className={`shrink-0 rounded-full p-2 ${iconBg}`}>
+            <IconComponent className={`h-4 w-4 ${iconColor}`} />
           </div>
-          <div className="text-sm text-gray-500">{body}</div>
+          <div>
+            <div className="mb-1 text-sm font-semibold text-gray-800">{title}</div>
+            <div className="text-xs text-gray-500 leading-relaxed">{body}</div>
+          </div>
         </div>
         {severity && (
-          <div
-            className={`ml-3 rounded-full px-2 py-1 text-xs font-semibold ${color}`}
-          >
+          <div className={`ml-1 shrink-0 rounded-full px-2 py-1 text-xs font-semibold ${badgeColor}`}>
             {severity}
           </div>
         )}
@@ -121,23 +142,7 @@ export default function SpendOverview({
       ];
     }
 
-    const months = Object.keys(spendData).sort((a, b) => {
-      const monthsOrder = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
-      return monthsOrder.indexOf(a) - monthsOrder.indexOf(b);
-    });
+    const months = Object.keys(spendData);
 
     return months.map((month) => ({
       month,
@@ -198,17 +203,11 @@ export default function SpendOverview({
               </span>
             </div>
             <div className="mt-1 text-sm text-gray-500">
-              Last 7 weeks performance across all platforms
+              Last 6 Months performance across all platforms
             </div>
           </div>
 
-          <div>
-            <select className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>Last 90 Days</option>
-            </select>
-          </div>
+       
         </div>
 
         {/* Chart area */}
@@ -273,61 +272,48 @@ export default function SpendOverview({
       </div>
 
       {/* Right column: AI Insights */}
-      <aside className="rounded-xl bg-white p-4 shadow-sm">
-        <div>
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-              <img src={ai} alt="" className="h-8" />
-              <span>AI Insights</span>
-            </div>
-            <div className="text-sm text-gray-400">
-              Real-time recommendations
-            </div>
+      <aside className="rounded-xl bg-white p-4 shadow-sm flex flex-col">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+            <img src={ai} alt="" className="h-8" />
+            <span>AI Insights</span>
           </div>
-
-          <div>
-
+          <div className="text-sm text-gray-400">
+            Real-time recommendations
           </div>
+        </div>
 
+        <div className="flex flex-col flex-1 gap-2">
           {aiInsights && aiInsights.length > 0 ? (
             aiInsights.slice(0, 3).map((insight) => (
-              <InsightCard
-                key={insight.id}
-                title={insight.title.slice(0, 30) + (insight.title.length > 30 ? "..." : "")} 
-                body={insight.description.slice(0,60) + (insight.description.length > 50 ? "..." : "")}
-                severity={mapImpactToSeverity(insight.impect)}
-              />
+              <div key={insight.id} className="flex-1">
+                <InsightCard
+                  title={insight.title.slice(0, 30) + (insight.title.length > 30 ? "..." : "")}
+                  body={insight.description.slice(0, 60) + (insight.description.length > 50 ? "..." : "")}
+                  severity={mapImpactToSeverity(insight.impect)}
+                />
+              </div>
             ))
           ) : (
-            <>
-              <InsightCard
-                title="Budget Optimization"
-                body="Google Ads performing 20% better than Meta. AI suggests shifting $10/day for +$340 monthly revenue."
-                severity="High"
-              />
-              <InsightCard
-                title="Creative Fatigue Detected"
-                body="Summer Sale campaign creative is 14 days old. AI predicts 18% CTR drop in next 3 days. Refresh now."
-                severity="Medium"
-              />
-              <InsightCard
-                title="Audience Expansion"
-                body="Your audience in 'Product Launch' has 85% overlap with high performers. AI recommends expansion."
-                severity="High"
-              />
-            </>
+            <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
+              <Target className="mb-3 h-8 w-8 text-gray-300" />
+              <p className="text-sm font-medium text-gray-500">No AI insights available</p>
+              <p className="mt-1 text-xs text-gray-400">Insights will appear once your campaigns have enough data.</p>
+            </div>
           )}
         </div>
 
-        <div className="mt-4">
-          <button 
-            onClick={handleViewAllInsights}
-            className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700 transition flex items-center justify-center gap-2"
-          >
-            <img src={ai2} alt="AI icon" className="w-5 h-5" />
-            View All AI Insights
-          </button>
-        </div>
+        {aiInsights && aiInsights.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={handleViewAllInsights}
+              className="w-full cursor-pointer rounded-md px-4 py-3 text-sm font-semibold text-white shadow transition flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <img src={ai2} alt="AI icon" className="w-5 h-5" />
+              View All AI Insights
+            </button>
+          </div>
+        )}
       </aside>
     </div>
   );
