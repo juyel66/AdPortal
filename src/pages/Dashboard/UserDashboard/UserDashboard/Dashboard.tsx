@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import SpendOverview from "./SpendOverview/SpendOverview";
 import CampaignsTable from "./RecentCampaigns/RecentCampaigns";
 import api from "@/lib/axios";
+import { Link } from "react-router-dom";
 
 // Types for dashboard data
 interface DashboardData {
@@ -52,9 +53,9 @@ interface DashboardData {
 
 // Helper function to format currency
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -63,17 +64,17 @@ const formatCurrency = (value: number): string => {
 // Helper function to format large numbers
 const formatNumber = (value: number): string => {
   if (value >= 1000000) {
-    return (value / 1000000).toFixed(1) + 'M';
+    return (value / 1000000).toFixed(1) + "M";
   }
   if (value >= 1000) {
-    return (value / 1000).toFixed(1) + 'K';
+    return (value / 1000).toFixed(1) + "K";
   }
   return value.toString();
 };
 
 // Helper function to format percentage
 const formatPercentage = (value: number): string => {
-  return value.toFixed(2) + '%';
+  return value.toFixed(2) + "%";
 };
 
 function StatCard({
@@ -93,19 +94,13 @@ function StatCard({
     <div className="rounded-xl bg-white p-5 shadow-sm border border-slate-100">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <img
-            src={iconImg}
-            alt="icon"
-            className="w-10 h-10 object-contain"
-          />
+          <img src={iconImg} alt="icon" className="w-10 h-10 object-contain" />
         </div>
 
         {delta && (
           <div
             className={`rounded-full px-2 py-1 text-xs font-medium ${
-              positive
-                ? "bg-green-50 text-green-600"
-                : "bg-red-50 text-red-600"
+              positive ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
             }`}
           >
             {delta}
@@ -114,9 +109,7 @@ function StatCard({
       </div>
 
       <div className="mt-3 text-sm text-gray-500">{label}</div>
-      <div className="mt-1 text-xl font-semibold text-gray-900">
-        {value}
-      </div>
+      <div className="mt-1 text-xl font-semibold text-gray-900">{value}</div>
     </div>
   );
 }
@@ -144,12 +137,8 @@ function ActionCard({
           <Icon className="h-6 w-6 text-white" />
         </div>
         <div>
-          <div className="text-lg font-semibold text-white">
-            {title}
-          </div>
-          <div className="mt-1 text-sm text-white/90">
-            {subtitle}
-          </div>
+          <div className="text-lg font-semibold text-white">{title}</div>
+          <div className="mt-1 text-sm text-white/90">{subtitle}</div>
         </div>
       </div>
     </button>
@@ -157,16 +146,16 @@ function ActionCard({
 }
 
 // Delete Confirmation Modal Component
-const DeleteConfirmationModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
   campaignName,
-  loading 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  onConfirm: () => void; 
+  loading,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
   campaignName: string;
   loading: boolean;
 }) => {
@@ -179,12 +168,13 @@ const DeleteConfirmationModal = ({
           <Trash2 className="h-6 w-6" />
           <h3 className="text-lg font-semibold">Delete Campaign</h3>
         </div>
-        
+
         <p className="text-gray-600">
-          Are you sure you want to delete <span className="font-semibold">"{campaignName}"</span>? 
-          This action cannot be undone.
+          Are you sure you want to delete{" "}
+          <span className="font-semibold">"{campaignName}"</span>? This action
+          cannot be undone.
         </p>
-        
+
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onClose}
@@ -219,21 +209,21 @@ const DeleteConfirmationModal = ({
 const ICONS = {
   dollar:
     "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494156/Container_6_h2gdjc.png",
-  eye:
-    "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_7_dlwyhq.png",
+  eye: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_7_dlwyhq.png",
   cursor:
     "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_8_y2rgps.png",
-  ROAS:
-    "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_9_apjmto.png",
+  ROAS: "https://res.cloudinary.com/dqkczdjjs/image/upload/v1765494155/Container_9_apjmto.png",
 };
 
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null,
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
-  
+
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -242,7 +232,7 @@ const UserDashboard: React.FC = () => {
   }>({
     isOpen: false,
     campaignId: null,
-    campaignName: '',
+    campaignName: "",
   });
 
   // Get org_id from selectedOrganization in localStorage
@@ -310,65 +300,69 @@ const UserDashboard: React.FC = () => {
     if (!deleteModal.campaignId || !orgId) return;
 
     setDeleteLoading(true);
-    
+
     try {
       // Make API call to delete campaign
-      const response = await api.delete(`/main/campaign/${deleteModal.campaignId}/?org_id=${orgId}`);
-      
-      console.log('✅ Campaign deleted successfully:', response.data);
-      
+      const response = await api.delete(
+        `/main/campaign/${deleteModal.campaignId}/?org_id=${orgId}`,
+      );
+
+      console.log("✅ Campaign deleted successfully:", response.data);
+
       // Remove campaign from local state
-      setDashboardData(prev => {
+      setDashboardData((prev) => {
         if (!prev) return prev;
         return {
           ...prev,
           recent_campaigns: prev.recent_campaigns.filter(
-            c => c.id !== deleteModal.campaignId
+            (c) => c.id !== deleteModal.campaignId,
           ),
         };
       });
-      
+
       // Close modal
-      setDeleteModal({ isOpen: false, campaignId: null, campaignName: '' });
-      
+      setDeleteModal({ isOpen: false, campaignId: null, campaignName: "" });
+
       // Show success toast
-      toast.success('Campaign deleted successfully!', {
+      toast.success("Campaign deleted successfully!", {
         duration: 3000,
-        position: 'top-center',
+        position: "top-center",
       });
-      
     } catch (err: any) {
-      console.error('❌ Campaign delete failed:', err);
-      
+      console.error("❌ Campaign delete failed:", err);
+
       // Handle specific error cases
       if (err.response?.status === 403) {
-        toast.error('You do not have permission to delete this campaign.', {
+        toast.error("You do not have permission to delete this campaign.", {
           duration: 5000,
-          position: 'top-center',
+          position: "top-center",
         });
       } else if (err.response?.status === 404) {
-        toast.error('Campaign not found. It may have been already deleted.', {
+        toast.error("Campaign not found. It may have been already deleted.", {
           duration: 5000,
-          position: 'top-center',
+          position: "top-center",
         });
-        
+
         // Remove from UI anyway
-        setDashboardData(prev => {
+        setDashboardData((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
             recent_campaigns: prev.recent_campaigns.filter(
-              c => c.id !== deleteModal.campaignId
+              (c) => c.id !== deleteModal.campaignId,
             ),
           };
         });
-        
-        setDeleteModal({ isOpen: false, campaignId: null, campaignName: '' });
+
+        setDeleteModal({ isOpen: false, campaignId: null, campaignName: "" });
       } else {
-        toast.error(err.response?.data?.message || 'Failed to delete campaign', {
-          duration: 5000,
-          position: 'top-center',
-        });
+        toast.error(
+          err.response?.data?.message || "Failed to delete campaign",
+          {
+            duration: 5000,
+            position: "top-center",
+          },
+        );
       }
     } finally {
       setDeleteLoading(false);
@@ -376,7 +370,7 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleDeleteCancel = () => {
-    setDeleteModal({ isOpen: false, campaignId: null, campaignName: '' });
+    setDeleteModal({ isOpen: false, campaignId: null, campaignName: "" });
   };
 
   // Format the last updated time
@@ -384,19 +378,22 @@ const UserDashboard: React.FC = () => {
     if (!dashboardData?.ai_insights || dashboardData.ai_insights.length === 0) {
       return "2 minutes ago";
     }
-    const latestInsight = dashboardData.ai_insights.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    const latestInsight = dashboardData.ai_insights.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     )[0];
-    
+
     const updatedTime = new Date(latestInsight.created_at);
     const now = new Date();
     const diffMs = now.getTime() - updatedTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffMins < 60)
+      return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
     return updatedTime.toLocaleDateString();
   };
 
@@ -413,8 +410,22 @@ const UserDashboard: React.FC = () => {
   if (error || !orgId) {
     return (
       <main className="">
-        <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
-          {error || "No organization selected"}
+        <div className="text-center text-red-600  p-4 rounded-lg">
+          {error || (
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="bg-white border border-gray-200 shadow-md rounded-xl p-6 text-center max-w-sm w-full">
+                <div className="text-lg font-semibold text-gray-800 mb-4">
+                  No organization selected please sign in again
+                </div>
+
+                <Link to="/auth/signin">
+                  <button className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Please Sign In 
+                  </button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     );
@@ -435,9 +446,7 @@ const UserDashboard: React.FC = () => {
       <div className="mb-6 flex items-center justify-between p-2">
         <div>
           <div className="mb-1 lg:flex  items-center gap-3">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Dashboard
-            </h1>
+            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
             <span className="inline-flex mt-2 items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
               <Sparkles className="h-4 w-4" />
               <span>AI Powered</span>
@@ -482,7 +491,7 @@ const UserDashboard: React.FC = () => {
         <StatCard
           iconImg={ICONS.ROAS}
           label="ROAS"
-          value={(dashboardData?.roas || 0).toFixed(1) + 'x'}
+          value={(dashboardData?.roas || 0).toFixed(1) + "x"}
           delta="+15.8%"
           positive
         />
@@ -500,9 +509,7 @@ const UserDashboard: React.FC = () => {
             subtitle="Start a new ad campaign"
             bgClass="bg-blue-600"
             Icon={Plus}
-            onClick={() =>
-              navigate("/user-dashboard/campaigns-create/step-1")
-            }
+            onClick={() => navigate("/user-dashboard/campaigns-create/step-1")}
           />
 
           <ActionCard
@@ -510,9 +517,7 @@ const UserDashboard: React.FC = () => {
             subtitle="Create ad copy with AI"
             bgClass="bg-purple-700"
             Icon={Sparkles}
-            onClick={() =>
-              navigate("/user-dashboard/ai-tools")
-            }
+            onClick={() => navigate("/user-dashboard/ai-tools")}
           />
 
           <ActionCard
@@ -520,16 +525,14 @@ const UserDashboard: React.FC = () => {
             subtitle="Check performance data"
             bgClass="bg-green-600"
             Icon={BarChart2}
-            onClick={ () => 
-              navigate("/user-dashboard/reports")
-            }
+            onClick={() => navigate("/user-dashboard/reports")}
           />
         </div>
       </section>
 
       {/* Spend Overview */}
       <div className="mt-5">
-        <SpendOverview 
+        <SpendOverview
           data={dashboardData?.spend_overview}
           aiInsights={dashboardData?.ai_insights}
         />
@@ -537,7 +540,7 @@ const UserDashboard: React.FC = () => {
 
       {/* Recent Campaigns */}
       <div className="mt-4">
-        <CampaignsTable 
+        <CampaignsTable
           campaigns={dashboardData?.recent_campaigns || []}
           onDelete={handleDeleteClick}
         />
