@@ -1,4 +1,4 @@
-"use client";
+
 
 import React, { useState, useEffect } from "react";
 import {
@@ -9,12 +9,15 @@ import {
   Pencil,
   Copy,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router";
 
 import Swal from "sweetalert2";
 import api from "@/lib/axios";
 import { toast } from "sonner";
+import pushIcon from "../../../../assets/pushicon.svg"
 
 interface Campaign {
   id: number;
@@ -72,6 +75,10 @@ const Campaigns: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [statusCounts, setStatusCounts] = useState({ all: 0, active: 0, paused: 0, draft: 0 });
+  const PAGE_SIZE = 10;
 
   // Get org_id from localStorage
   const getOrgId = (): string => {
@@ -101,40 +108,47 @@ const Campaigns: React.FC = () => {
 
   useEffect(() => {
     if (orgId) {
-      fetchCampaigns();
+      fetchCampaigns(currentPage, searchTerm, activeFilter);
     } else {
       setLoading(false);
       setError("No organization selected");
     }
-  }, [orgId]);
+  }, [orgId, currentPage, searchTerm, activeFilter]);
 
   useEffect(() => {
-    // Filter campaigns based on search term and status filter
-    let filtered = campaigns;
+    if (orgId) fetchStatusCounts();
+  }, [orgId]);
 
-    // Apply status filter
-    if (activeFilter !== "all") {
-      filtered = filtered.filter(
-        (campaign) =>
-          campaign.status.toLowerCase() === activeFilter.toLowerCase(),
-      );
+  const fetchStatusCounts = async () => {
+    try {
+      const [allRes, activeRes, pausedRes, draftRes] = await Promise.all([
+        api.get(`/main/campaigns/?org_id=${orgId}&page_size=1`),
+        api.get(`/main/campaigns/?org_id=${orgId}&status=ACTIVE&page_size=1`),
+        api.get(`/main/campaigns/?org_id=${orgId}&status=PAUSED&page_size=1`),
+        api.get(`/main/campaigns/?org_id=${orgId}&status=DRAFT&page_size=1`),
+      ]);
+      setStatusCounts({
+        all: allRes.data.count || 0,
+        active: activeRes.data.count || 0,
+        paused: pausedRes.data.count || 0,
+        draft: draftRes.data.count || 0,
+      });
+    } catch {
+      // counts fail silently
     }
+  };
 
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter((campaign) =>
-        campaign.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-
-    setFilteredCampaigns(filtered);
-  }, [campaigns, searchTerm, activeFilter]);
-
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (page: number = 1, search: string = "", statusFilter: string = "all") => {
     try {
       setLoading(true);
-      const response = await api.get(`/main/campaigns/?org_id=${orgId}`);
-      setCampaigns(response.data.results || []);
+      const params = new URLSearchParams({ org_id: orgId, page: String(page) });
+      if (search) params.set("search", search);
+      if (statusFilter !== "all") params.set("status", statusFilter.toUpperCase());
+      const response = await api.get(`/main/campaigns/?${params.toString()}`);
+      const results = response.data.results || [];
+      setCampaigns(results);
+      setFilteredCampaigns(results);
+      setTotalCount(response.data.count || 0);
       setError(null);
     } catch (err: any) {
       console.error("Error fetching campaigns:", err);
@@ -175,8 +189,12 @@ const Campaigns: React.FC = () => {
         // Call delete API
         await api.delete(`/main/campaign/${id}/?org_id=${orgId}`);
 
-        // Remove from local state
-        setCampaigns(campaigns.filter((c) => c.id !== id));
+        // Re-fetch current page (go to previous page if last item on page was deleted)
+        const remaining = campaigns.filter((c) => c.id !== id).length;
+        const newPage = remaining === 0 && currentPage > 1 ? currentPage - 1 : currentPage;
+        setCurrentPage(newPage);
+        if (newPage === currentPage) fetchCampaigns(currentPage, searchTerm, activeFilter);
+        fetchStatusCounts();
 
         // Show success message
         Swal.fire({
@@ -216,10 +234,7 @@ const Campaigns: React.FC = () => {
   };
 
   const getStatusCount = (status: string) => {
-    if (status === "all") return campaigns.length;
-    return campaigns.filter(
-      (c) => c.status.toLowerCase() === status.toLowerCase(),
-    ).length;
+    return statusCounts[status as keyof typeof statusCounts] ?? 0;
   };
 
   // Format currency
@@ -296,7 +311,7 @@ const Campaigns: React.FC = () => {
         <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
           {error}
           <button
-            onClick={fetchCampaigns}
+            onClick={() => fetchCampaigns(currentPage)}
             className="block mx-auto mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
           >
             Try Again
@@ -336,7 +351,7 @@ const Campaigns: React.FC = () => {
                   "ads syncing initiated successfully! It may take a few moments for the changes to reflect.",
                 );
                 // Optionally, refresh campaigns after sync
-                fetchCampaigns();
+                fetchCampaigns(currentPage, searchTerm, activeFilter);
               } catch (err: any) {
                 console.error("Error syncing ads:", err);
                 Swal.fire({
@@ -376,7 +391,7 @@ const Campaigns: React.FC = () => {
               type="text"
               placeholder="Search campaigns..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-700
                          focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
@@ -385,7 +400,7 @@ const Campaigns: React.FC = () => {
           {/* Filters */}
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setActiveFilter("all")}
+              onClick={() => { setActiveFilter("all"); setCurrentPage(1); }}
               className={`rounded-lg px-4 py-2 text-sm font-medium shadow-sm ${
                 activeFilter === "all"
                   ? "bg-[#2D6FF8] text-white"
@@ -396,7 +411,7 @@ const Campaigns: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveFilter("active")}
+              onClick={() => { setActiveFilter("active"); setCurrentPage(1); }}
               className={`rounded-lg px-4 py-2 text-sm font-medium ${
                 activeFilter === "active"
                   ? "bg-[#2D6FF8] text-white"
@@ -407,7 +422,7 @@ const Campaigns: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveFilter("paused")}
+              onClick={() => { setActiveFilter("paused"); setCurrentPage(1); }}
               className={`rounded-lg px-4 py-2 text-sm font-medium ${
                 activeFilter === "paused"
                   ? "bg-[#2D6FF8] text-white"
@@ -418,7 +433,7 @@ const Campaigns: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveFilter("draft")}
+              onClick={() => { setActiveFilter("draft"); setCurrentPage(1); }}
               className={`rounded-lg px-4 py-2 text-sm font-medium ${
                 activeFilter === "draft"
                   ? "bg-[#2D6FF8] text-white"
@@ -433,13 +448,20 @@ const Campaigns: React.FC = () => {
 
       {/* Campaign Cards */}
       {filteredCampaigns.length > 0 ? (
+        <>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 p-2">
           {filteredCampaigns.map((item) => (
             <CampaignCard
               key={item.id}
               campaign={item}
+              orgId={orgId}
               onDelete={handleDelete}
               onDuplicate={handleDuplicate}
+              onStatusToggle={(id, newStatus) => {
+                setCampaigns((prev) =>
+                  prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c))
+                );
+              }}
               formatCurrency={formatCurrency}
               formatNumber={formatNumber}
               formatPercentage={formatPercentage}
@@ -448,6 +470,71 @@ const Campaigns: React.FC = () => {
             />
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalCount > PAGE_SIZE && (() => {
+          const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+          const startItem = (currentPage - 1) * PAGE_SIZE + 1;
+          const endItem = Math.min(currentPage * PAGE_SIZE, totalCount);
+
+          const getPageNumbers = () => {
+            const pages: (number | "...")[] = [];
+            if (totalPages <= 7) {
+              for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+              pages.push(1);
+              if (currentPage > 3) pages.push("...");
+              for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+              if (currentPage < totalPages - 2) pages.push("...");
+              pages.push(totalPages);
+            }
+            return pages;
+          };
+
+          return (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 py-4">
+              <p className="text-sm text-slate-500">
+                Showing <span className="font-medium text-slate-700">{startItem}</span>–<span className="font-medium text-slate-700">{endItem}</span> of <span className="font-medium text-slate-700">{totalCount}</span> campaigns
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronLeft size={15} /> Prev
+                </button>
+
+                {getPageNumbers().map((page, idx) =>
+                  page === "..." ? (
+                    <span key={`ellipsis-${idx}`} className="px-2 text-slate-400 select-none">…</span>
+                  ) : (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page as number)}
+                      className={`min-w-[36px] rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                        currentPage === page
+                          ? "bg-[#2D6FF8] border-[#2D6FF8] text-white"
+                          : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  Next <ChevronRight size={15} />
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+        </>
       ) : (
         <div className="bg-white rounded-lg p-8 text-center max-w-md mx-auto my-10 shadow-sm border border-gray-200">
   <div className="mb-4">
@@ -484,8 +571,10 @@ const Campaigns: React.FC = () => {
 
 interface CampaignCardProps {
   campaign: Campaign;
+  orgId: string;
   onDelete: (id: number, name: string) => void;
   onDuplicate: (campaign: Campaign) => void;
+  onStatusToggle: (id: number, newStatus: string) => void;
   formatCurrency: (value: number, currency?: string) => string;
   formatNumber: (value: number) => string;
   formatPercentage: (value: number) => string;
@@ -495,8 +584,10 @@ interface CampaignCardProps {
 
 const CampaignCard: React.FC<CampaignCardProps> = ({
   campaign,
+  orgId,
   onDelete,
   onDuplicate,
+  onStatusToggle,
   formatCurrency,
   formatNumber,
   formatPercentage,
@@ -504,14 +595,42 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
   getBudgetDisplay,
 }) => {
   const [open, setOpen] = useState(false);
+  const [toggling, setToggling] = useState(false);
+  const [optimisticStatus, setOptimisticStatus] = useState(campaign.status?.toUpperCase());
 
-  // Extract platforms from draft_data if platforms array is empty
+  const handleToggleStatus = async () => {
+    if (toggling) return;
+    const prevStatus = optimisticStatus;
+    const nextStatus = prevStatus === "ACTIVE" ? "PAUSED" : "ACTIVE";
+    setOptimisticStatus(nextStatus); // instant UI flip
+    setToggling(true);
+    try {
+      const res = await api.post(
+        `/main/campaign/${campaign.id}/toggle-status/?org_id=${orgId}`
+      );
+      const newStatus: string = res.data.status?.toUpperCase();
+      setOptimisticStatus(newStatus);
+      onStatusToggle(campaign.id, newStatus);
+      toast.success(res.data.message || `Campaign status updated to ${newStatus}.`);
+    } catch (err: any) {
+      console.error("Error toggling campaign status:", err);
+      setOptimisticStatus(prevStatus); // revert on failure
+      toast.error(
+        err.response?.data?.message || "Failed to toggle campaign status."
+      );
+    } finally {
+      setToggling(false);
+    }
+  };
+
+
   const platforms =
     campaign.platforms && campaign.platforms.length > 0
       ? campaign.platforms
       : campaign.draft_data?.platforms || [];
 
   const displayPlatforms = getPlatformDisplayNames(platforms);
+ 
 
   return (
     <div className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
@@ -521,7 +640,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
             {campaign.name}
           </h3>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <Badge status={campaign.status} />
+            <Badge status={optimisticStatus ?? campaign.status} />
 
             <Chip>
               {campaign.objective
@@ -538,11 +657,24 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <img
-            src={ACTION_BTN}
-            alt="action"
-            className="h-7 w-7 cursor-pointer"
-          />
+          {optimisticStatus === "ACTIVE" && (
+            <img
+              src={ACTION_BTN}
+              alt="pause campaign"
+              className={`h-7 w-7 cursor-pointer transition-opacity ${toggling ? "opacity-50 pointer-events-none" : ""}`}
+              onClick={handleToggleStatus}
+              title="Pause Campaign"
+            />
+          )}
+          {optimisticStatus === "PAUSED" && (
+            <img
+              src={pushIcon}
+              alt="activate campaign"
+              className={`h-5 w-5 cursor-pointer transition-opacity ${toggling ? "opacity-50 pointer-events-none" : ""}`}
+              onClick={handleToggleStatus}
+              title="Activate Campaign"
+            />
+          )}
           <button onClick={() => setOpen(!open)}>
             <MoreVertical className="h-5 w-5 text-slate-400" />
           </button>
