@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import bannerImg from "../../../assets/bannerImg.svg"
 import { toast } from "sonner";
-import { useUserProfile } from "@/hooks/useUserProfile";
+// import { useUserProfile } from "@/hooks/useUserProfile";
 
 const CreateOnes = () => {
 
@@ -12,7 +12,7 @@ const CreateOnes = () => {
     });
   }
 
-  const { user, is_admin, email } = useUserProfile();
+
   
   return (
     <section className="relative overflow-hidden bg-white container mx-auto lg:mt-0 mt-5 lg:p-0 p-2 ">
