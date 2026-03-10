@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 
 type AdMatrics = {
   impressions: number;
@@ -69,7 +69,89 @@ const getMediaType = (fileUrl?: string): "Image" | "Video" => {
   return videoExtensions.includes(fileExt) ? "Video" : "Image";
 };
 
-// Helper function to get file name from URL
+// Video player with manual play button
+const VideoPlayer: React.FC<{ src: string }> = ({ src }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [muted, setMuted] = useState(true);
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (playing) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    videoRef.current.muted = !muted;
+    setMuted(!muted);
+  };
+
+  return (
+    <div
+      className="relative h-40 w-full bg-black rounded-lg overflow-hidden cursor-pointer"
+      onClick={togglePlay}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <video
+        ref={videoRef}
+        src={src}
+        className="h-full w-full object-cover"
+        muted
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+
+      {/* Play/Pause overlay */}
+      {(!playing || hovered) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
+            {playing ? (
+              <svg className="h-5 w-5 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5 text-slate-800 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Mute/Unmute button — bottom right */}
+      <button
+        onClick={toggleMute}
+        className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 hover:bg-black/80 transition"
+        title={muted ? "Unmute" : "Mute"}
+      >
+        {muted ? (
+          /* Muted icon */
+          <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16.5 12A4.5 4.5 0 0 0 14 7.97V10.18l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0 0 17.73 18L19 19.27 20.27 18 5.27 3 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+          </svg>
+        ) : (
+          /* Unmuted icon */
+          <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77 0-4.28-2.99-7.86-7-8.77z"/>
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+};
+
+
+
 const getFileName = (fileUrl?: string): string => {
   if (!fileUrl) return "";
   return fileUrl.split('/').pop() || "";
@@ -110,21 +192,7 @@ const CreativePerformance: React.FC<CreativePerformanceProps> = ({ campaign }) =
                       }}
                     />
                   ) : (
-                    <video
-                      src={fileUrl}
-                      className="h-40 w-full object-cover"
-                      controls={false}
-                      muted
-                      loop
-                      onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
-                      onMouseLeave={(e) => {
-                        (e.target as HTMLVideoElement).pause();
-                        (e.target as HTMLVideoElement).currentTime = 0;
-                      }}
-                    >
-                      <source src={fileUrl} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+                    <VideoPlayer src={fileUrl!} />
                   )}
 
                   {/* Media Type Badge */}
