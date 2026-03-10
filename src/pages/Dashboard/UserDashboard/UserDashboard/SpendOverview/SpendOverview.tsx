@@ -102,7 +102,7 @@ function InsightCard({
         : "text-gray-500";
 
   return (
-    <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+    <div className="mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-3">
           <div className={`shrink-0 rounded-full p-2 ${iconBg}`}>
@@ -192,7 +192,7 @@ export default function SpendOverview({
   return (
     <div className="w-full grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Left / Main: Chart + KPIs (span 2 on lg) */}
-      <div className="lg:col-span-2 rounded-xl bg-white p-6 shadow-sm ">
+      <div className="lg:col-span-2 rounded-xl bg-white p-6 shadow-sm">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div>
@@ -207,7 +207,7 @@ export default function SpendOverview({
             </div>
           </div>
 
-       
+         
         </div>
 
         {/* Chart area */}
@@ -272,30 +272,33 @@ export default function SpendOverview({
       </div>
 
       {/* Right column: AI Insights */}
-      <aside className="rounded-xl bg-white p-4 shadow-sm flex flex-col">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-            <img src={ai} alt="" className="h-8" />
-            <span>AI Insights</span>
+      <aside className="rounded-xl bg-white p-4 shadow-sm">
+        <div>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+              <img src={ai} alt="" className="h-8" />
+              <span>AI Insights</span>
+            </div>
+            <div className="text-sm text-gray-400">
+              Real-time recommendations
+            </div>
           </div>
-          <div className="text-sm text-gray-400">
-            Real-time recommendations
-          </div>
-        </div>
 
-        <div className="flex flex-col flex-1 gap-2">
+          <div>
+
+          </div>
+
           {aiInsights && aiInsights.length > 0 ? (
             aiInsights.slice(0, 3).map((insight) => (
-              <div key={insight.id} className="flex-1">
-                <InsightCard
-                  title={insight.title.slice(0, 30) + (insight.title.length > 30 ? "..." : "")}
-                  body={insight.description.slice(0, 60) + (insight.description.length > 50 ? "..." : "")}
-                  severity={mapImpactToSeverity(insight.impect)}
-                />
-              </div>
+              <InsightCard
+                key={insight.id}
+                title={insight.title.slice(0, 30) + (insight.title.length > 30 ? "..." : "")}
+                body={insight.description.slice(0, 60) + (insight.description.length > 50 ? "..." : "")}
+                severity={mapImpactToSeverity(insight.impect)}
+              />
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
               <Target className="mb-3 h-8 w-8 text-gray-300" />
               <p className="text-sm font-medium text-gray-500">No AI insights available</p>
               <p className="mt-1 text-xs text-gray-400">Insights will appear once your campaigns have enough data.</p>
@@ -307,7 +310,7 @@ export default function SpendOverview({
           <div className="mt-4">
             <button
               onClick={handleViewAllInsights}
-              className="w-full cursor-pointer rounded-md px-4 py-3 text-sm font-semibold text-white shadow transition flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700"
+              className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700 transition flex items-center justify-center gap-2"
             >
               <img src={ai2} alt="AI icon" className="w-5 h-5" />
               View All AI Insights
