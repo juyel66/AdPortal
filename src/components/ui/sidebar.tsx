@@ -273,7 +273,12 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <img
+        src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1773253272/hamburger_h6z2as.png"
+        alt="Toggle Sidebar"
+        className="w-5 h-5 object-contain lg:hidden"
+      />
+      <PanelLeftIcon className="hidden lg:block" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
