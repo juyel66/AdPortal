@@ -266,7 +266,7 @@ const UserNotificationPage: React.FC = () => {
                       e.stopPropagation();
                       setShowDeleteConfirm(n.id);
                     }}
-                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all"
                   >
                     <X className="w-4 h-4" />
                   </button>
