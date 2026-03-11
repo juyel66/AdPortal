@@ -147,7 +147,15 @@ const SignUp: React.FC = () => {
     }));
 
     // Real-time validation for the changed field
-    if (touched[name]) {
+    if (name === "acceptTerms") {
+      setErrors((prev) => ({
+        ...prev,
+        acceptTerms: !checked
+          ? "You must accept the Terms of Service and Privacy Policy to create an account."
+          : undefined,
+        api: undefined,
+      }));
+    } else if (touched[name]) {
       const error = validateField(name, newValue as string);
       setErrors((prev) => ({
         ...prev,
@@ -485,7 +493,9 @@ const SignUp: React.FC = () => {
                 </label>
               </div>
               {errors.acceptTerms && (
-                <p className="mt-1 text-xs text-red-600">{errors.acceptTerms}</p>
+                <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                  <span>⚠</span> {errors.acceptTerms}
+                </p>
               )}
             </div>
 
