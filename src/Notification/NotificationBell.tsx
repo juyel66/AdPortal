@@ -136,8 +136,9 @@ const NotificationBell: React.FC = () => {
                   <div className="text-sm font-medium">{n.title}</div>
 
                   {/* Show message if present */}
-                  <div className="text-xs text-gray-700 truncate">
-                    {n.message || n.data?.message}
+                  <div className="text-xs text-gray-700 truncate flex items-center gap-2">
+                    <img className="w-4 h-4 " src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1773254132/bell_horu2c.png" alt="" />
+                    {(n.message.slice(0,45) || n.data?.message.slice(0,45)) + "..."}
                   </div>
 
                   <div className="text-[11px] text-gray-400 mt-1">
@@ -160,7 +161,7 @@ const NotificationBell: React.FC = () => {
                 setOpen(false);
                 navigate(getOpenNotificationsUrl());
               }}
-              className="text-sm text-blue-600"
+              className="text-sm text-blue-600 cursor-pointer"
             >
               Open notifications page
             </button>
