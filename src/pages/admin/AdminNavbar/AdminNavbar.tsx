@@ -3,7 +3,7 @@ import NotificationBell from "@/Notification/NotificationBell";
 
 
 const AdminNavbar = () => {
-    const { full_name, email } = useUserProfile();
+    const { full_name, email, is_admin } = useUserProfile();
 
     return (
         <div>
@@ -17,7 +17,7 @@ const AdminNavbar = () => {
                 <div className="navbar-end">
                     <div className='flex items-center gap-4'>
                         
-                        <NotificationBell />
+                         <div className="lg:flex hidden"><NotificationBell /></div>
                         
                         {/* <Link to="notification">
                             <img 
@@ -27,9 +27,12 @@ const AdminNavbar = () => {
                             />
                         </Link> */}
                         
-                        <div>
-                            <p className='text-xl'>{full_name}</p>
-                            <p className='text-gray-500'>{email}</p>
+                        <div className='flex flex-col bg-gray-200 pr-3 pl-3 rounded-xl'>
+                            <p className='text-xl whitespace-nowrap font-semibold'>{full_name}</p>
+                            <p className='text-gray-900 '>{is_admin ? 'Admin' : 'User'}</p>
+                        </div>
+                        <div className=" pr-2 lg:hidden ">
+                           <NotificationBell />
                         </div>
                     </div>
                 </div>
