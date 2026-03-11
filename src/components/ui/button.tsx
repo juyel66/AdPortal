@@ -59,4 +59,26 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+function HamburgerButton({
+  className,
+  ...props
+}: React.ComponentProps<"button">) {
+  return (
+    <button
+      data-slot="button"
+      className={cn(
+        "inline-flex items-center justify-center bg-transparent border-none outline-none p-0 cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+        className
+      )}
+      {...props}
+    >
+      <img
+        src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1773253652/hamburger_1_hedajr.png"
+        alt="menu"
+        className="w-5 h-5 object-contain"
+      />
+    </button>
+  )
+}
+
+export { Button, buttonVariants, HamburgerButton }
