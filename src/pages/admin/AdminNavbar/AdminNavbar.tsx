@@ -3,7 +3,7 @@ import NotificationBell from "@/Notification/NotificationBell";
 
 
 const AdminNavbar = () => {
-    const { full_name, email, is_admin } = useUserProfile();
+    const { full_name, is_admin } = useUserProfile();
 
     return (
         <div>
