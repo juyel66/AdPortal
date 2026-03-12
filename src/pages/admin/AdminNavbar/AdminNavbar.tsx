@@ -27,7 +27,7 @@ const AdminNavbar = () => {
                             />
                         </Link> */}
                         
-                        <div className='flex flex-col bg-gray-200 pr-3 pl-3 rounded-xl'>
+                        <div className='flex flex-col  pr-3 pl-3 rounded-xl'>
                             <p className='text-xl whitespace-nowrap font-semibold'>{full_name}</p>
                             <p className='text-gray-900 '>{is_admin ? 'Admin' : 'User'}</p>
                         </div>
