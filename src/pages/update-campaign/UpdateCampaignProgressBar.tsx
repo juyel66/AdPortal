@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import type {
   CampaignProgressBarProps,
   CampaignStep,
@@ -17,23 +18,28 @@ const STEPS: CampaignStep[] = [
 const CampaignProgressBar: React.FC<CampaignProgressBarProps> = ({
   currentStep,
 }) => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+
+  const handleStepClick = (stepId: number) => {
+    navigate(`/user-dashboard/campaigns-update/${id}/update-step-${stepId}`);
+  };
+
   const renderStep = (step: CampaignStep) => {
-    const isCompleted = step.id < currentStep;
     const isActive = step.id === currentStep;
 
     return (
       <div
         key={step.id}
-        className="flex flex-col items-center gap-2 rounded-lg border bg-white p-3"
+        onClick={() => handleStepClick(step.id)}
+        className="flex flex-col items-center gap-2 rounded-lg border bg-white p-3 cursor-pointer hover:bg-slate-50 transition-colors"
       >
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium
             ${
-              isCompleted
-                ? "bg-green-500 text-white"
-                : isActive
+              isActive
                 ? "bg-blue-600 text-white"
-                : "border border-slate-300 text-slate-400"
+                : "bg-green-500 text-white"
             }
           `}
         >
@@ -69,22 +75,20 @@ const CampaignProgressBar: React.FC<CampaignProgressBarProps> = ({
       
       <div className="hidden md:flex md:items-center md:justify-between">
         {STEPS.map((step) => {
-          const isCompleted = step.id < currentStep;
           const isActive = step.id === currentStep;
 
           return (
             <div
               key={step.id}
-              className="flex flex-col items-center gap-2"
+              onClick={() => handleStepClick(step.id)}
+              className="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium
                   ${
-                    isCompleted
-                      ? "bg-green-500 text-white"
-                      : isActive
+                    isActive
                       ? "bg-blue-600 text-white"
-                      : "border border-slate-300 text-slate-400"
+                      : "bg-green-500 text-white"
                   }
                 `}
               >
