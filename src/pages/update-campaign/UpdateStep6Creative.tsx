@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Image as ImageIcon, Video, UploadCloud, Sparkles, Pencil, ChevronDown, ChevronUp } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import api from "@/lib/axios";
 import Swal from "sweetalert2";
 import CopyGeneratePreview from "../create-campaign/CopyGeneratePreview";
@@ -27,6 +27,7 @@ interface AdAsset {
 interface AdData {
   id: number;
   name: string;
+  ad_name: string;
   status: string;
   headline: string;
   primary_text: string;
@@ -47,13 +48,16 @@ interface CampaignResponse {
   };
 }
 
+const isVideoUrl = (url: string) => /\.(mp4|webm|ogg|mov|avi)(\?|$)/i.test(url);
+
 const UpdateStep6Creative: React.FC = () => {
   const navigate = useNavigate();
+  const { id: campaignId } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
-  
-  const campaignId = localStorage.getItem("campaignId") || "50";
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [adName, setAdName] = useState("");
   const [adFormat, setAdFormat] = useState<AdFormat>("image");
@@ -119,165 +123,43 @@ const UpdateStep6Creative: React.FC = () => {
 
     try {
       const response = await api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`);
-      setCampaignData(response.data);
-      
       const data = response.data;
-      
+      setCampaignData(data);
+
       if (data.ads && data.ads.length > 0) {
         const firstAd = data.ads[0];
-        
-        setAdName(firstAd.name || "");
+        setAdName(firstAd.ad_name || "");
         setHeadline(firstAd.headline || "");
         setPrimaryText(firstAd.primary_text || "");
         setDescription(firstAd.description || "");
-        
-        if (firstAd.call_to_action) {
-          setCta(firstAd.call_to_action);
-        }
-        
-        if (firstAd.destination_url) {
-          setDestinationUrl(firstAd.destination_url);
-        }
-        
-        if (firstAd.assets && firstAd.assets.length > 0) {
-          const imageAsset = firstAd.assets.find((asset: any) => asset.file_type === "IMAGE");
-          if (imageAsset) {
-            setPreviewUrl(imageAsset.file_url);
-            setShowPreview(true);
-          }
-        }
+        if (firstAd.call_to_action) setCta(firstAd.call_to_action);
+        if (firstAd.destination_url) setDestinationUrl(firstAd.destination_url);
       }
-      
-      if (data.audience_targeting && data.audience_targeting.keywords) {
+
+      if (data.audience_targeting?.keywords) {
         setKeywords(data.audience_targeting.keywords);
       }
-      
-      if (data.file_url && !previewUrl) {
+
+      if (data.file_url) {
         setPreviewUrl(data.file_url);
         setShowPreview(true);
+        setAdFormat(isVideoUrl(data.file_url) ? "video" : "image");
       }
-      
+
       if (data.ads && data.ads.length > 0 && (data.ads[0].headline || data.ads[0].primary_text || data.ads[0].description)) {
         setShowPreview(true);
       }
 
-      localStorage.setItem("api_response", JSON.stringify(response.data));
-
-      const builderData = getCampaignBuilderData();
-      const updatedBuilderData = {
-        ...builderData,
-        step6: {
-          adName: data.ads && data.ads.length > 0 ? data.ads[0].name || "" : "",
-          adFormat: "image",
-          headline: data.ads && data.ads.length > 0 ? data.ads[0].headline || "" : "",
-          primaryText: data.ads && data.ads.length > 0 ? data.ads[0].primary_text || "" : "",
-          description: data.ads && data.ads.length > 0 ? data.ads[0].description || "" : "",
-          cta: data.ads && data.ads.length > 0 ? data.ads[0].call_to_action || "Learn More" : "Learn More",
-          destinationUrl: data.ads && data.ads.length > 0 ? data.ads[0].destination_url || "" : "",
-          keywords: data.audience_targeting?.keywords || "",
-          creativeUrl: data.file_url || (data.ads && data.ads.length > 0 && data.ads[0].assets && data.ads[0].assets.length > 0 ? data.ads[0].assets[0].file_url : ""),
-          campaignData: response.data,
-        },
-        metadata: {
-          ...builderData.metadata,
-          fetchedAt: new Date().toISOString(),
-        },
-      };
-      localStorage.setItem("campaign_builder_data", JSON.stringify(updatedBuilderData));
-
     } catch (err: any) {
       console.error("Error fetching campaign:", err);
       setError(err.response?.data?.message || "Failed to fetch campaign data");
-      
-      const storedData = localStorage.getItem("api_response");
-      if (storedData) {
-        try {
-          const parsedData = JSON.parse(storedData);
-          setCampaignData(parsedData);
-          
-          const data = parsedData;
-          
-          if (data.ads && data.ads.length > 0) {
-            const firstAd = data.ads[0];
-            if (firstAd.name) setAdName(firstAd.name);
-            if (firstAd.headline) setHeadline(firstAd.headline);
-            if (firstAd.primary_text) setPrimaryText(firstAd.primary_text);
-            if (firstAd.description) setDescription(firstAd.description);
-            if (firstAd.call_to_action) setCta(firstAd.call_to_action);
-            if (firstAd.destination_url) setDestinationUrl(firstAd.destination_url);
-            if (firstAd.assets && firstAd.assets.length > 0) {
-              const imageAsset = firstAd.assets.find((asset: any) => asset.file_type === "IMAGE");
-              if (imageAsset) {
-                setPreviewUrl(imageAsset.file_url);
-              }
-            }
-          }
-          
-          if (data.audience_targeting && data.audience_targeting.keywords) {
-            setKeywords(data.audience_targeting.keywords);
-          }
-          
-          if (data.file_url && !previewUrl) {
-            setPreviewUrl(data.file_url);
-          }
-        } catch (e) {
-          console.error("Error parsing stored campaign data:", e);
-        }
-      }
     } finally {
       setFetchLoading(false);
     }
   };
 
   useEffect(() => {
-    const loadSavedData = async () => {
-      const storedApiResponse = localStorage.getItem("api_response");
-      if (storedApiResponse) {
-        try {
-          const parsedData = JSON.parse(storedApiResponse);
-          setCampaignData(parsedData);
-          
-          const data = parsedData;
-          
-          if (data.ads && data.ads.length > 0) {
-            const firstAd = data.ads[0];
-            if (!adName && firstAd.name) setAdName(firstAd.name);
-            if (!headline && firstAd.headline) setHeadline(firstAd.headline);
-            if (!primaryText && firstAd.primary_text) setPrimaryText(firstAd.primary_text);
-            if (!description && firstAd.description) setDescription(firstAd.description);
-            if (!cta && firstAd.call_to_action) setCta(firstAd.call_to_action);
-            if (!destinationUrl && firstAd.destination_url) setDestinationUrl(firstAd.destination_url);
-          }
-          
-          if (!keywords && data.audience_targeting && data.audience_targeting.keywords) {
-            setKeywords(data.audience_targeting.keywords);
-          }
-        } catch (e) {
-          console.error("Error parsing stored API response:", e);
-        }
-      }
-
-      const builderData = getCampaignBuilderData();
-      if (builderData.step6) {
-        const saved = builderData.step6;
-        if (!adName && saved.adName) setAdName(saved.adName);
-        if (!adFormat && saved.adFormat) setAdFormat(saved.adFormat);
-        if (!headline && saved.headline) setHeadline(saved.headline);
-        if (!primaryText && saved.primaryText) setPrimaryText(saved.primaryText);
-        if (!description && saved.description) setDescription(saved.description);
-        if (!cta && saved.cta) setCta(saved.cta);
-        if (!destinationUrl && saved.destinationUrl) setDestinationUrl(saved.destinationUrl);
-        if (!keywords && saved.keywords) setKeywords(saved.keywords);
-        
-        if (saved.headline || saved.primaryText || saved.description) {
-          setShowPreview(true);
-        }
-      }
-
-      await fetchCampaignData();
-    };
-
-    loadSavedData();
+    fetchCampaignData();
   }, []);
 
   const handleFileUpload = async (file: File) => {
@@ -287,6 +169,7 @@ const UpdateStep6Creative: React.FC = () => {
         title: "Warning",
         text: "This doesn't look like an image file. It may not display correctly.",
       });
+      
     }
     if (adFormat === "video" && !file.type.startsWith("video/")) {
       Swal.fire({
@@ -420,11 +303,22 @@ const UpdateStep6Creative: React.FC = () => {
         formData.append("file_name", uploadedFile.name);
         formData.append("file_type", uploadedFile.type);
 
+        setIsUploading(true);
+        setUploadProgress(0);
+
         response = await api.post(`/main/create-ad/?org_id=${org_id}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadProgress(percent);
+            }
+          },
         });
+
+        setIsUploading(false);
       } else {
         const requestData: any = {
           campaign_id: parseInt(campaignId),
@@ -486,6 +380,8 @@ const UpdateStep6Creative: React.FC = () => {
       });
 
     } catch (err: any) {
+      setIsUploading(false);
+      setUploadProgress(0);
       console.error("Error updating ad:", err);
       
       let errorMessage = "Failed to update ad. Please try again.";
@@ -535,6 +431,7 @@ const UpdateStep6Creative: React.FC = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           <span className="ml-3 text-gray-500">Fetching campaign data for ID: {campaignId}...</span>
         </div>
+        {/* <div className=""></div> */}
       </div>
     );
   }
@@ -593,10 +490,8 @@ const UpdateStep6Creative: React.FC = () => {
               setAdFormat("image");
               setUploadedFile(null);
               setFileBase64("");
-              if (campaignData?.file_url) {
+              if (campaignData?.file_url && !isVideoUrl(campaignData.file_url)) {
                 setPreviewUrl(campaignData.file_url);
-              } else if (campaignData?.ads && campaignData.ads.length > 0 && campaignData.ads[0].assets && campaignData.ads[0].assets.length > 0) {
-                setPreviewUrl(campaignData.ads[0].assets[0].file_url);
               } else {
                 setPreviewUrl("");
               }
@@ -616,7 +511,11 @@ const UpdateStep6Creative: React.FC = () => {
               setAdFormat("video");
               setUploadedFile(null);
               setFileBase64("");
-              setPreviewUrl("");
+              if (campaignData?.file_url && isVideoUrl(campaignData.file_url)) {
+                setPreviewUrl(campaignData.file_url);
+              } else {
+                setPreviewUrl("");
+              }
             }}
             className={`rounded-xl border p-4 flex flex-col items-center gap-2 ${
               adFormat === "video"
@@ -860,6 +759,24 @@ const UpdateStep6Creative: React.FC = () => {
         </div>
       </div>
 
+      {isUploading && (
+        <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-blue-700">
+              {uploadedFile?.type.startsWith("video/") ? "Uploading video..." : "Uploading image..."}
+            </span>
+            <span className="text-sm font-bold text-blue-700">{uploadProgress}%</span>
+          </div>
+          <div className="w-full bg-blue-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="h-3 rounded-full bg-blue-600 transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+          <p className="text-xs text-blue-500 mt-2">Please wait, do not close this page...</p>
+        </div>
+      )}
+
       {(showPreview || headline || primaryText || description || previewUrl) && (
         <div id="ad-preview-section" className="mb-6 border-t pt-6">
           <h3 className="text-md font-semibold text-gray-900 mb-4">Ad Preview</h3>
@@ -870,7 +787,7 @@ const UpdateStep6Creative: React.FC = () => {
               description,
               cta,
               mediaUrl: previewUrl,
-              isVideo: adFormat === "video",
+              isVideo: uploadedFile ? adFormat === "video" : isVideoUrl(previewUrl),
             }}
           />
           <p className="text-xs text-gray-500 mt-2 text-center">
@@ -889,10 +806,10 @@ const UpdateStep6Creative: React.FC = () => {
 
         <button
           onClick={handleSubmit}
-          disabled={loading || !campaignId}
+          disabled={loading || isUploading || !campaignId}
           className="btn md:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border py-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Saving..." : "Update Ad"}
+          {isUploading ? `Uploading ${uploadProgress}%` : loading ? "Saving..." : "Update Ad"}
         </button>
       </div>
     </div>
