@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-/* =========================
-   STAT CARD TYPE
-========================= */
+
 export type AdminStatCard = {
   title: string;
   value: string;
@@ -12,12 +10,10 @@ export type AdminStatCard = {
   positive: boolean;
 };
 
-/* =========================
-   PLATFORM PIE DATA
-========================= */
+
 export type PlatformCampaign = {
   name: "Meta" | "Google" | "TikTok";
-  value: number; // percentage
+  value: number; 
   color: string;
-  count: number; // campaign count
+  count: number; 
 };
