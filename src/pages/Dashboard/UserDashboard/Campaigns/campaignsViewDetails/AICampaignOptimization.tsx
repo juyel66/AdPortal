@@ -1,6 +1,6 @@
 import React from "react";
 import type {
-  ImpactLevel,
+  impactLevel,
 } from "@/types/aiCampaignOptimization";
 
 /* ===============================
@@ -12,7 +12,7 @@ interface AIInsight {
   title: string;
   description: string;
   created_at: string;
-  impect: string; // Note: API returns "impect" (misspelled) instead of "impact"
+  impact: string; // Note: API returns "impact" (misspelled) instead of "impact"
 }
 
 interface CampaignData {
@@ -29,12 +29,12 @@ interface AICampaignOptimizationProps {
 ================================ */
 
 const impactStyles: Record<
-  ImpactLevel,
+  impactLevel,
   { badge: string; text: string }
 > = {
   high: {
     badge: "bg-green-100 text-green-700 border-green-200",
-    text: "High Impact",
+    text: "High impact",
   },
   medium: {
     badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
@@ -47,8 +47,8 @@ const impactStyles: Record<
 };
 
 // Helper to map API impact to our component's impact level
-const mapImpactLevel = (impect: string): ImpactLevel => {
-  const upper = impect?.toUpperCase() || "";
+const mapimpactLevel = (impact: string): impactLevel => {
+  const upper = impact?.toUpperCase() || "";
   if (upper.includes("HIGH")) return "high";
   if (upper.includes("MEDIUM")) return "medium";
   return "low";
@@ -93,7 +93,7 @@ const AICampaignOptimization: React.FC<AICampaignOptimizationProps> = ({ campaig
 
       <div className="space-y-4">
         {insights.map((insight) => {
-          const impact = impactStyles[mapImpactLevel(insight.impect)];
+          const impact = impactStyles[mapimpactLevel(insight.impact)];
 
           return (
             <div

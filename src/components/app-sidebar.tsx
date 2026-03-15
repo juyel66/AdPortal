@@ -580,13 +580,13 @@ export function AppSidebar() {
         {/* TOP */}
         <div>
           {/* Logo */}
-          <div className="flex items-center gap-2 px-4">
+          <Link to="/" className="flex items-center gap-2 px-4">
             <img
               src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765309106/Rectangle_ktqcsy.png"
               alt="AdPortal Logo"
               className="h-[66px] w-[200px] object-contain"
             />
-          </div>
+          </Link>
 
           {/* Account Dropdown only for user, not admin */}
           {!isAdmin && (

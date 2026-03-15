@@ -10,12 +10,12 @@ type GeneratedItem = {
   text: string;
 };
 
-type OptimizationImpact = "High Impact" | "Medium Impact";
+type Optimizationimpact = "High impact" | "Medium impact";
 
 type OptimizationItem = {
   title: string;
   description: string;
-  impact: OptimizationImpact;
+  impact: Optimizationimpact;
 };
 
 const OPTIMIZATION_DATA: OptimizationItem[] = [
@@ -23,25 +23,25 @@ const OPTIMIZATION_DATA: OptimizationItem[] = [
     title: "Budget Reallocation Suggestion",
     description:
       "Google Ads is performing 23% better than Meta in terms of ROAS. Consider reallocating $15/day from Meta to Google Ads.",
-    impact: "High Impact",
+    impact: "High impact",
   },
   {
     title: "New Target Audience Proposal",
     description:
       "Targeting a younger demographic on Instagram has shown a 35% increase in engagement. Recommend allocating an additional $10/day.",
-    impact: "Medium Impact",
+    impact: "Medium impact",
   },
   {
     title: "Creative Content Enhancement",
     description:
       "Video content on social media results in 50% higher shares. Consider investing an extra $20/day for video production.",
-    impact: "High Impact",
+    impact: "High impact",
   },
   {
     title: "Cross-Promotion Strategy",
     description:
       "Collaborating with influencers has led to a 40% boost in brand awareness. Allocate $5/day for influencer partnerships.",
-    impact: "Medium Impact",
+    impact: "Medium impact",
   },
 ];
 
@@ -452,14 +452,14 @@ const AiTools: React.FC = () => {
                 </div>
                 <span
                   className={`text-xs px-2 py-1 rounded-full h-fit ml-4 ${
-                    item.impect === "HIGH"
+                    item.impact === "HIGH"
                       ? "bg-green-100 border border-green-500 text-green-700"
-                      : item.impect === "MEDIUM"
+                      : item.impact === "MEDIUM"
                       ? "bg-yellow-100 border border-yellow-500 text-yellow-700"
                       : "bg-slate-100 border border-slate-300 text-slate-700"
                   }`}
                 >
-                  {item.impect}
+                  {item.impact}
                 </span>
               </div>
             ))

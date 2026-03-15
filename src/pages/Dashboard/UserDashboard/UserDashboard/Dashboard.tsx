@@ -32,7 +32,7 @@ interface DashboardData {
     title: string;
     description: string;
     created_at: string;
-    impect: "HIGH" | "MEDIUM" | "LOW";
+    impact: "HIGH" | "MEDIUM" | "LOW";
   }>;
   recent_campaigns: Array<{
     id: number;
