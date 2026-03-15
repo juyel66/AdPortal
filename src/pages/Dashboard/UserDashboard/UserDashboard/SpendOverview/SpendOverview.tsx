@@ -26,7 +26,7 @@ interface SpendOverviewProps {
     title: string;
     description: string;
     created_at: string;
-    impect: "HIGH" | "MEDIUM" | "LOW";
+    impact: "HIGH" | "MEDIUM" | "LOW";
   }>;
 }
 
@@ -178,7 +178,7 @@ export default function SpendOverview({
   const platformTotals = calculatePlatformTotals();
 
   // Map API impact to severity
-  const mapImpactToSeverity = (impact: string): "High" | "Medium" | "Low" => {
+  const mapimpactToSeverity = (impact: string): "High" | "Medium" | "Low" => {
     switch (impact) {
       case "HIGH":
         return "High";
@@ -294,7 +294,7 @@ export default function SpendOverview({
                 key={insight.id}
                 title={insight.title.slice(0, 30) + (insight.title.length > 30 ? "..." : "")}
                 body={insight.description.slice(0, 60) + (insight.description.length > 50 ? "..." : "")}
-                severity={mapImpactToSeverity(insight.impect)}
+                severity={mapimpactToSeverity(insight.impact)}
               />
             ))
           ) : (
