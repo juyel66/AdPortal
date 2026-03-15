@@ -376,11 +376,11 @@ const AiTools: React.FC = () => {
               <h2 className="font-semibold text-slate-900">Generated Copy</h2>
               {generated && (
                 <button 
-                  onClick={handleRegenerate}
+                  onClick={handleRegenerate} 
                   disabled={loading}
                   className="flex cursor-pointer items-center gap-1 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <RefreshCcw size={14} /> Regenerate
+                  <RefreshCcw size={14} className={loading ? "animate-spin" : ""} /> Regenerate
                 </button>
               )}
             </div>
