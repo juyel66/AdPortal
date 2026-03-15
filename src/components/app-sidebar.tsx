@@ -584,7 +584,7 @@ export function AppSidebar() {
             <img
               src="https://res.cloudinary.com/dqkczdjjs/image/upload/v1765309106/Rectangle_ktqcsy.png"
               alt="AdPortal Logo"
-              className="h-[66px] w-[200px] object-contain"
+              className="h-[66px] w-[200px] object-contain" 
             />
           </Link>
 
