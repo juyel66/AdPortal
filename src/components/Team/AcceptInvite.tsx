@@ -44,7 +44,7 @@ const AcceptInvite = () => {
           throw result.reason;
         }
 
-        // Persist so reload still shows success card
+        
         localStorage.setItem(storageKey, "true");
 
         setSuccess(true);
