@@ -44,7 +44,7 @@ const AcceptInvite = () => {
           throw result.reason;
         }
 
-        
+       
         localStorage.setItem(storageKey, "true");
 
         setSuccess(true);
