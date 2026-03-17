@@ -71,7 +71,7 @@ const Navbar = () => {
               How it Works
             </NavLink>
             <NavLink to="/pricing" className={navLinkClass}>
-              Pricing
+              Pricingg
             </NavLink>
 
             {email && (
@@ -159,7 +159,7 @@ const Navbar = () => {
             className={navLinkClass}
             onClick={handleLinkClick}
           >
-            Pricing
+            Pricingg
           </NavLink>
 
           {email && (
