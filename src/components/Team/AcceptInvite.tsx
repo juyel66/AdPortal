@@ -22,7 +22,7 @@ const AcceptInvite = () => {
 
     const storageKey = `invite_accepted_${token}`;
 
-    // If already accepted before (persisted), wait 2s then show success
+    
     if (localStorage.getItem(storageKey) === "true") {
       setTimeout(() => {
         setSuccess(true);
