@@ -61,7 +61,6 @@ const SettingNotification: React.FC = () => {
       
       if (response.data) {
         // Assuming the API returns an object with notification settings
-        // You might need to adjust this based on the actual API response structure
         const settings = response.data;
         
         setEnabled({
