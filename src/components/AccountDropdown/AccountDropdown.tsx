@@ -135,7 +135,7 @@ export default function AccountDropdown({
   }, [open]);
 
   const handleOrganizationSelect = (org: Organization) => {
-    // Only update if a different org is selected
+  
     if (localSelectedOrganization?.id === org.id) {
       setLocalSelectedOrganization(org); // still update state for UI
       return;
