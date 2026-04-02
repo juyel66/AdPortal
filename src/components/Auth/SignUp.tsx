@@ -217,6 +217,7 @@ const SignUp: React.FC = () => {
     try {
       await dispatch(
         register({
+          full_name: form.name.trim(),
           first_name: full_name,
           last_name,
           email: form.email,
