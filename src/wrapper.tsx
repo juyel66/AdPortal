@@ -62,7 +62,7 @@ export const RootWraper = () => {
       return;
     }
 
-    const wsUrl = `ws://10.10.13.99:8080/ws/notifications/?token=${token}`;
+    const wsUrl = `${import.meta.env.VITE_API_BASE_WS_URL}/ws/notifications/?token=${token}`;
     console.log("Attempting WS connect");
 
     try {
