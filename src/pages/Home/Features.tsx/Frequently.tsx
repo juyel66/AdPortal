@@ -38,7 +38,7 @@ const Frequently = () => {
   return (
     <section className="w-full bg-gradient-to-br from-slate-50 via-blue-50 to-white py-24">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center justify-center">
           {/* LEFT TITLE */}
           <div>
             <h2 className="text-4xl md:text-5xl font-extrabold leading-tight text-slate-900">
