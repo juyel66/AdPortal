@@ -66,6 +66,7 @@ import OrganizationManagement from "./pages/admin/Organization/OrganizationManag
 import UserNotificationPage from "./Notification/UserNotificationPage";
 import AdminContact from "./pages/Contact/AdminContact";
 import AdminNotificationPage from "./Notification/AdminNotificationPage";
+import StripePaymentGateway from "./components/StripePaymentGateway/StripePaymentGateway";
 
 export const router = createBrowserRouter([
   {
@@ -176,6 +177,11 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <UserDashboard />,
+      },
+      {
+        path: "payment",
+        element: <StripePaymentGateway />,
+
       },
       {
         path: "campaigns",
