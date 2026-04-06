@@ -18,7 +18,7 @@ const Success = () => {
                 <p className="text-gray-500 text-sm mb-6">
                     If you have any questions or need help, please contact our support team.
                 </p>
-                <a href="/" className="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold shadow hover:bg-blue-600 transition">Go to Dashboard</a>
+                <a href="/" className="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold shadow hover:bg-blue-600 transition">Go to Home page</a>
             </div>
         </div>
     );
