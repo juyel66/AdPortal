@@ -389,17 +389,25 @@
 import React, { useState, useEffect } from "react";
 import { Check, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import api from "../../../lib/axios";
 import type {
   Plan,
   BillingHistoryItem,
   PlanKey,
   ApiPlan,
-  ApiFeature,
-  CheckoutResponse
+  ApiFeature
 } from "@/types/subscription";
 
 const planOrder: PlanKey[] = ["starter", "growth", "scale"];
+
+type RawBillingHistoryItem = {
+  id?: number;
+  amount?: number;
+  date?: string;
+  status?: string;
+  invoice_file?: string;
+};
 
 const getOrgId = (): string | null => {
   const selectedOrg = localStorage.getItem("selectedOrganization");
@@ -415,6 +423,7 @@ const getOrgId = (): string | null => {
 };
 
 const SubscriptionBilling: React.FC = () => {
+  const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [activePlan, setActivePlan] = useState<PlanKey | "">("");
   useEffect(() => {
@@ -474,7 +483,7 @@ const SubscriptionBilling: React.FC = () => {
       });
 
       setPlans(transformedPlans);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching plans:", error);
       toast.error("Failed to load subscription plans");
       // Fallback to static plans if API fails
@@ -521,7 +530,7 @@ const SubscriptionBilling: React.FC = () => {
     try {
       const response = await api.get(`/finance/billing-history?org_id=${org_id}`);
       
-      let historyData: any[] = [];
+      let historyData: RawBillingHistoryItem[] = [];
       
       if (Array.isArray(response.data)) {
         historyData = response.data;
@@ -532,7 +541,7 @@ const SubscriptionBilling: React.FC = () => {
 
 
       
-      const transformedHistory: BillingHistoryItem[] = historyData.map((item: any) => ({
+      const transformedHistory: BillingHistoryItem[] = historyData.map((item) => ({
         id: item.id || 0,
         amount: item.amount || 0,
         date: item.date || "",
@@ -541,7 +550,7 @@ const SubscriptionBilling: React.FC = () => {
       }));
 
       setBillingHistory(transformedHistory);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching billing history:", error);
       setBillingHistory([]);
     } finally {
@@ -549,65 +558,11 @@ const SubscriptionBilling: React.FC = () => {
     }
   };
 
-  const handleBuyPlan = async (planId: number, planKey: PlanKey): Promise<void> => {
-    const org_id = getOrgId();
-    if (!org_id) {
-      toast.error("Please select an organization first");
-      return;
-    }
-
+  const handleBuyPlan = (planId: number, planKey: PlanKey): void => {
     setProcessingPayment({ planId, planKey });
-    
-    try {
-      // Send both plan_id and plan_key to be safe
-      const response = await api.post<CheckoutResponse>(
-        `/finance/buy-plan/?org_id=${org_id}`,
-        {
-          plan_id: planId,
-          plan_key: planKey
-        }
-      );
-
-      const checkoutData = response.data;
-      
-      if (checkoutData.checkout_url) {
-        // Open Stripe checkout in new tab
-        window.open(checkoutData.checkout_url, '_blank', 'noopener,noreferrer');
-        toast.success("Redirecting to payment gateway...");
-      } else {
-        toast.error("No checkout URL received from server");
-      }
-
-    } catch (error: any) {
-      console.error("Error buying plan:", error);
-      
-      if (error.response?.status === 401) {
-        toast.error("Session expired. Please log in again.");
-      } else if (error.response?.status === 400) {
-        const errorData = error.response.data;
-        if (errorData.detail) {
-          toast.error(errorData.detail);
-        } else if (errorData.message) {
-          toast.error(errorData.message);
-        } else if (errorData.error) {
-          toast.error(errorData.error);
-        } else {
-          toast.error("Invalid request. Please try again.");
-        }
-      } else if (error.response?.status === 403) {
-        toast.error("You don't have permission to upgrade plan.");
-      } else if (error.response?.status === 429) {
-        toast.error("Too many requests. Please try again later.");
-      } else if (error.response?.status >= 500) {
-        toast.error("Server error. Please try again later.");
-      } else if (error.message === "Network Error") {
-        toast.error("Network error. Please check your connection.");
-      } else {
-        toast.error("Failed to process payment. Please try again.");
-      }
-    } finally {
-      setProcessingPayment(null);
-    }
+    navigate(`/user-dashboard/payment?plan_id=${planId}&plan_key=${planKey}`, {
+      state: { planId, planKey },
+    });
   };
 
   const downloadInvoice = async (item: BillingHistoryItem): Promise<void> => {
