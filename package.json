@@ -16,7 +16,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@reduxjs/toolkit": "^2.11.2",
     "@stripe/react-stripe-js": "^6.1.0",
-    "@stripe/stripe-js": "^9.0.1",
+    "@stripe/stripe-js": "^9.1.0",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.14.0",
     "class-variance-authority": "^0.7.1",
