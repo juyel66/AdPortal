@@ -529,6 +529,9 @@ const SubscriptionBilling: React.FC = () => {
         historyData = response.data.results;
       }
       
+
+
+      
       const transformedHistory: BillingHistoryItem[] = historyData.map((item: any) => ({
         id: item.id || 0,
         amount: item.amount || 0,
