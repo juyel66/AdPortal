@@ -1,4 +1,4 @@
-
+// Global type definitions for the AdPortal application
 
 // Sidebar types
 export type SidebarContextProps = {
