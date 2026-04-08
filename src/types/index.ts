@@ -1,4 +1,4 @@
-// Global type definitions for the AdPortal application
+
 
 // Sidebar types
 export type SidebarContextProps = {
@@ -16,7 +16,7 @@ export interface AppSidebarProps {
   isAdmin?: boolean;
 }
 
-// Campaign types
+
 export interface Campaign {
   id: number;
   name: string;
