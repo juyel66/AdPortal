@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ShoppingCart, Eye, MessageCircle, Users, MousePointer, CircleStar } from "lucide-react";
 import { useCampaign } from "../../../src/pages/create-campaign/CampaignContext";
 import type { CampaignObjective, ObjectiveKey } from "@/types/createCampaignStep2";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import api from "@/lib/axios";
 
 const OBJECTIVES: CampaignObjective[] = [
@@ -49,6 +49,15 @@ const objectiveToApiValue: Record<ObjectiveKey, string> = {
   app_promotion: "APP_PROMOTION"
 };
 
+const apiValueToObjective: Record<string, ObjectiveKey> = {
+  CONVERSIONS: "conversions",
+  TRAFFIC: "traffic",
+  AWARENESS: "awareness",
+  ENGAGEMENT: "engagement",
+  LEAD_GENERATION: "lead_generation",
+  APP_PROMOTION: "app_promotion",
+};
+
 const ICONS: Record<ObjectiveKey, React.ReactNode> = {
   conversions: <ShoppingCart size={18} />,
   awareness: <Eye size={18} />,
@@ -61,11 +70,12 @@ traffic: <MousePointer size={18} />,
 const Step3Objective: React.FC = () => {
   const { campaignData, updateCampaignData } = useCampaign();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // Get campaign_id from localStorage
-  const campaignId = localStorage.getItem("campaignId");
+  const campaignId = searchParams.get("campaignId");
 
   // Initialize with data from context
   const [selected, setSelected] = useState<ObjectiveKey>(() => {
@@ -73,6 +83,54 @@ const Step3Objective: React.FC = () => {
     const validObjective = OBJECTIVES.find(obj => obj.key === savedObjective);
     return validObjective ? savedObjective as ObjectiveKey : "conversions";
   });
+
+  const getOrgId = () => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        return orgData.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+      return null;
+    }
+  };
+
+  const fetchCampaignData = useCallback(async () => {
+    if (!campaignId) {
+      setFetchLoading(false);
+      return;
+    }
+
+    const org_id = getOrgId();
+    if (!org_id) {
+      setError("No organization selected");
+      setFetchLoading(false);
+      return;
+    }
+
+    try {
+      const response = await api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`);
+      const apiObjective = response.data.objective || "";
+      const selectedObjective = apiObjective && apiValueToObjective[apiObjective]
+        ? apiValueToObjective[apiObjective]
+        : "conversions";
+
+      setSelected(selectedObjective);
+    } catch (err: unknown) {
+      console.error("Error fetching campaign:", err);
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      setError(errorResponse.response?.data?.message || "Failed to fetch campaign data");
+    } finally {
+      setFetchLoading(false);
+    }
+  }, [campaignId]);
+
+  useEffect(() => {
+    void fetchCampaignData();
+  }, [fetchCampaignData]);
 
   // Update context when selection changes
   const handleSelectObjective = (key: ObjectiveKey) => {
@@ -128,24 +186,35 @@ const Step3Objective: React.FC = () => {
         objective: selected
       });
 
-      // Navigate to next step
-      navigate("/user-dashboard/campaigns-create/step-4");
+      navigate(`/user-dashboard/campaigns-create/step-4?campaignId=${campaignId}`);
 
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Failed to save objective";
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      const errorMessage = errorResponse.response?.data?.message || "Failed to save objective";
       setError(errorMessage);
-      console.error("❌ Error saving objective:", err.response?.data || err);
+      console.error("❌ Error saving objective:", errorResponse.response?.data || err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Check if campaignId exists
-  useEffect(() => {
-    if (!campaignId) {
-      console.warn("⚠️ No campaign ID found in localStorage");
-    }
-  }, [campaignId]);
+  if (fetchLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Campaign Objective
+          </h2>
+          <p className="text-sm text-slate-500">
+            Loading your campaign objective...
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-gray-500">Loading objective data...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -264,7 +333,7 @@ const Step3Objective: React.FC = () => {
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
         <Link
-          to="/user-dashboard/campaigns-create/step-2"
+          to={campaignId ? `/user-dashboard/campaigns-create/step-2?campaignId=${campaignId}` : "/user-dashboard/campaigns-create/step-2"}
           className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
         >
           Previous
