@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 // Type definitions for platforms
@@ -309,6 +309,14 @@ export const CampaignProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
     return initialCampaignData;
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CAMPAIGN_STORAGE_KEY, JSON.stringify(campaignData));
+    } catch (error) {
+      console.error('❌ Campaign Context: Error saving to localStorage:', error);
+    }
+  }, [campaignData]);
 
 
 
