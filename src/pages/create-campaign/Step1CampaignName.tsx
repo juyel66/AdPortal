@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 import { toast } from "sonner";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 
 type CreateCampaignResponse = {
   campaign_id?: number;
@@ -19,10 +19,42 @@ type CreateCampaignResponse = {
 };
 
 const Step1CampaignName: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const campaignId = searchParams.get("campaignId");
   const [campaignName, setCampaignName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(Boolean(campaignId));
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCampaignName = async () => {
+      if (!campaignId) {
+        setFetchLoading(false);
+        return;
+      }
+
+      const org_id = getOrgId();
+      if (!org_id) {
+        setError("No organization selected");
+        setFetchLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`);
+        setCampaignName(response.data.name || response.data.campaign_name || "");
+      } catch (err: unknown) {
+        const errorResponse = err as { response?: { data?: { message?: string } } };
+        setError(errorResponse.response?.data?.message || "Failed to fetch campaign data");
+        console.error("Error fetching campaign:", err);
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+
+    void fetchCampaignName();
+  }, [campaignId]);
 
 
   const getOrgId = () => {
@@ -103,32 +135,25 @@ const Step1CampaignName: React.FC = () => {
     setError("");
 
     try {
-      const response = await api.post<CreateCampaignResponse>(`/main/create-ad/?org_id=${org_id}`, {
-        campaign_name: campaignName
-      });
+      const response = campaignId
+        ? await api.patch<CreateCampaignResponse>(`/main/campaign/${campaignId}/?org_id=${org_id}`, {
+            name: campaignName,
+          })
+        : await api.post<CreateCampaignResponse>(`/main/create-ad/?org_id=${org_id}`, {
+            campaign_name: campaignName,
+          });
 
       console.log("Success:", response.data);
 
-      const campaignId = extractCampaignId(response.data);
-      const createdCampaignName = response.data.campaign_name || response.data.name || campaignName;
-      const campaignStatus = response.data.status || response.data.data?.status || "draft";
-
-      if (!campaignId) {
+      const nextCampaignId = extractCampaignId(response.data) || (campaignId ? Number(campaignId) : null);
+      if (!nextCampaignId) {
         const fallbackMessage = "Campaign created, but the server did not return a campaign id.";
         setError(fallbackMessage);
         toast.error(fallbackMessage);
         return;
       }
 
-     
-      localStorage.setItem("campaignId", String(campaignId));
-      localStorage.setItem("campaignStatus", campaignStatus);
-      localStorage.setItem("campaignName", createdCampaignName);
-
-      // toast.success("Campaign created successfully.");
-
-
-      navigate("/user-dashboard/campaigns-create/step-2");
+      navigate(`/user-dashboard/campaigns-create/step-2?campaignId=${nextCampaignId}`);
 
     } catch (err: unknown) {
       const message = getErrorMessage(err);
@@ -147,6 +172,14 @@ const Step1CampaignName: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (fetchLoading) {
+    return (
+      <div className="w-full flex justify-center items-center py-12">
+        <div className="text-gray-500">Loading campaign data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
