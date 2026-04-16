@@ -94,6 +94,7 @@ const Step2Platforms: React.FC = () => {
         const orgData = JSON.parse(selectedOrg);
         org_id = orgData.id;
       }
+      
 
       // ★★★ Log the request data ★★★
       const requestData = {
