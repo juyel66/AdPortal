@@ -100,7 +100,7 @@ const PowerfulFeatures = () => {
             </p>
 
                      <Link
-  to="/user-dashboard/dashboard"
+  to="/user-dashboard/campaigns"
   className="
     inline-flex items-center justify-center
     rounded-xl
@@ -145,7 +145,7 @@ const PowerfulFeatures = () => {
             </p>
 
                      <Link
-  to="/user-dashboard/dashboard"
+  to="/user-dashboard/ai-tools"
   className="
     inline-flex items-center justify-center
     rounded-xl
@@ -215,7 +215,7 @@ const PowerfulFeatures = () => {
             </p>
 
            <Link
-  to="/user-dashboard/dashboard"
+  to="/user-dashboard/campaigns"
   className="
     inline-flex items-center justify-center
     rounded-xl
