@@ -15,6 +15,7 @@ interface Props {
 const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
   const tiktokVideoRef = useRef<HTMLVideoElement | null>(null);
   const [isTiktokPlaying, setIsTiktokPlaying] = useState(false);
+  console.log(isTiktokPlaying);
 
   useEffect(() => {
     setIsTiktokPlaying(false);
