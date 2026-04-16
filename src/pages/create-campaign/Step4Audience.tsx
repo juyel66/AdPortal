@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import Icon from "../../assets/Icon.svg";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 
@@ -8,18 +8,84 @@ type GenderType = "all" | "male" | "female";
 
 const Step4Audience: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fetchLoading, setFetchLoading] = useState(true);
   
-  // Get campaign_id from localStorage
-  const campaignId = localStorage.getItem("campaignId");
+  const campaignId = searchParams.get("campaignId");
 
-  // Local state - completely free
-  const [minAge, setMinAge] = useState<string>("18");
-  const [maxAge, setMaxAge] = useState<string>("65");
+  const [minAge, setMinAge] = useState<string>("");
+  const [maxAge, setMaxAge] = useState<string>("");
   const [gender, setGender] = useState<GenderType>("all");
   const [location, setLocation] = useState<string>("");
   const [interests, setInterests] = useState<string>("");
+
+  const getOrgId = () => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        return orgData.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+      return null;
+    }
+  };
+
+  const fetchCampaignData = useCallback(async () => {
+    if (!campaignId) {
+      setError("Campaign ID not found");
+      setFetchLoading(false);
+      return;
+    }
+
+    const org_id = getOrgId();
+    if (!org_id) {
+      setError("No organization selected");
+      setFetchLoading(false);
+      return;
+    }
+
+    try {
+      const response = await api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`);
+      console.log("📥 Campaign data:", response.data);
+
+      const audience = response.data.audience_targeting || {};
+
+      if (audience.min_age !== undefined && audience.min_age !== null) {
+        setMinAge(String(audience.min_age));
+      } else {
+        setMinAge("18");
+      }
+
+      if (audience.max_age !== undefined && audience.max_age !== null) {
+        setMaxAge(String(audience.max_age));
+      } else {
+        setMaxAge("65");
+      }
+
+      if (audience.gender && ["all", "male", "female"].includes(audience.gender)) {
+        setGender(audience.gender as GenderType);
+      }
+
+      if (audience.locations && audience.locations.length > 0) {
+        setLocation(audience.locations[0]);
+      }
+
+      if (audience.keywords) {
+        setInterests(audience.keywords);
+      }
+    } catch (err: unknown) {
+      console.error("Error fetching campaign:", err);
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      setError(errorResponse.response?.data?.message || "Failed to fetch campaign data");
+    } finally {
+      setFetchLoading(false);
+    }
+  }, [campaignId]);
 
   // Estimated reach (static for UI)
   const estimatedReach = useMemo(() => {
@@ -42,6 +108,24 @@ const Step4Audience: React.FC = () => {
       progress: Math.min(90, Math.max(40, baseMin / 10)),
     };
   }, [gender, interests]);
+
+  useEffect(() => {
+    void fetchCampaignData();
+  }, [fetchCampaignData]);
+
+  if (fetchLoading) {
+    return (
+      <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Target Audience</h2>
+          <p className="text-sm text-gray-500">Loading your audience data...</p>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-gray-500">Loading audience data...</div>
+        </div>
+      </div>
+    );
+  }
 
   // Submit to API
   const handleSubmit = async () => {
@@ -77,10 +161,11 @@ const Step4Audience: React.FC = () => {
       const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData);
       console.log(" Audience saved:", response.data);
 
-      navigate("/user-dashboard/campaigns-create/step-5");
+      navigate(`/user-dashboard/campaigns-create/step-5?campaignId=${campaignId}`);
 
-    } catch (err: any) {
-      setError(err.response?.data?.message || "All fields are required. Please check your input and try again.");
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      setError(errorResponse.response?.data?.message || "All fields are required. Please check your input and try again.");
       toast.error("All fields are required. Please check your input and try again.")
       console.error(" Error:", err);
     } finally {
@@ -202,7 +287,7 @@ const Step4Audience: React.FC = () => {
       </div>
 
       {/* Estimated Reach */}
-      <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+      <div className="rounded-xl border border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50 p-4">
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs text-gray-500">Estimated Daily Reach</p>
@@ -211,7 +296,7 @@ const Step4Audience: React.FC = () => {
             </p>
           </div>
 
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-b from-blue-500 to-blue-300 shadow-md">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-linear-to-b from-blue-500 to-blue-300 shadow-md">
             <img src={Icon} alt="icon" className="w-8 h-8" />
           </div>
         </div>
@@ -232,7 +317,7 @@ const Step4Audience: React.FC = () => {
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
         <Link
-          to="/user-dashboard/campaigns-create/step-3"
+          to={campaignId ? `/user-dashboard/campaigns-create/step-3?campaignId=${campaignId}` : "/user-dashboard/campaigns-create/step-3"}
           className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
         >
           Previous
