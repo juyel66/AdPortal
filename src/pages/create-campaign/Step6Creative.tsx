@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Image as ImageIcon, Video, UploadCloud, Sparkles, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import CopyGeneratePreview from "./CopyGeneratePreview";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import api from "@/lib/axios";
 import Swal from "sweetalert2";
 
 type AdFormat = "image" | "video";
+
+const isVideoUrl = (url: string) => /\.(mp4|webm|ogg|mov|avi|mkv)(\?|#|$)/i.test(url);
 
 interface GenerateCopyResponse {
   "Ad copy"?: {
@@ -19,10 +21,12 @@ interface GenerateCopyResponse {
 
 const Step6Creative: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
   
-  const campaignId = localStorage.getItem("campaignId");
+  const campaignId = searchParams.get("campaignId");
 
   // Form states - all visible from the start
   const [adName, setAdName] = useState("");
@@ -34,7 +38,7 @@ const Step6Creative: React.FC = () => {
   const [headline, setHeadline] = useState("");
   const [primaryText, setPrimaryText] = useState("");
   const [description, setDescription] = useState("");
-  const [cta, setCta] = useState("Shop now");
+  const [cta, setCta] = useState("Shop Now");
   const [destinationUrl, setDestinationUrl] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -57,13 +61,18 @@ const Step6Creative: React.FC = () => {
     }
   };
 
-  // Clear all campaign-related data from localStorage
-  const clearCampaignData = () => {
-    localStorage.removeItem("campaign_builder_data");
-    localStorage.removeItem("campaignId");
-    localStorage.removeItem("campaignName");
-    localStorage.removeItem("campaignStatus");
-    console.log("🧹 Campaign data cleared from localStorage");
+  const getOrgId = () => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        return orgData.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+      return null;
+    }
   };
 
   // Convert file to base64
@@ -86,7 +95,7 @@ const Step6Creative: React.FC = () => {
       setHeadline(saved.headline || "");
       setPrimaryText(saved.primaryText || "");
       setDescription(saved.description || "");
-      setCta(saved.cta || "Learn More");
+      setCta(saved.cta || "Shop Now");
       setDestinationUrl(saved.destinationUrl || "");
       setKeywords(saved.keywords || "");
       
@@ -96,6 +105,106 @@ const Step6Creative: React.FC = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const fetchCampaignData = async () => {
+      if (!campaignId) {
+        setFetchLoading(false);
+        return;
+      }
+
+      const org_id = getOrgId();
+      if (!org_id) {
+        setError("No organization selected");
+        setFetchLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`);
+        const data = response.data;
+
+        if (data.ads && data.ads.length > 0) {
+          const firstAd = data.ads[0];
+          setAdName(firstAd.ad_name || "");
+          setHeadline(firstAd.headline || "");
+          setPrimaryText(firstAd.primary_text || "");
+          setDescription(firstAd.description || "");
+          if (firstAd.call_to_action) setCta(firstAd.call_to_action);
+          if (firstAd.destination_url) setDestinationUrl(firstAd.destination_url);
+        }
+
+        if (data.audience_targeting?.keywords) {
+          setKeywords(data.audience_targeting.keywords);
+        }
+
+        if (data.file_url) {
+          setPreviewUrl(data.file_url);
+          setShowPreview(true);
+          const isVideo = data.file_type?.startsWith("video/") || isVideoUrl(data.file_url);
+          setAdFormat(isVideo ? "video" : "image");
+        }
+
+        if (data.ads && data.ads.length > 0 && (data.ads[0].headline || data.ads[0].primary_text || data.ads[0].description)) {
+          setShowPreview(true);
+        }
+      } catch (err: unknown) {
+        console.error("Error fetching campaign:", err);
+        const errorResponse = err as { response?: { data?: { message?: string } } };
+        setError(errorResponse.response?.data?.message || "Failed to fetch campaign data");
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+
+    void fetchCampaignData();
+  }, [campaignId]);
+
+  useEffect(() => {
+    try {
+      const builderData = getCampaignBuilderData();
+      const updatedBuilderData = {
+        ...builderData,
+        step6: {
+          adName,
+          adFormat,
+          product,
+          audience,
+          benefits,
+          tone,
+          headline,
+          primaryText,
+          description,
+          cta,
+          destinationUrl,
+          keywords,
+          uploadedFile: uploadedFile?.name || "",
+        },
+        metadata: {
+          ...builderData.metadata,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+
+      localStorage.setItem("campaign_builder_data", JSON.stringify(updatedBuilderData));
+    } catch (error) {
+      console.error("Error saving step 6 draft:", error);
+    }
+  }, [
+    adName,
+    adFormat,
+    product,
+    audience,
+    benefits,
+    tone,
+    headline,
+    primaryText,
+    description,
+    cta,
+    destinationUrl,
+    keywords,
+    uploadedFile,
+  ]);
 
   const handleFileUpload = async (file: File) => {
     // Show warning but don't block if file type doesn't match
@@ -174,7 +283,7 @@ const Step6Creative: React.FC = () => {
         setHeadline(adCopy.headline || "");
         setPrimaryText(adCopy.primary_text || "");
         setDescription(adCopy.description || "");
-        setCta(adCopy.call_to_action || "Learn More");
+        setCta(adCopy.call_to_action || "Shop Now");
         setKeywords(benefits);
         
         // Show the preview section
@@ -196,12 +305,13 @@ const Step6Creative: React.FC = () => {
           showConfirmButton: false,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ Error generating ad copy:", err);
+      const errorResponse = err as { response?: { data?: { message?: string } } };
       Swal.fire({
         icon: "error",
         title: "Generation Failed",
-        text: err.response?.data?.message || "Failed to generate ad copy",
+        text: errorResponse.response?.data?.message || "Failed to generate ad copy",
       });
     } finally {
       setIsGenerating(false);
@@ -257,7 +367,7 @@ const Step6Creative: React.FC = () => {
         });
       } else {
         // No file, send as JSON
-        const requestData: any = {
+        const requestData: Record<string, string | number> = {
           campaign_id: parseInt(campaignId),
         };
         if (adName) requestData.ad_name = adName;
@@ -288,20 +398,24 @@ const Step6Creative: React.FC = () => {
       localStorage.setItem("api_response", JSON.stringify(response.data));
       console.log("💾 Complete API response stored in localStorage with key: api_response");
 
-      // Save to localStorage for next steps
+      // Keep draft data so the user can go back from the review step.
       const builderData = getCampaignBuilderData();
       const updatedBuilderData = {
         ...builderData,
         step6: {
           adName,
           adFormat,
+          product,
+          audience,
+          benefits,
+          tone,
           headline,
           primaryText,
           description,
           cta,
           destinationUrl,
           keywords,
-          uploadedFile: uploadedFile?.name,
+          uploadedFile: uploadedFile?.name || "",
           adResponse: response.data,
         },
         metadata: {
@@ -309,7 +423,7 @@ const Step6Creative: React.FC = () => {
           updatedAt: new Date().toISOString(),
         },
       };
-      
+
       localStorage.setItem("campaign_builder_data", JSON.stringify(updatedBuilderData));
 
       Swal.fire({
@@ -319,29 +433,27 @@ const Step6Creative: React.FC = () => {
         timer: 1500,
         showConfirmButton: false,
       }).then(() => {
-        // Clear all campaign data from localStorage
-        clearCampaignData();
-        
         // Navigate to review page
-        navigate("/user-dashboard/campaigns-create/step-7");
+        navigate(`/user-dashboard/campaigns-create/step-7?campaignId=${campaignId}`);
       });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(" Error creating ad:", err);
       
       let errorMessage = "Failed to create ad. Please try again.";
+      const errorResponse = err as { response?: { data?: unknown } };
       
-      if (err.response?.data) {
-        console.log("API Error Response:", err.response.data);
+      if (errorResponse.response?.data) {
+        console.log("API Error Response:", errorResponse.response.data);
         
-        if (typeof err.response.data === 'object') {
+        if (typeof errorResponse.response.data === 'object') {
           const errors = [];
-          for (const [key, value] of Object.entries(err.response.data)) {
+          for (const [key, value] of Object.entries(errorResponse.response.data)) {
             errors.push(`${key}: ${JSON.stringify(value)}`);
           }
           errorMessage = errors.join('\n');
         } else {
-          errorMessage = String(err.response.data);
+          errorMessage = String(errorResponse.response.data);
         }
       }
       
@@ -367,6 +479,20 @@ const Step6Creative: React.FC = () => {
       }
     };
   }, [previewUrl]);
+
+  if (fetchLoading) {
+    return (
+      <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Create Your Ad</h2>
+          <p className="text-sm text-gray-500">Loading your creative data...</p>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-gray-500">Loading ad data...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6">
@@ -716,7 +842,7 @@ const Step6Creative: React.FC = () => {
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
         <Link
-          to="/user-dashboard/campaigns-create/step-5"
+          to={campaignId ? `/user-dashboard/campaigns-create/step-5?campaignId=${campaignId}` : "/user-dashboard/campaigns-create/step-5"}
           className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white py-2 text-center"
         >
           Previous
