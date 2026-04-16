@@ -49,6 +49,7 @@ const UpdateStep5Budget: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");
+  const [campaignPlatforms, setCampaignPlatforms] = useState<PlatformKey[]>([]);
   
   const campaignId = id || localStorage.getItem("campaignId");
 
@@ -140,6 +141,11 @@ const UpdateStep5Budget: React.FC = () => {
       setIntegrationStatus(statusMap);
       setIntegrationLoading(false);
 
+      const selectedCampaignPlatforms = (campaignResponse.data.platforms || [])
+        .map((platform: string) => apiValueToPlatform[platform])
+        .filter((platform: PlatformKey | undefined): platform is PlatformKey => Boolean(platform));
+      setCampaignPlatforms(selectedCampaignPlatforms);
+
       // Budgets data - populate platformBudgets from API response
       const campaignBudgets: BudgetEntry[] = campaignResponse.data.budgets || [];
       
@@ -167,11 +173,17 @@ const UpdateStep5Budget: React.FC = () => {
         if (firstPlatform && apiValueToPlatform[firstPlatform]) {
           setSelectedPlatform(apiValueToPlatform[firstPlatform]);
         }
-      } else {
+      } else if (selectedCampaignPlatforms.length > 0) {
         // Auto-select first connected platform
+        const first = selectedCampaignPlatforms[0];
+        if (first) {
+          setSelectedPlatform(first);
+        }
+      } else {
         const first = (integrationResponse.data.integrations as { platform: string; status: boolean }[]).find(i => i.status);
         if (first && apiValueToPlatform[first.platform]) {
           setSelectedPlatform(apiValueToPlatform[first.platform]);
+          setCampaignPlatforms([apiValueToPlatform[first.platform]]);
         }
       }
 
@@ -220,9 +232,11 @@ const UpdateStep5Budget: React.FC = () => {
         return;
       }
 
-      // Build budgets array for all enabled platforms
+      const activePlatforms = campaignPlatforms.length > 0 ? campaignPlatforms : [selectedPlatform];
+
+      // Build budgets array only for the platforms selected in Step 2.
       const budgets = (Object.keys(platformBudgets) as PlatformKey[])
-        .filter(key => integrationStatus[platformToApiValue[key]])
+        .filter(key => activePlatforms.includes(key))
         .map(key => {
           const d = platformBudgets[key];
           return {
@@ -306,8 +320,8 @@ const UpdateStep5Budget: React.FC = () => {
       )}
 
       {/* Platform Tabs */}
-      <div className="flex gap-6 mb-6 border-b border-gray-200">
-        {(['google', 'facebook', 'tiktok'] as PlatformKey[]).map(key => {
+      <div className="flex gap-4 mb-6 border-b border-gray-200 overflow-x-auto pb-1">
+        {(campaignPlatforms.length > 0 ? campaignPlatforms : (['google', 'facebook', 'tiktok'] as PlatformKey[])).map(key => {
           const apiKey = platformToApiValue[key];
           const enabled = integrationStatus[apiKey];
           const isActive = selectedPlatform === key;
@@ -453,7 +467,7 @@ const UpdateStep5Budget: React.FC = () => {
 
       {/* Budget Summary — all enabled platforms */}
       <div className="space-y-3 mb-4">
-        {(Object.keys(platformBudgets) as PlatformKey[])
+        {(campaignPlatforms.length > 0 ? campaignPlatforms : (Object.keys(platformBudgets) as PlatformKey[]))
           .filter(key => integrationStatus[platformToApiValue[key]])
           .map(key => {
             const d = platformBudgets[key];
@@ -510,10 +524,10 @@ const UpdateStep5Budget: React.FC = () => {
       </div> */}
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between mt-5">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between mt-5">
         <Link
           to={`/user-dashboard/campaigns-update/${campaignId}/update-step-4`}
-          className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
+          className="btn w-full sm:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
         >
           Previous
         </Link>
@@ -521,7 +535,7 @@ const UpdateStep5Budget: React.FC = () => {
         <button
           onClick={handleSubmit}
           disabled={loading || !campaignId}
-          className="btn md:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn w-full sm:w-40 text-white bg-blue-600 hover:bg-blue-700 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Updating..." : "Update & Continue"}
         </button>
