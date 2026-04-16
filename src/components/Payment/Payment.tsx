@@ -218,18 +218,18 @@ const Payment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 px-4 py-10">
-            <div className="mx-auto mt-8 w-full max-w-md rounded-2xl bg-white shadow-xl border border-slate-200 overflow-hidden">
+        <div className="min-h-screen  px-4 py-10">
+            <div className="mx-auto mt-8 w-full container rounded-2xl bg-white shadow-xl border border-slate-200 overflow-hidden">
                 <div className="bg-blue-900 px-6 py-6 text-white">
-                    <h1 className="text-2xl font-bold">Complete Your Payment</h1>
-                    <p className="mt-1 text-sm text-blue-100">Secure checkout powered by Stripe</p>
+                    <h1 className="md:text-2xl text-xl text-center font-bold">Complete Your Payment</h1>
+                    <p className="mt-1 text-sm text-center text-blue-100">Secure checkout powered by Stripe</p>
                 </div>
 
                 <div className="p-6 space-y-5">
-                    <div className="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700">
+                    {/* <div className="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700">
                         <p><span className="font-semibold">Plan ID:</span> {planId || "N/A"}</p>
                         <p><span className="font-semibold">Plan Key:</span> {planKey || "N/A"}</p>
-                    </div>
+                    </div> */}
 
                     {loading && (
                         <div className="rounded-lg border border-slate-200 p-5 text-center text-slate-600">
