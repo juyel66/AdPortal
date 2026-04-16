@@ -5,14 +5,20 @@ import api from "@/lib/axios";
 
 type BudgetType = "daily" | "lifetime";
 type PlatformKey = 'google' | 'facebook' | 'tiktok';
+type BudgetField = "budget" | "startDate" | "endDate";
 
 interface PlatformBudgetData {
-  budget: number;
+  budget: string;
   budgetType: BudgetType;
   startDate: string;
   endDate: string;
   runContinuously: boolean;
 }
+
+type ValidationIssue = {
+  platform: PlatformKey;
+  fields: BudgetField[];
+};
 
 // Platform to API value mapping
 const platformToApiValue: Record<string, string> = {
@@ -27,6 +33,12 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   tiktok: "TikTok",
 };
 
+const FIELD_LABELS: Record<BudgetField, string> = {
+  budget: "Budget",
+  startDate: "Start Date",
+  endDate: "End Date",
+};
+
 const API_TO_KEY: Record<string, PlatformKey> = {
   GOOGLE: 'google',
   META: 'facebook',
@@ -37,6 +49,7 @@ const Step5Budget: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([]);
 
   const campaignId = localStorage.getItem("campaignId");
 
@@ -49,7 +62,7 @@ const Step5Budget: React.FC = () => {
     const end = new Date();
     end.setDate(end.getDate() + 30);
     return {
-      budget: 100,
+      budget: "",
       budgetType: 'daily',
       startDate: today,
       endDate: end.toISOString().split('T')[0],
@@ -70,6 +83,71 @@ const Step5Budget: React.FC = () => {
       ...prev,
       [selectedPlatform]: { ...prev[selectedPlatform], ...patch },
     }));
+  };
+
+  const updateCurrentField = (field: BudgetField, value: string) => {
+    updateCurrent({ [field]: value } as Partial<PlatformBudgetData>);
+
+    setValidationIssues(prev => {
+      const issues = prev.map((issue) => {
+        if (issue.platform !== selectedPlatform) {
+          return issue;
+        }
+
+        return {
+          ...issue,
+          fields: issue.fields.filter((item) => item !== field),
+        };
+      }).filter((issue) => issue.fields.length > 0);
+
+      return issues;
+    });
+  };
+
+  const sanitizeBudgetInput = (value: string) => {
+    const digitsOnly = value.replace(/[^\d]/g, "");
+
+    if (digitsOnly === "") {
+      return "";
+    }
+
+    return digitsOnly.replace(/^0+(?=\d)/, "");
+  };
+
+  const validateBudgets = () => {
+    const issues: ValidationIssue[] = [];
+    const enabledPlatforms = (Object.keys(platformBudgets) as PlatformKey[])
+      .filter(key => integrationStatus[platformToApiValue[key]]);
+
+    enabledPlatforms.forEach((key) => {
+      const currentBudget = platformBudgets[key];
+      const missingFields: BudgetField[] = [];
+
+      if (!currentBudget.budget || Number(currentBudget.budget) <= 0) {
+        missingFields.push("budget");
+      }
+
+      if (!currentBudget.startDate) {
+        missingFields.push("startDate");
+      }
+
+      if (!currentBudget.runContinuously && !currentBudget.endDate) {
+        missingFields.push("endDate");
+      }
+
+      if (missingFields.length > 0) {
+        issues.push({ platform: key, fields: missingFields });
+      }
+    });
+
+    setValidationIssues(issues);
+
+    if (issues.length > 0) {
+      setError("Please complete the required fields highlighted below.");
+      return false;
+    }
+
+    return true;
   };
 
   // Fetch integration status on mount
@@ -121,8 +199,13 @@ const Step5Budget: React.FC = () => {
       return;
     }
 
+    if (!validateBudgets()) {
+      return;
+    }
+
     setLoading(true);
     setError("");
+    setValidationIssues([]);
 
     try {
       const selectedOrg = localStorage.getItem("selectedOrganization");
@@ -142,7 +225,7 @@ const Step5Budget: React.FC = () => {
             budget_type: d.budgetType === 'daily' ? 'DAILY' : 'ONETIME',
             start_date: d.startDate,
             end_date: d.runContinuously ? null : d.endDate,
-            budget: d.budget,
+            budget: Number(d.budget),
             run_continuously: d.runContinuously,
           };
         });
@@ -182,6 +265,15 @@ const Step5Budget: React.FC = () => {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
           <p className="text-sm text-red-600">{error}</p>
+          {validationIssues.length > 0 && (
+            <div className="mt-3 space-y-1 text-xs text-red-700">
+              {validationIssues.map((issue) => (
+                <p key={issue.platform}>
+                  {PLATFORM_LABELS[issue.platform]} tab: {issue.fields.map((field) => FIELD_LABELS[field]).join(", ")}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -253,15 +345,18 @@ const Step5Budget: React.FC = () => {
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             value={current.budget}
-            onChange={(e) => updateCurrent({ budget: Number(e.target.value) })}
+            onChange={(e) => updateCurrentField("budget", sanitizeBudgetInput(e.target.value))}
             className="w-full rounded-lg border border-gray-300 pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter amount"
-            step="1"
           />
         </div>
         <p className="text-xs text-gray-400 mt-1">Enter any amount you prefer</p>
+        {validationIssues.find((issue) => issue.platform === selectedPlatform)?.fields.includes("budget") && (
+          <p className="mt-1 text-xs text-red-600">{FIELD_LABELS.budget} is required.</p>
+        )}
       </div>
 
       {/* Campaign Schedule */}
@@ -275,9 +370,12 @@ const Step5Budget: React.FC = () => {
             <input
               type="date"
               value={current.startDate}
-              onChange={(e) => updateCurrent({ startDate: e.target.value })}
+              onChange={(e) => updateCurrentField("startDate", e.target.value)}
               className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             />
+            {validationIssues.find((issue) => issue.platform === selectedPlatform)?.fields.includes("startDate") && (
+              <p className="mt-1 text-xs text-red-600">{FIELD_LABELS.startDate} is required.</p>
+            )}
           </div>
           {/* End Date */}
           <div className="relative">
@@ -287,12 +385,15 @@ const Step5Budget: React.FC = () => {
               type="date"
               value={current.endDate}
               disabled={current.runContinuously}
-              onChange={(e) => updateCurrent({ endDate: e.target.value })}
+              onChange={(e) => updateCurrentField("endDate", e.target.value)}
               className={`w-full rounded-lg border pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 cursor-pointer
                 ${current.runContinuously ? "bg-gray-100 border-gray-200 cursor-not-allowed" : "border-gray-300 focus:ring-blue-500"}
               `}
               min={current.startDate || getCurrentDate()}
             />
+            {!current.runContinuously && validationIssues.find((issue) => issue.platform === selectedPlatform)?.fields.includes("endDate") && (
+              <p className="mt-1 text-xs text-red-600">{FIELD_LABELS.endDate} is required.</p>
+            )}
           </div>
         </div>
         {/* Run Continuously */}
