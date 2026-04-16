@@ -44,6 +44,7 @@ interface AdAccountsResponse {
     name: string;
     business_id: string;
     business_name: string;
+    
   };
 }
 
