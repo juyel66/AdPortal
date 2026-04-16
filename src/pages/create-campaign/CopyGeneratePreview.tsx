@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ThumbsUp,
   MessageCircle,
@@ -13,6 +13,39 @@ interface Props {
 }
 
 const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
+  const tiktokVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [isTiktokPlaying, setIsTiktokPlaying] = useState(false);
+
+  useEffect(() => {
+    setIsTiktokPlaying(false);
+    const video = tiktokVideoRef.current;
+
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [data.mediaUrl, data.isVideo]);
+
+  const toggleTiktokPlayback = async () => {
+    const video = tiktokVideoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    if (video.paused) {
+      try {
+        await video.play();
+        setIsTiktokPlaying(true);
+      } catch (error) {
+        console.error("Unable to play TikTok preview video:", error);
+      }
+    } else {
+      video.pause();
+      setIsTiktokPlaying(false);
+    }
+  };
+
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 p-6 space-y-10">
       {/* Generated Copy Fields */}
@@ -63,13 +96,13 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
             <video
               src={data.mediaUrl}
               controls
-              className="w-full h-[360px] object-cover"
+              className="w-full h-90 object-cover"
             />
           ) : (
             <img
               src={data.mediaUrl}
               alt="ad creative"
-              className="w-full h-[360px] object-cover"
+              className="w-full h-90 object-cover"
             />
           )}
 
@@ -77,7 +110,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           <div className="flex items-center justify-between px-3 py-2 bg-gray-100">
             <p className="text-sm font-semibold">{data.headline}</p>
             <button className="px-3 py-2 font-bold bg-gray-300 text-xs rounded">
-              Shop Now
+              {data.cta || "Shop Now"}
             </button>
           </div>
 
@@ -126,7 +159,7 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
               </div>
               <div>
                 <button className="px-3 py-2 font-bold bg-gray-300 text-xs rounded">
-                  Shop Now
+                  {data.cta || "Shop Now"}
                 </button>
               </div>
             </div>
@@ -150,15 +183,20 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
 
       {/* TikTok Ad Preview */}
       <Section title="Tiktok Ad Preview">
-        <div className="relative w-[240px] h-[440px] bg-black rounded-xl overflow-hidden">
+        <div
+          className="relative w-60 h-110 bg-black rounded-xl overflow-hidden cursor-pointer"
+          onClick={toggleTiktokPlayback}
+        >
           {/* Media */}
           {data.isVideo ? (
             <video
+              ref={tiktokVideoRef}
               src={data.mediaUrl}
-              autoPlay
               loop
-              muted
+              playsInline
+              controls={false}
               className="absolute inset-0 w-full h-full object-cover"
+              onEnded={() => setIsTiktokPlaying(false)}
             />
           ) : (
             <img
@@ -172,6 +210,10 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
           <div className="absolute top-2 left-0 right-0 text-center text-white text-xs">
             Following · <span className="font-semibold">For You</span>
           </div>
+
+          {data.isVideo && (
+            <div className="absolute inset-0 bg-black/0" aria-hidden="true" />
+          )}
 
           {/* Right actions */}
           <div className="absolute right-2 bottom-24 flex flex-col gap-4 items-center text-white text-[10px]">
@@ -193,11 +235,11 @@ const CopyGeneratePreview: React.FC<Props> = ({ data }) => {
             <p className="text-xs mb-1">@JaneFisher</p>
             <p className="text-xs mb-2">{data.description}</p>
 
-            <button className="w-full bg-[#FE2C55] text-white text-xs py-3 rounded-sm">
-              Shop now
+            <button className="w-full bg-[#FE2C55] text-white text-xs py-3 rounded-sm pointer-events-none">
+              {data.cta || "Shop Now"}
             </button>
 
-            <span className="absolute right-4 bottom-5 bg-white/30 text-white font-semibold text-[10px] px-2 py-[4px] rounded">
+                <span className="absolute right-4 bottom-5 bg-white/30 text-white font-semibold text-[10px] px-2 py-1 rounded">
               Ad
             </span>
           </div>
