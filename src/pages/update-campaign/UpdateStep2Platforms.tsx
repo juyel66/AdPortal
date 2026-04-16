@@ -329,8 +329,8 @@ const Step2Platforms: React.FC = () => {
           )}
         </div>
 
-        {/* API Request Preview with campaign_id */}
-        <div className="mt-3 pt-3 border-t border-blue-200">
+        
+        {/* <div className="mt-3 pt-3 border-t border-blue-200">
           <p className="text-xs font-medium text-blue-800 mb-2">
             🔄 Will Update Campaign #{campaignId} with (POST Request):
           </p>
@@ -343,7 +343,8 @@ const Step2Platforms: React.FC = () => {
           <p className="text-xs text-blue-600 mt-2">
             ✓ POST Request to: /main/update-ad/?org_id={getOrgId()}
           </p>
-        </div>
+        </div> */}
+        
       </div>
 
       {/* Navigation Buttons */}
