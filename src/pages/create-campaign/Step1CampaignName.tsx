@@ -1,6 +1,22 @@
 import api from "@/lib/axios";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+
+type CreateCampaignResponse = {
+  campaign_id?: number;
+  id?: number;
+  campaign_name?: string;
+  name?: string;
+  status?: string;
+  data?: {
+    campaign_id?: number;
+    id?: number;
+    campaign_name?: string;
+    name?: string;
+    status?: string;
+  };
+};
 
 const Step1CampaignName: React.FC = () => {
   const [campaignName, setCampaignName] = useState("");
@@ -23,6 +39,52 @@ const Step1CampaignName: React.FC = () => {
     }
   };
 
+  const getErrorMessage = (error: unknown) => {
+    const responseError = error as {
+      response?: {
+        data?: unknown;
+      };
+    };
+
+    const responseData = responseError.response?.data;
+
+    if (typeof responseData === "string") {
+      return responseData;
+    }
+
+    if (responseData && typeof responseData === "object") {
+      if ("campaign_name" in responseData) {
+        const fieldMessage = (responseData as { campaign_name?: unknown }).campaign_name;
+        if (typeof fieldMessage === "string") {
+          return fieldMessage;
+        }
+
+        if (Array.isArray(fieldMessage) && fieldMessage.length > 0) {
+          return String(fieldMessage[0]);
+        }
+      }
+
+      if ("message" in responseData) {
+        const message = (responseData as { message?: unknown }).message;
+        if (typeof message === "string") {
+          return message;
+        }
+      }
+    }
+
+    return "Something went wrong";
+  };
+
+  const extractCampaignId = (responseData: CreateCampaignResponse) => {
+    return (
+      responseData.campaign_id ||
+      responseData.id ||
+      responseData.data?.campaign_id ||
+      responseData.data?.id ||
+      null
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -41,22 +103,45 @@ const Step1CampaignName: React.FC = () => {
     setError("");
 
     try {
-      const response = await api.post(`/main/create-ad/?org_id=${org_id}`, {
+      const response = await api.post<CreateCampaignResponse>(`/main/create-ad/?org_id=${org_id}`, {
         campaign_name: campaignName
       });
 
       console.log("Success:", response.data);
 
+      const campaignId = extractCampaignId(response.data);
+      const createdCampaignName = response.data.campaign_name || response.data.name || campaignName;
+      const campaignStatus = response.data.status || response.data.data?.status || "draft";
+
+      if (!campaignId) {
+        const fallbackMessage = "Campaign created, but the server did not return a campaign id.";
+        setError(fallbackMessage);
+        toast.error(fallbackMessage);
+        return;
+      }
+
      
-      localStorage.setItem("campaignId", response.data.campaign_id.toString());
-      localStorage.setItem("campaignStatus", response.data.status);
-      localStorage.setItem("campaignName", response.data.campaign_name);
+      localStorage.setItem("campaignId", String(campaignId));
+      localStorage.setItem("campaignStatus", campaignStatus);
+      localStorage.setItem("campaignName", createdCampaignName);
+
+      // toast.success("Campaign created successfully.");
 
 
       navigate("/user-dashboard/campaigns-create/step-2");
 
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong");
+    } catch (err: unknown) {
+      const message = getErrorMessage(err);
+      const normalizedMessage = message.toLowerCase();
+
+      if (normalizedMessage.includes("already exists") && normalizedMessage.includes("campaign")) {
+        toast.error("A campaign with this name already exists in your organization.");
+        setError("A campaign with this name already exists in your organization.");
+      } else {
+        setError(message);
+        toast.error(message);
+      }
+
       console.error("Error:", err);
     } finally {
       setLoading(false);
