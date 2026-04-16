@@ -482,7 +482,7 @@ const UpdateStep5Budget: React.FC = () => {
       </div>
 
       {/* API Request Preview */}
-      <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+      {/* <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
         <p className="text-xs font-medium text-gray-700 mb-2">
           Will Update Campaign #{campaignId} with (POST Request):
         </p>
@@ -507,7 +507,7 @@ const UpdateStep5Budget: React.FC = () => {
         <p className="text-xs text-blue-600 mt-2">
           ✓ POST Request to: /main/update-ad/?org_id={getOrgId()}
         </p>
-      </div>
+      </div> */}
 
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
