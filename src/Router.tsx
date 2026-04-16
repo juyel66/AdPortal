@@ -68,6 +68,8 @@ import AdminContact from "./pages/Contact/AdminContact";
 import AdminNotificationPage from "./Notification/AdminNotificationPage";
 
 import Payment from "./components/Payment/Payment";
+import TiktokAuthCallBack from "./components/Settings/TiktokAuthCallBack";
+import GoogleAuthCallback from "./components/Settings/GoogleAuthCallback";
 
 export const router = createBrowserRouter([
   {
@@ -102,6 +104,14 @@ export const router = createBrowserRouter([
             {
         path: "meta-auth-callback",
         element: <MetaAuthCallback />,
+      },
+            {
+        path: "tiktok-auth-callback",
+        element: <TiktokAuthCallBack />,
+      },
+            {
+        path: "google-auth-callback",
+        element: <GoogleAuthCallback />,
       },
       {
         path: "features",
