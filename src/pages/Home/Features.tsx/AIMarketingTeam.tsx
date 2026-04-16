@@ -42,7 +42,7 @@ const AIMarketingTeam = () => {
             {/* CTA */}
             <div className="mt-10">
               <Link
-                to="/auth/signin"
+                to="/user-dashboard/ai-tools"
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
               >
                 Try AI Features Now 
