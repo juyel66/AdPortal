@@ -78,6 +78,23 @@ const Step7Review: React.FC = () => {
     }).format(amount);
   };
 
+  const getMediaType = (fileUrl?: string, fileType?: string) => {
+    const normalizedUrl = fileUrl?.toLowerCase() || "";
+    const normalizedType = fileType?.toLowerCase() || "";
+
+    const isVideo =
+      normalizedType.startsWith("video/") ||
+      /\.(mp4|webm|mov|m4v|avi|mkv)(\?|#|$)/.test(normalizedUrl);
+
+    const isImage =
+      normalizedType.startsWith("image/") ||
+      /\.(png|jpe?g|gif|webp|bmp|svg)(\?|#|$)/.test(normalizedUrl);
+
+    if (isVideo) return "video";
+    if (isImage) return "image";
+    return "unknown";
+  };
+
   // Handle publish button click
   const handlePublish = () => {
     setPublishing(true);
@@ -259,6 +276,33 @@ const Step7Review: React.FC = () => {
               )}
               {apiResponse.file_url && (
                 <p><span className="font-medium">File URL:</span> {apiResponse.file_url}</p>
+              )}
+
+              {apiResponse.file_url && (
+                <div className="pt-2">
+                  {getMediaType(apiResponse.file_url, apiResponse.file_type) === "video" ? (
+                    <video
+                      src={apiResponse.file_url}
+                      controls
+                      className="mt-1 w-full max-w-md rounded-xl border border-gray-200 bg-black"
+                    />
+                  ) : getMediaType(apiResponse.file_url, apiResponse.file_type) === "image" ? (
+                    <img
+                      src={apiResponse.file_url}
+                      alt={apiResponse.file_name || "Creative preview"}
+                      className="mt-1 w-full max-w-md rounded-xl border border-gray-200 object-cover"
+                    />
+                  ) : (
+                    <a
+                      href={apiResponse.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-blue-600 underline"
+                    >
+                      Open media preview
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           </div>
