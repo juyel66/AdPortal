@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Check } from "lucide-react";
 // import { useCampaign } from "./CampaignContext";
-import { useNavigate, Link } from "react-router";
+import { useNavigate, Link, useSearchParams } from "react-router";
 import type { PlatformItem } from "@/types/createCampaignStep1";
 import type { PlatformKey } from "./CampaignContext";
 import api from "@/lib/axios";
@@ -40,18 +40,82 @@ const platformToApiValue: Record<PlatformKey, string> = {
   pinterest: "PINTEREST",
 };
 
+const apiValueToPlatform: Record<string, PlatformKey> = {
+  META: "facebook",
+  GOOGLE: "google",
+  TIKTOK: "tiktok",
+};
+
 const Step2Platforms: React.FC = () => {
   // const { campaignData, updateCampaignData } = useCampaign();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
   const [integrationStatus, setIntegrationStatus] = useState<Record<string, boolean>>({});
   const [integrationLoading, setIntegrationLoading] = useState(true);
   
-  const campaignId = localStorage.getItem("campaignId");
+  const campaignId = searchParams.get("campaignId");
 
   const [selected, setSelected] = useState<PlatformKey[]>([]);
+
+  const getOrgId = () => {
+    try {
+      const selectedOrg = localStorage.getItem("selectedOrganization");
+      if (selectedOrg) {
+        const orgData = JSON.parse(selectedOrg);
+        return orgData.id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error parsing organization data:", error);
+      return null;
+    }
+  };
+
+  const fetchCampaignData = useCallback(async () => {
+    if (!campaignId) {
+      setError("Campaign ID not found");
+      setIntegrationLoading(false);
+      return;
+    }
+
+    const org_id = getOrgId();
+    if (!org_id) {
+      setError("No organization selected");
+      setIntegrationLoading(false);
+      return;
+    }
+
+    try {
+      const [campaignResponse, integrationResponse] = await Promise.all([
+        api.get(`/main/campaign/${campaignId}/?org_id=${org_id}`),
+        api.get(`/main/integrations-status/?org_id=${org_id}`),
+      ]);
+
+      console.log("📥 Campaign data:", campaignResponse.data);
+
+      const statusMap: Record<string, boolean> = {};
+      (integrationResponse.data.integrations as { platform: string; status: boolean }[]).forEach((item) => {
+        statusMap[item.platform] = item.status;
+      });
+      setIntegrationStatus(statusMap);
+
+      const apiPlatforms = campaignResponse.data.platforms || [];
+      const selectedPlatforms = apiPlatforms
+        .map((platform: string) => apiValueToPlatform[platform])
+        .filter((platform: PlatformKey | undefined) => platform !== undefined);
+
+      setSelected(selectedPlatforms);
+    } catch (err: unknown) {
+      console.error("Error fetching campaign:", err);
+      const e = err as { response?: { data?: { message?: string } } };
+      setError(e.response?.data?.message || "Failed to fetch campaign data");
+    } finally {
+      setIntegrationLoading(false);
+    }
+  }, [campaignId]);
 
   const togglePlatform = (key: PlatformKey) => {
     const apiKey = platformToApiValue[key];
@@ -88,15 +152,13 @@ const Step2Platforms: React.FC = () => {
     try {
       const apiPlatforms = selected.map(key => platformToApiValue[key]);
 
-      const selectedOrg = localStorage.getItem("selectedOrganization");
-      let org_id = "";
-      if (selectedOrg) {
-        const orgData = JSON.parse(selectedOrg);
-        org_id = orgData.id;
+      const org_id = getOrgId();
+      if (!org_id) {
+        setError("No organization selected");
+        setLoading(false);
+        return;
       }
-      
 
-      // ★★★ Log the request data ★★★
       const requestData = {
         campaign_id: parseInt(campaignId),
         platforms: apiPlatforms
@@ -111,7 +173,7 @@ const Step2Platforms: React.FC = () => {
       const response = await api.post(`/main/create-ad/?org_id=${org_id}`, requestData);
 
       console.log(" Platforms saved:", response.data);
-      navigate("/user-dashboard/campaigns-create/step-3");
+      navigate(`/user-dashboard/campaigns-create/step-3?campaignId=${campaignId}`);
 
     } catch (err: unknown) {
       console.error(" Full error:", err);
@@ -134,32 +196,8 @@ const Step2Platforms: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchIntegrationStatus = async () => {
-      const selectedOrg = localStorage.getItem("selectedOrganization");
-      let org_id = "";
-      if (selectedOrg) {
-        const orgData = JSON.parse(selectedOrg);
-        org_id = orgData.id;
-      }
-      try {
-        const response = await api.get(`/main/integrations-status/?org_id=${org_id}`);
-        const statusMap: Record<string, boolean> = {};
-        response.data.integrations.forEach((item: { platform: string; status: boolean }) => {
-          statusMap[item.platform] = item.status;
-        });
-        setIntegrationStatus(statusMap);
-      } catch (err) {
-        console.error("Failed to fetch integration status:", err);
-      } finally {
-        setIntegrationLoading(false);
-      }
-    };
-
-    fetchIntegrationStatus();
-    if (!campaignId) {
-      console.warn(" No campaign ID found in localStorage");
-    }
-  }, [campaignId]);
+    void fetchCampaignData();
+  }, [fetchCampaignData]);
 
   return (
     <div className="space-y-6">
@@ -174,7 +212,7 @@ const Step2Platforms: React.FC = () => {
         
         {campaignId && (
           <p className="text-xs text-gray-400 mt-1">
-            Campaign ID: {campaignId} (from localStorage)
+            Campaign ID: {campaignId}
           </p>
         )}
       </div>
@@ -292,7 +330,7 @@ const Step2Platforms: React.FC = () => {
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-5">
         <Link
-          to="/user-dashboard/campaigns-create/step-1"
+          to={campaignId ? `/user-dashboard/campaigns-create/step-1?campaignId=${campaignId}` : "/user-dashboard/campaigns-create/step-1"}
           className="btn md:w-40 text-gray-700 border rounded-xl border-gray-700 hover:bg-gray-400 hover:text-white"
         >
           Previous
