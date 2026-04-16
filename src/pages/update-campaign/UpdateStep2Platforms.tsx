@@ -153,7 +153,7 @@ const Step2Platforms: React.FC = () => {
         return;
       }
 
-      // API তে যেভাবে ডাটা পাঠাতে হবে (POST method এ)
+
       const requestData = {
         campaign_id: parseInt(campaignId),
         platforms: apiPlatforms
@@ -164,7 +164,7 @@ const Step2Platforms: React.FC = () => {
         data: requestData
       });
 
-      // POST method ব্যবহার করে আপডেট করা
+   
       const response = await api.post(`/main/update-ad/?org_id=${org_id}`, requestData);
 
       console.log("✅ Platforms updated successfully:", response.data);
@@ -173,7 +173,7 @@ const Step2Platforms: React.FC = () => {
       navigate(`/user-dashboard/campaigns-update/${campaignId}/update-step-3`);
 
     } catch (err: unknown) {
-      console.error("❌ Error updating platforms:", err);
+      console.error(" Error updating platforms:", err);
       const e = err as { response?: { data: { message?: string } } };
       setError(e.response?.data?.message || "Something went wrong");
     } finally {
@@ -183,7 +183,7 @@ const Step2Platforms: React.FC = () => {
 
   useEffect(() => {
     if (!campaignId) {
-      console.warn("⚠️ No campaign ID found");
+      console.warn(" No campaign ID found");
     }
   }, [campaignId]);
 
