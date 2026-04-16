@@ -215,7 +215,7 @@ const PowerfulFeatures = () => {
             </p>
 
            <Link
-  to="/user-dashboard/campaigns"
+  to="/user-dashboard/analytics"
   className="
     inline-flex items-center justify-center
     rounded-xl
