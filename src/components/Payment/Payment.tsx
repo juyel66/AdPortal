@@ -193,7 +193,7 @@ const Payment = () => {
 
                 const secret = response.data.clientSecret || response.data.client_secret;
                 if (!secret) {
-                    setError("Backend did not return a Stripe client secret.");
+                    setError("Subscription already exists");
                     return;
                 }
 
@@ -237,17 +237,42 @@ const Payment = () => {
                         </div>
                     )}
 
-                    {error && (
-                        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                            {error}
-                        </div>
-                    )}
 
-                    {!publishableKey && (
-                        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                            Missing Stripe publishable key. Please add <span className="font-semibold">VITE_payment_gateway_key</span> in your .env file and restart the dev server.
-                        </div>
-                    )}
+                  {error && !clientSecret && (
+  <div className="flex items-center justify-center py-10">
+    <div className="w-full max-w-md bg-white border border-red-200 shadow-lg rounded-2xl p-6 text-center">
+      
+      <div className="flex items-center justify-center mb-4">
+        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+          <svg
+            className="w-6 h-6 text-red-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        Payment Failed
+      </h3>
+
+      <p className="text-sm text-gray-500 mb-5">
+        {error}
+      </p>
+
+
+    </div>
+  </div>
+)}
+
 
                     {publishableKey && clientSecret && !error && stripePromise && (
                         <EmbeddedCheckoutProvider
