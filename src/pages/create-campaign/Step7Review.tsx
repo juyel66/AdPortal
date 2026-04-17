@@ -204,7 +204,8 @@ const Step7Review: React.FC = () => {
       setPublishing(true);
 
       try {
-        await api.patch(`/main/campaign/${campaignId}/?org_id=${orgId}`, {
+        await api.post(`/main/update-ad/?org_id=${orgId}`, {
+          campaign_id: Number(campaignId),
           draft: false,
         });
 
@@ -422,9 +423,9 @@ const Step7Review: React.FC = () => {
               {apiResponse.file_name && (
                 <p><span className="font-medium">Uploaded File:</span> {apiResponse.file_name}</p>
               )}
-              {apiResponse.file_url && (
+              {/* {apiResponse.file_url && (
                 <p><span className="font-medium">File URL:</span> {apiResponse.file_url}</p>
-              )}
+              )} */}
 
               {apiResponse.file_url && (
                 <div className="pt-2">
@@ -438,7 +439,7 @@ const Step7Review: React.FC = () => {
                     <img
                       src={apiResponse.file_url}
                       alt={apiResponse.file_name || "Creative preview"}
-                      className="mt-1 w-full rounded-xl border border-gray-200 object-cover"
+                      className="mt-1 w-full h-[300px] rounded-xl border border-gray-200 object-cover"
                     />
                   ) : (
                     <a
