@@ -302,14 +302,14 @@ const UpdateStep5Budget: React.FC = () => {
         </p>
         
         {/* Show campaign ID */}
-        {campaignId && campaignData && (
+        {/* {campaignId && campaignData && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
             <p className="text-xs font-medium text-blue-800">
               Campaign ID: <span className="font-bold">{campaignData.id}</span> | 
               Status: <span className="font-bold">{campaignData.status}</span>
             </p>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Error message */}
