@@ -216,7 +216,7 @@ const Step2Platforms: React.FC = () => {
           platforms.
         </p>
         
-        {campaignId && campaignData && (
+        {/* {campaignId && campaignData && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
             <p className="text-xs font-medium text-blue-800">
               Campaign ID: <span className="font-bold">{campaignData.id}</span> | 
@@ -228,7 +228,7 @@ const Step2Platforms: React.FC = () => {
                 : 'None selected'}
             </p>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Error message */}
