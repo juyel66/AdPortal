@@ -153,7 +153,7 @@ const Step7Review: React.FC = () => {
             {campaignData.status && (
               <p>
                 <span className="font-medium">Status:</span>{" "}
-                <span className="text-yellow-600 font-medium">{campaignData.status}</span>
+                <span className="text-green-500 font-medium">{campaignData.status}</span>
               </p>
             )}
             {campaignData.created_at && (
