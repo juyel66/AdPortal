@@ -444,7 +444,7 @@ const UpdateStep6Creative: React.FC = () => {
           Update creative assets and ad copy
         </p>
         
-        {campaignId && campaignData && (
+        {/* {campaignId && campaignData && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
             <p className="text-xs font-medium text-blue-800">
               Campaign ID: <span className="font-bold">{campaignId}</span>
@@ -458,7 +458,7 @@ const UpdateStep6Creative: React.FC = () => {
               </p>
             )}
           </div>
-        )}
+        )} */}
       </div>
 
       {error && (
