@@ -51,6 +51,11 @@ const Step2Platforms: React.FC = () => {
   const [integrationStatus, setIntegrationStatus] = useState<Record<string, boolean>>({});
   
   const campaignId = id || localStorage.getItem("campaignId");
+  
+  const campaignValue = campaignData
+    ? `Campaign #${campaignData.id} - Status: ${campaignData.status}`
+    : "Loading campaign...";  
+    console.log("complete",campaignValue);
 
   const getOrgId = () => {
     try {
