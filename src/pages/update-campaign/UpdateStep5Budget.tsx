@@ -58,6 +58,8 @@ const UpdateStep5Budget: React.FC = () => {
   const [integrationStatus, setIntegrationStatus] = useState<Record<string, boolean>>({});
   const [integrationLoading, setIntegrationLoading] = useState(true);
 
+  console.log(campaignData);
+
   const getDefaultData = (): PlatformBudgetData => {
     const today = new Date().toISOString().split('T')[0];
     const end = new Date();
